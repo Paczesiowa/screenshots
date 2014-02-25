@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html><!-- &lt;![endif]--><head>
+<title>Scrive</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="content-language" content="en" />
+<!--[if lt IE 9]&gt;
+        &lt;script src="/libs/html5shiv.js"&gt;&lt;/script&gt;
+        &lt;![endif]-->
+<link href="/static/scrive/SourceSansPro.css" rel="stylesheet" type="text/css" />
+<link href="/static/scrive/HelveticaNeue.css" rel="stylesheet" type="text/css" />
+<link rel=" icon" href="/static/scrive/favicon.ico" />
+
+
+<link rel="stylesheet" type="text/css" href="/static/scrive/systemPage.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="/static/scrive/systemPage.less.css" media="screen" />
+
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script src="/static/detect-zoom.js"></script>
+<script src="/static/dom2img.js"></script>
+<script>
+  $(document).ready(function() {
+    Dom2Img.screenshot({url: '/screenshot',
+                        callback: function(data) {
+                          var dataurl = 'data:image/png;base64,' + data.screenshot;
+                          window.open(dataurl, '_blank');
+                        }});
+  });
+</script>
+
+<style type="text/css"></style>
+
+<!-- start Mixpanel -->
+
+<!-- end Mixpanel -->
+<!-- Google analytics tracking -->
+
+<!-- end Google analytics -->
+
+</head>
+<body>
+<div class="signview"><div style="display: block;" class="pageheader"><div class="content"><div class="logowrapper"><img src="/static/scrive/logo.png" class="logo" /></div><div class="sender"><div class="inner"><div class="name"></div><div class="phone"></div></div></div><div class="clearfix"></div></div></div>
+<div class="mainContainer">
+
+<div><div><div class="arrows"><div style="top: 1919.5px; left: 1431px; width: 82px;" class="action-arrow right"><div class="front"></div><div class="label"></div><div class="back"></div></div></div><div class="subcontainerWrapper"><div><div class="instructions section spacing"><div class="headline" style="margin-bottom : 10px">Welcome <span class="name">John Smith</span></div><div class="headline"><div>Follow the <span class="highlight-green">GREEN ARROW</span> for instructions</div></div><div class="subheadline"></div><div class="subheadline"><div class="smaller-bits"><span class="duedate">Due date  2014-02-07</span><a href="/static/scrive/api/frontend/downloadmainfile/66/standard.pdf?documentid=66&amp;signatorylinkid=116" target="_blank" class="download clickable">standard.pdf</a></div></div></div></div><div class="subcontainer"><div class="document-pages"><div class="pagediv ui-droppable" id="page1"><img src="/protected_static/scrive/document.png" class="pagejpg" /></div></div><div class="section signatories spacing"><h2>Review parties</h2><div class="columns-container"><div class="column spacing first-column"><div class="sigbox"><div class="titleinfo spacing"><div class="name">John Smith</div></div><div class="inner spacing"><div class="details"><div class="company"></div><div title="bartek@scrive.com" class="email field">Email: bartek@scrive.com</div><div title="" class="orgnum field">Org. no.: not entered</div><div title="" class="persnum field">Pers.nr: not entered</div></div></div><div class="statusbox"><div class="spacing butt opened"><span class="icon status opened"></span><span class="status statustext opened">Reviewed online</span></div></div></div></div><div class="column spacing"><div class="sigbox"><div class="titleinfo spacing"><div class="name">test-1@skrivapa.se</div></div><div class="inner spacing"><div class="details"><div class="company"></div><div title="test-1@skrivapa.se" class="email field">Email: test-1@skrivapa.se</div><div title="" class="orgnum field">Org. no.: not entered</div><div title="" class="persnum field">Pers.nr: not entered</div></div></div><div class="statusbox"><div class="spacing butt signed"><span class="icon status signed"></span><span class="status statustext signed">Signed</span></div></div></div></div></div></div><div class="section spacing signbuttons highlight"><div class="rejectwrapper reject"><a class="blue button button-large button-round" style="width: 142px;"><div class="label">Reject and reply</div></a></div><div class="signwrapper sign"><a class="green button button-large button-green button-round" style="width: 142px;"><div class="label">Sign<span class="icon cross" style="position: absolute; top: auto;margin-top: -1px;"></span></div></a></div><div class="clearfix"></div></div><div class="clearfix"></div></div></div></div><div class="clearfix"></div><div class="spacer40"></div></div>
+</div>
+<div style="display: block;" class="pagefooter"><div class="content"><div class="poweredbyscrive"><div class="text">Powered by </div><span class="logo"></span></div><div class="clearfix"></div></div></div></div>
+<div style="height: 2183px;" class="modal grey active"><div style="top: 1111px; margin-top: 50px; left: 0px; margin-left: 692px; width: 520px;" class="modal-container"><div class="modal-header no-icon"><a style="display: inline;" class="modal-close"></a><div style="width: 420px;" class="modal-header-inner"><div class="modal-title">Sign</div></div></div><div class="modal-body"><div class="modal-content"><div class="body"><div><div><p>By clicking the button you will sign the contract <b class="documenttitle"></b> with the parties <span class="unsignedpartynotcurrent"></span> and your signature will be registered by the e-signing service Scrive. </p></div></div></div></div></div><div class="modal-footer"><label style="display: inline-block;" class="cancel clickable close float-left">Cancel</label><a class="greybg green button button-green button-round float-right" style="margin-top: -10px; margin-bottom: 0px; display: inline;"><div class="label">Sign</div></a></div></div></div></body></html>
