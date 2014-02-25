@@ -50,4 +50,4 @@ Currently only PhantomJS renderer is supported.
       install_requires='BeautifulSoup4 == 4.3.2',
       entry_points={'console_scripts': 'dom2img = dom2img:main'},
       test_suite='nose.collector',
-      setup_requires=['nose == 1.3.0'])
+      tests_require=['nose == 1.3.0', 'PIL == 1.1.7'])

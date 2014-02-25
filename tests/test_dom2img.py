@@ -1,8 +1,11 @@
 # coding=utf-8
+import StringIO
 import unittest
 
-from dom2img import _dom2img
+from PIL import Image
 from bs4 import BeautifulSoup
+
+from dom2img import _dom2img
 
 
 class Dom2ImgTest(unittest.TestCase):
@@ -82,3 +85,31 @@ class Dom2ImgTest(unittest.TestCase):
 '''
         self.assertEqual(bs(fun(content.encode('utf-8'))).prettify(),
                          bs(content2).prettify())
+
+    def test_render(self):
+        content = b'''
+<!DOCTYPE html>
+<html>
+  <body style="margin: 0;
+               background-color: white;">
+    <div style="width: 200px;
+                height: 100px;
+                background-color: red;
+                margin: 50px;">
+    </div>
+  </body>
+</html>
+'''
+        output = _dom2img._render(content, 300, 200, 0, 0, '', '')
+        buff = StringIO.StringIO()
+        buff.write(output)
+        buff.seek(0)
+        image = Image.open(buff)
+        self.assertEqual(image.size, (300, 200))
+        for i in range(300):
+            for j in range(200):
+                pixel = image.getpixel((i, j))
+                if (50 <= i < 250) and (50 <= j < 150):
+                    self.assertEqual(pixel, (255, 0, 0, 255))
+                else:
+                    self.assertEqual(pixel, (255, 255, 255, 255))
