@@ -1,7 +1,9 @@
 import sys
 from subprocess import Popen, PIPE
+import StringIO
 
 from dom2img import _cookies, _url_utils
+from PIL import Image
 import pkg_resources
 from bs4 import BeautifulSoup
 
@@ -56,15 +58,22 @@ def _render(content, width, height, top, left, cookie_domain, cookie_string):
     return proc.communicate(content)[0]
 
 
-def _resize(img_string, scale):
+def _resize(img_string, scale, resize_filter=Image.ANTIALIAS):
     '''
     Resizes to <scale>% of original size the img_string
-    using convert tool from imagemagick
+    img_string is a bytestring containing png image data
+    scale is an integer percentage number (50 means 2 times smaller image)
+    resize_filter is a PIL filter used for resizing
     '''
     if scale != 100:  # no point in resizing to 100%
-        convert_args = ['convert', '-', '-resize', str(scale) + '%', '-']
-        proc = Popen(convert_args, stdin=PIPE, stdout=PIPE)
-        return proc.communicate(img_string)[0]
+        img = Image.open(StringIO.StringIO(img_string))
+        width, height = img.size
+        new_width = int(round(width * (scale / 100.)))
+        new_height = int(round(height * (scale / 100.)))
+        result = img.resize((new_width, new_height), resize_filter)
+        buff = StringIO.StringIO()
+        result.save(buff, format='PNG')
+        return buff.getvalue()
     else:
         return img_string
 

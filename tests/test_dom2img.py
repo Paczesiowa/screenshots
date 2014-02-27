@@ -27,10 +27,7 @@ class Process(object):
 class Dom2ImgTest(unittest2.TestCase):
 
     def _image_from_bytestring(self, content):
-        buff = StringIO.StringIO()
-        buff.write(content)
-        buff.seek(0)
-        return Image.open(buff)
+        return Image.open(StringIO.StringIO(content))
 
     def _validate_render_pixels(self, expected_pixel, *args):
         output = _dom2img._render(*args)
@@ -248,3 +245,31 @@ class Dom2ImgTest(unittest2.TestCase):
             self._validate_render_pixels(
                 expected_pixel_for_bgcolor(255, 255, 255, 255),
                 content, 300, 200, 0, 0, 'example.com', 'key=val')
+
+    def test_resize(self):
+        img = Image.new('RGBA', (80, 40))
+
+        def pixel_color(i, j):
+            if (20 <= i < 60) and (10 <= j < 30):
+                return (255, 0, 0, 255)
+            else:
+                return (255, 255, 255, 255)
+
+        for i in range(80):
+            for j in range(40):
+                img.putpixel((i, j), pixel_color(i, j))
+
+        buff = StringIO.StringIO()
+        img.save(buff, format='PNG')
+        img_string = buff.getvalue()
+
+        # default antialias filter looks better, but the result
+        # is hard to unittest
+        result_string = _dom2img._resize(img_string, 50, Image.NEAREST)
+
+        result = Image.open(StringIO.StringIO(result_string))
+        self.assertEqual(result.size, (40, 20))
+        for i in range(40):
+            for j in range(20):
+                self.assertEqual(result.getpixel((i, j)),
+                                 pixel_color(2 * i, 2 * j))

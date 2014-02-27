@@ -11,7 +11,7 @@ except ImportError:
 __version__ = '0.1'
 
 
-tests_require = ['nose == 1.3.0', 'pillow == 2.3.0', 'flask == 0.10.1']
+tests_require = ['nose == 1.3.0', 'flask == 0.10.1']
 if sys.version_info < (3,):
     tests_require.append('unittest2 == 0.5.1')
 else:
@@ -55,7 +55,7 @@ Currently only PhantomJS renderer is supported.
       platforms=['Linux'],
       package_data={'dom2img': ['render_file.phantom.js']},
       zip_safe=True,
-      install_requires='BeautifulSoup4 == 4.3.2',
+      install_requires=['BeautifulSoup4 == 4.3.2', 'pillow == 2.3.0'],
       entry_points={'console_scripts': 'dom2img = dom2img:main'},
       test_suite='nose.collector',
       tests_require=tests_require)
