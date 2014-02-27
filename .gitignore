@@ -1,0 +1,5 @@
+*.pyc
+.ropeproject
+dist
+virtualenv
+dom2img.egg-info
