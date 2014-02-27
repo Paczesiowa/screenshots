@@ -27,3 +27,4 @@
 * przejrzec i upiekszyc kod w libce
 * sprawdzic co sie w kazdej funkcji moze zjebac
 * zobaczyc czy setup.py wszystko moze odpalic poprawnie na golym pythonie
+* kazdy plik pep8+pyflakes+rope-organize-imports+pylint

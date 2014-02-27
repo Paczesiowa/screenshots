@@ -10,7 +10,7 @@ def _clean_up_html(content, prefix):
     '''
     Clean up html by removing all script tags
     and making relative urls absolute.
-    content is a utf-8 encoded byte string with html
+    content is an utf-8 encoded byte string with html
     prefix is a url byte string that will be user to make absolute url.
     Returns cleaned up html string
     '''
@@ -29,6 +29,17 @@ def _clean_up_html(content, prefix):
 def _render(content, width, height, top, left, cookie_domain, cookie_string):
     '''
     Renders html content using PhantomJS
+    content is an utf-8 encoded byte string with html.
+    width is an int with the width size of phantomjs viewport,
+      and width of the resulting image
+    height is an int with the height size of phantomjs viewport,
+      and height of the resulting image
+    top is an int with the pixel offset from the top/vertical scroll position
+    left is an int with the pixel offset from the left/
+      horizontal scroll position
+    cookie_domain is a byte string containing url (just the host part)
+    cookie_string is a byte string containing cookies keys and values
+    using format key1=val1;key2=val2
     '''
     render_file_phantom_js_location = \
         pkg_resources.resource_filename(__name__, 'render_file.phantom.js')

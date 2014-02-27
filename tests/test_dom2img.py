@@ -242,3 +242,9 @@ class Dom2ImgTest(unittest2.TestCase):
             self._validate_render_pixels(
                 expected_pixel_for_bgcolor(0, 0, 0, 255),
                 content, 300, 200, 0, 0, '127.0.0.1', 'key=val')
+
+        # bg is not changed with correct cookie passed, but wrong domain
+        with Process(app.run, port=1111):
+            self._validate_render_pixels(
+                expected_pixel_for_bgcolor(255, 255, 255, 255),
+                content, 300, 200, 0, 0, 'example.com', 'key=val')
