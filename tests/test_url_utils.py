@@ -1,11 +1,11 @@
-import unittest
+import unittest2
 
 import bs4
 
 from dom2img import _url_utils
 
 
-class UrlUtilsTest(unittest.TestCase):
+class UrlUtilsTest(unittest2.TestCase):
 
     def assertEqualStr(self, a, b):
         return self.assertEqual(str(a), str(b))

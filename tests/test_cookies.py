@@ -1,10 +1,10 @@
 # coding=utf-8
-import unittest
+import unittest2
 
 from dom2img import _cookies, _arg_utils
 
 
-class CookiesTest(unittest.TestCase):
+class CookiesTest(unittest2.TestCase):
 
     def test_serialize_cookies(self):
         fun = _cookies.serialize_cookies

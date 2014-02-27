@@ -1,9 +1,9 @@
-import unittest
+import unittest2
 
 from dom2img import _arg_utils
 
 
-class ArgUtilsTest(unittest.TestCase):
+class ArgUtilsTest(unittest2.TestCase):
 
     def test_non_negative_int(self):
         fun = _arg_utils.non_negative_int

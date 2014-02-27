@@ -24,3 +24,6 @@
 * dodact typ cookies
 * wyciagac prefix w jsie
 * zamiast screenshot w jsie, zwracac slownik, zeby w backendzie mozna go przekazac
+* przejrzec i upiekszyc kod w libce
+* sprawdzic co sie w kazdej funkcji moze zjebac
+* zobaczyc czy setup.py wszystko moze odpalic poprawnie na golym pythonie
