@@ -1,5 +1,5 @@
 *.pyc
 .ropeproject
 dist
-virtualenv
+virtualenv*
 dom2img.egg-info
