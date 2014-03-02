@@ -24,6 +24,21 @@ class Process(object):
         self.server.join()
 
 
+class MonkeyPatch(object):
+
+    def __init__(self, obj, attr, new_attr):
+        self._obj = obj
+        self._attr = attr
+        self._new_attr = new_attr
+
+    def __enter__(self):
+        self._old = getattr(self._obj, self._attr)
+        setattr(self._obj, self._attr, self._new_attr)
+
+    def __exit__(self, type, value, traceback):
+        setattr(self._obj, self._attr, self._old)
+
+
 class Dom2ImgTest(unittest2.TestCase):
 
     def _image_from_bytestring(self, content):
@@ -31,8 +46,6 @@ class Dom2ImgTest(unittest2.TestCase):
 
     def _validate_render_pixels(self, expected_pixel, *args):
         output = _dom2img._render(*args)
-        with open('/tmp/test.png', 'w') as f:
-            f.write(output)
         image = self._image_from_bytestring(output)
         width, height = image.size
         for i in range(width):
@@ -273,3 +286,77 @@ class Dom2ImgTest(unittest2.TestCase):
             for j in range(20):
                 self.assertEqual(result.getpixel((i, j)),
                                  pixel_color(2 * i, 2 * j))
+
+    def test_dom2img(self):
+        '''
+        Test all the features!
+        '''
+        content = b'''
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="http://127.0.0.1:1111/test.css">
+    <link rel="stylesheet" href="body_margin.css">
+    <style>
+      body {
+        width: 800px;
+        height: 800px;
+      }
+      div {
+        width: 400px;
+        height: 200px;
+        background-color: red;
+        margin: 100px;
+      }
+    </style>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        $('div').remove();
+      });
+    </script>
+  </head>
+  <body>
+    <div>
+    </div>
+  </body>
+</html>
+'''
+        app = Flask('test')
+
+        # test.css overrides body bgcolor to black
+        # if cookie key=val is present
+        @app.route('/<path>', methods=['GET'])
+        def test_css(path):
+            if request.cookies.get('key') == 'val':
+                if path == 'test.css':
+                    css = 'body { background-color: white;}'
+                elif path == 'body_margin.css':
+                    css = 'body { margin: 0;}'
+                else:
+                    css = ''
+            else:
+                css = ''
+            return Response(css, mimetype='text/css')
+
+        # override _resize to use 'nearest' resize filter
+        # to make unit testing possible
+        old_resize = _dom2img._resize
+
+        def _new_resize(img_string, scale):
+            return old_resize(img_string, scale, Image.NEAREST)
+
+        with MonkeyPatch(_dom2img, '_resize', _new_resize):
+            with Process(app.run, port=1111):
+                output = _dom2img._dom2img(content, 500, 300, 50, 50, 50,
+                                           'http://127.0.0.1:1111/', 'key=val')
+                image = self._image_from_bytestring(output)
+                self.assertEqual(image.size, (250, 150))
+                for i in range(250):
+                    for j in range(150):
+                        if (25 <= i < 225) and (25 <= j < 125):
+                            expected_pixel = (255, 0, 0, 255)
+                        else:
+                            expected_pixel = (255, 255, 255, 255)
+                        self.assertEqual(image.getpixel((i, j)),
+                                         expected_pixel, str((i, j)))

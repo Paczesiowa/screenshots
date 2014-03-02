@@ -78,12 +78,45 @@ def _resize(img_string, scale, resize_filter=Image.ANTIALIAS):
         return img_string
 
 
+def _dom2img(content, width, height, top, left, scale, prefix, cookie_string):
+    '''
+    Renders html using PhantomJS.
+
+    Parameters:
+    * content - utf-8 encoded byte string containing html input
+    * width - non-negative int with the width of virtual render viewport
+              (using pixels unit)
+    * height - non-negative int with the height of virtual render viewport
+               (using pixels unit)
+    * top - non-negative int with offset from the top of the page,
+            that should be rendered (using pixels unit)
+    * left - non-negative int with offset from the left border of the page,
+             that should be rendered (using pixels unit)
+    * scale - non-negative int with percentage number,
+              that the screenshot will be scaled to (50 means half the
+              original size)
+    * prefix - byte string containing absolute url that will be used
+               to handle relative urls in html (for images, css scripts)
+               and optionally for cookies
+    * cookie_string - byte string containing cookies keys and values
+                      using format key1=val1;key2=val2
+
+    Returns string containing png image with the screenshot.
+    '''
+    cookie_domain = _cookies.get_cookie_domain(prefix)
+    cleaned_up_content = _clean_up_html(content, prefix)
+    img_string = _render(cleaned_up_content, width, height, top,
+                         left, cookie_domain, cookie_string)
+
+    return _resize(img_string, scale)
+
+
 def dom2img(content, height, width, top, left, scale, prefix, cookies=None):
     '''
     Renders html using PhantomJS.
 
     Parameters:
-    * content - string containing html input
+    * content - utf-8 encoded byte string containing html input
     * height - string containing non-negative int with
                the height of virtual render viewport (using pixels unit)
     * width - string containing non-negative int with
