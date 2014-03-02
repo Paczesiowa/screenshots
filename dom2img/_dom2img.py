@@ -2,7 +2,7 @@ import sys
 from subprocess import Popen, PIPE
 import StringIO
 
-from dom2img import _cookies, _url_utils
+from dom2img import _cookies, _url_utils, _arg_utils, _compat
 from PIL import Image
 import pkg_resources
 from bs4 import BeautifulSoup
@@ -111,52 +111,86 @@ def _dom2img(content, width, height, top, left, scale, prefix, cookie_string):
     return _resize(img_string, scale)
 
 
-def dom2img(content, height, width, top, left, scale, prefix, cookies=None):
+def dom2img(content, width, height, prefix,
+            top=0, left=0, scale=100, cookies=None):
     '''
     Renders html using PhantomJS.
 
     Parameters:
-    * content - utf-8 encoded byte string containing html input
-    * height - string containing non-negative int with
-               the height of virtual render viewport (using pixels unit)
-    * width - string containing non-negative int with
-              the width of virtual render viewport (using pixels unit)
-    * top - string containing non-negative int with
-            offset from the top of the page that should be rendered
-            (using pixels unit)
-    * left - string containing non-negative int with
-             offset from the left border of the page that should be rendered
-             (using pixels unit)
-    * scale - string containing non-negative int with percentage number
+    * content - html input (utf-8 encoded byte string or unicode text)
+    * width - non-negative int with the width of virtual
+              render viewport (using pixels unit)
+    * height - non-negative int with the height of virtual
+               render viewport (using pixels unit).
+    * top - non-negative int with offset from the top of the page
+            where rendering should start (using pixels unit)
+    * left - non-negative int with offset from the left border of the page
+             where rendering should start (using pixels unit)
+    * scale - non-negative int with percentage number
               that the screenshot will be scaled to (50 means half the
               original size)
-    * prefix - string containing absolute urls that will be used
-               to handle relative urls in html (for images, css scripts)
-               and optionally for cookies
-    * cookies - string-to-string dictionary (or None) containing
-                cookie keys and values. ";=" are invalid characters
 
-    Returns string containing png image with the screenshot.
+     height, width, top, left: int or byte string/unicode text containing
+                               decimal representation of the integer number
+    * prefix - absolute url that will be used
+               to resolve relative urls in html (for images, css scripts)
+               and to derive cookie domain for cookies
+               can be byte string or ascii-only unicode text.
+    * cookies - cookies key and values that will be sent with all
+                resource requests (images, css scripts)
+      * None
+      * byte string (or ascii-only unicode text) using
+        key1=val1;key2=val2 format
+      * string dictionary with cookie keys and values.
+        Neither keys nor values should contain semicolons.
+        Keys cannot contain '=' character.
+        Keys and values can be byte strings or ascii-only unicode texts.
+
+    Returns byte string containing png image with the screenshot.
 
     Raises:
     * Dom2ImgArgumentException (subclass of ValueError) if arguments are
       in improper format
     '''
-    if type(content) != str and type(content) != unicode:
-        raise _utils.Dom2ImgArgumentException('content is not a string')
-    height = _utils.non_negative_int(height, 'height')
-    width = _utils.non_negative_int(width, 'width')
-    top = _utils.non_negative_int(top, 'top')
-    left = _utils.non_negative_int(left, 'left')
-    scale = _utils.non_negative_int(scale, 'scale')
-    if not _utils.is_absolute_url(prefix):
-        raise _utils.Dom2ImgArgumentException('prefix must be an absolute URL')
-    _cookies.validate_cookies(cookies)
+    if isinstance(content, _compat.text):
+        content = content.encode('utf-8')
+    if not isinstance(content, _compat.byte_string):
+        raise _arg_utils.Dom2ImgArgumentException(
+            'content must be utf-8 encoded byte string or unicode')
+    height = _arg_utils.non_negative_int(height, 'height')
+    width = _arg_utils.non_negative_int(width, 'width')
+    top = _arg_utils.non_negative_int(top, 'top')
+    left = _arg_utils.non_negative_int(left, 'left')
+    scale = _arg_utils.non_negative_int(scale, 'scale')
+    if isinstance(prefix, _compat.text):
+        try:
+            prefix = prefix.encode('ascii')
+        except UnicodeEncodeError:
+            raise _arg_utils.Dom2ImgArgumentException(
+                'unicode prefix must be ascii-only')
+    if not isinstance(prefix, _compat.byte_string):
+        raise _arg_utils.Dom2ImgArgumentException(
+            'prefix must be a byte-string or an unicode text')
+    if not _url_utils.is_absolute_url(prefix):
+        raise _arg_utils.Dom2ImgArgumentException(
+            'prefix must be an absolute URL')
+    if cookies is None:
+        cookies = {}
+    if isinstance(cookies, dict):
+        cookies = _cookies.validate_cookies(cookies)
+        cookie_string = _cookies.serialize_cookies(cookies)
+    elif isinstance(cookies, _compat.text):
+        try:
+            cookie_string = cookies.encode('ascii')
+        except UnicodeEncodeError:
+            raise _arg_utils.Dom2ImgArgumentException(
+                'unicode cookies must be ascii-only')
+    elif isinstance(cookies, _compat.byte_string):
+        cookie_string = cookies
+    else:
+        raise _arg_utils.Dom2ImgArgumentException(
+            'cookies must be None/string/dict')
 
-    cookie_string = _utils.serialize_cookies(cookies)
-    cookie_domain = _utils.get_cookie_domain(prefix)
-    cleaned_up_content = _clean_up_html(content, prefix)
-    img_string = _render(cleaned_up_content, width, height, top,
-                         left, cookie_domain, cookie_string)
-
-    return _resize(img_string, scale)
+    return _dom2img(content=content, width=width, height=height,
+                    prefix=prefix, top=top, left=left, scale=scale,
+                    cookie_string=cookie_string)

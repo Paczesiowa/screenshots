@@ -7,7 +7,7 @@ from PIL import Image
 from bs4 import BeautifulSoup
 from flask import Flask, request, Response
 
-from dom2img import _dom2img
+from dom2img import _dom2img, _arg_utils
 
 
 class Process(object):
@@ -324,8 +324,9 @@ class Dom2ImgTest(unittest2.TestCase):
 '''
         app = Flask('test')
 
-        # test.css overrides body bgcolor to black
-        # if cookie key=val is present
+        # result is empty if there's no cookie key=val
+        # test.css overrides body bgcolor to white
+        # body_margin.css sets body margin to 0
         @app.route('/<path>', methods=['GET'])
         def test_css(path):
             if request.cookies.get('key') == 'val':
@@ -360,3 +361,250 @@ class Dom2ImgTest(unittest2.TestCase):
                             expected_pixel = (255, 255, 255, 255)
                         self.assertEqual(image.getpixel((i, j)),
                                          expected_pixel, str((i, j)))
+
+    def test_dom2img_wrapper(self):
+        fun = _dom2img.dom2img
+        exc = _arg_utils.Dom2ImgArgumentException
+
+        worker_args = {}
+
+        def grab_worker_args(**kwargs):
+            worker_args.clear()
+            for key, val in kwargs.items():
+                worker_args[key] = val
+
+        with MonkeyPatch(_dom2img, '_dom2img', grab_worker_args):
+            fun(b'content', 100, 100, b'http://example.com/', 0, 0, 100, None)
+            self.assertEqual(worker_args['content'], b'content')
+
+            fun(u'fööbär', 100, 100, b'http://example.com/', 0, 0, 100, None)
+            self.assertEqual(worker_args['content'], u'fööbär'.encode('utf-8'))
+
+            fun(b'', 100, 100, b'http://example.com/', 0, 0, 100, None)
+            self.assertEqual(worker_args['width'], 100)
+
+            fun(b'', b'200', 100, b'http://example.com/', 0, 0, 100, None)
+            self.assertEqual(worker_args['width'], 200)
+
+            fun(b'', u'300', 100, b'http://example.com/', 0, 0, 100, None)
+            self.assertEqual(worker_args['width'], 300)
+
+            fun(b'', 100, 100, b'http://example.com/', 0, 0, 100, None)
+            self.assertEqual(worker_args['height'], 100)
+
+            fun(b'', 100, b'200', b'http://example.com/', 0, 0, 100, None)
+            self.assertEqual(worker_args['height'], 200)
+
+            fun(b'', 100, u'300', b'http://example.com/', 0, 0, 100, None)
+            self.assertEqual(worker_args['height'], 300)
+
+            fun(b'', 100, 100, b'http://example.com/', 100, 0, 100, None)
+            self.assertEqual(worker_args['top'], 100)
+
+            fun(b'', 100, 100, b'http://example.com/', b'200', 0, 100, None)
+            self.assertEqual(worker_args['top'], 200)
+
+            fun(b'', 100, 100, b'http://example.com/', u'300', 0, 100, None)
+            self.assertEqual(worker_args['top'], 300)
+
+            fun(b'', 100, 100, b'http://example.com/', 0, 100, 100, None)
+            self.assertEqual(worker_args['left'], 100)
+
+            fun(b'', 100, 100, b'http://example.com/', 0, b'200', 100, None)
+            self.assertEqual(worker_args['left'], 200)
+
+            fun(b'', 100, 100, b'http://example.com/', 0, u'300', 100, None)
+            self.assertEqual(worker_args['left'], 300)
+
+            fun(b'', 100, 100, b'http://example.com/', 0, 0, 100, None)
+            self.assertEqual(worker_args['scale'], 100)
+
+            fun(b'', 100, 100, b'http://example.com/', 0, 0, b'200', None)
+            self.assertEqual(worker_args['scale'], 200)
+
+            fun(b'', 100, 100, b'http://example.com/', 0, 0, u'300', None)
+            self.assertEqual(worker_args['scale'], 300)
+
+            fun(b'', 100, 100, b'http://example.com/', 0, 0, 100, None)
+            self.assertEqual(worker_args['prefix'], b'http://example.com/')
+
+            fun(b'', 100, 100, u'http://example.com/', 0, 0, 100, None)
+            self.assertEqual(worker_args['prefix'], b'http://example.com/')
+
+            fun(b'', 100, 100, b'http://example.com/', 0, 0, 100, None)
+            self.assertEqual(worker_args['cookie_string'], b'')
+
+            fun(b'', 100, 100, b'http://example.com/', 0, 0, 100, {})
+            self.assertEqual(worker_args['cookie_string'], b'')
+
+            fun(b'', 100, 100, b'http://example.com/', 0, 0, 100, b'')
+            self.assertEqual(worker_args['cookie_string'], b'')
+
+            fun(b'', 100, 100, b'http://example.com/', 0, 0, 100, u'')
+            self.assertEqual(worker_args['cookie_string'], b'')
+
+            fun(b'', 100, 100, b'http://example.com/',
+                0, 0, 100, b'key1=val1;key2=val2')
+            self.assertEqual(worker_args['cookie_string'],
+                             b'key1=val1;key2=val2')
+
+            fun(b'', 100, 100, b'http://example.com/',
+                0, 0, 100, u'key1=val1;key2=val2')
+            self.assertEqual(worker_args['cookie_string'],
+                             b'key1=val1;key2=val2')
+
+            fun(b'', 100, 100, b'http://example.com/',
+                0, 0, 100, {b'key1': b'val1', b'key2': b'val2'})
+            self.assertEqual(worker_args['cookie_string'],
+                             b'key2=val2;key1=val1')
+
+            fun(b'', 100, 100, b'http://example.com/',
+                0, 0, 100, {u'key1': u'val1', u'key2': u'val2'})
+            self.assertEqual(worker_args['cookie_string'],
+                             b'key2=val2;key1=val1')
+
+            self.assertRaisesRegexp(
+                exc, u'content must be utf-8 encoded byte string or unicode',
+                fun, [], 0, 0, b'http://example.com/', 0, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'width must be int or byte string or unicode',
+                fun, b'', None, 0, b'http://example.com/', 0, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'width must be ascii-only unicode',
+                fun, b'', u'föö', 0, b'http://example.com/', 0, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'width cannot be parsed as an int',
+                fun, b'', b'1.5', 0, b'http://example.com/', 0, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'Unexpected negative integer for width',
+                fun, b'', -1, 0, b'http://example.com/', 0, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'height must be int or byte string or unicode',
+                fun, b'', 0, None, b'http://example.com/', 0, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'height must be ascii-only unicode',
+                fun, b'', 0, u'föö', b'http://example.com/', 0, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'height cannot be parsed as an int',
+                fun, b'', 0, b'1.5', b'http://example.com/', 0, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'Unexpected negative integer for height',
+                fun, b'', 0, -1, b'http://example.com/', 0, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'top must be int or byte string or unicode',
+                fun, b'', 0, 0, b'http://example.com/', None, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'top must be ascii-only unicode',
+                fun, b'', 0, 0, b'http://example.com/', u'föö', 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'top cannot be parsed as an int',
+                fun, b'', 0, 0, b'http://example.com/', b'1.5', 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'Unexpected negative integer for top',
+                fun, b'', 0, 0, b'http://example.com/', -1, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'left must be int or byte string or unicode',
+                fun, b'', 0, 0, b'http://example.com/', 0, None, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'left must be ascii-only unicode',
+                fun, b'', 0, 0, b'http://example.com/', 0, u'föö', 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'left cannot be parsed as an int',
+                fun, b'', 0, 0, b'http://example.com/', 0, b'1.5', 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'Unexpected negative integer for left',
+                fun, b'', 0, 0, b'http://example.com/', 0, -1, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'scale must be int or byte string or unicode',
+                fun, b'', 0, 0, b'http://example.com/', 0, 0, None, {})
+
+            self.assertRaisesRegexp(
+                exc, u'scale must be ascii-only unicode',
+                fun, b'', 0, 0, b'http://example.com/', 0, 0, u'föö', {})
+
+            self.assertRaisesRegexp(
+                exc, u'scale cannot be parsed as an int',
+                fun, b'', 0, 0, b'http://example.com/', 0, 0, b'1.5', {})
+
+            self.assertRaisesRegexp(
+                exc, u'Unexpected negative integer for scale',
+                fun, b'', 0, 0, b'http://example.com/', 0, 0, -1, {})
+
+            self.assertRaisesRegexp(
+                exc, u'unicode prefix must be ascii-only',
+                fun, b'', 0, 0, u'http://example.com/föö', 0, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'prefix must be a byte-string or an unicode text',
+                fun, b'', 0, 0, None, 0, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'prefix must be an absolute URL',
+                fun, b'', 0, 0, b'example.com', 0, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'prefix must be an absolute URL',
+                fun, b'', 0, 0, b'example.com/', 0, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'prefix must be an absolute URL',
+                fun, b'', 0, 0, b'//example.com', 0, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'prefix must be an absolute URL',
+                fun, b'', 0, 0, b'//example.com/', 0, 0, 0, {})
+
+            self.assertRaisesRegexp(
+                exc, u'cookies must be None/string/dict',
+                fun, b'', 0, 0, b'http://example.com/', 0, 0, 0, 7)
+
+            self.assertRaisesRegexp(
+                exc, u'unicode cookies must be ascii-only',
+                fun, b'', 0, 0, b'http://example.com/', 0, 0, 0, u'föö')
+
+            self.assertRaisesRegexp(
+                exc, u'cookies keys/values must be ascii-only',
+                fun, b'', 0, 0, b'http://example.com/', 0, 0, 0,
+                {u'föö': b'bär'})
+
+            self.assertRaisesRegexp(
+                exc, u'cookies key/values must be strings',
+                fun, b'', 0, 0, b'http://example.com/', 0, 0, 0,
+                {u'foo': []})
+
+            self.assertRaisesRegexp(
+                exc, u'cookies key/values must be strings',
+                fun, b'', 0, 0, b'http://example.com/', 0, 0, 0,
+                {3: b'bar'})
+
+            self.assertRaisesRegexp(
+                exc, u"cookies keys cannot use '=' character",
+                fun, b'', 0, 0, b'http://example.com/', 0, 0, 0,
+                {u'f=o': b'bar'})
+
+            self.assertRaisesRegexp(
+                exc, u"cookies keys/values cannot use ';' character",
+                fun, b'', 0, 0, b'http://example.com/', 0, 0, 0,
+                {u'f;o': b'bar'})
+
+            self.assertRaisesRegexp(
+                exc, u"cookies keys/values cannot use ';' character",
+                fun, b'', 0, 0, b'http://example.com/', 0, 0, 0,
+                {u'foo': b'b;r'})

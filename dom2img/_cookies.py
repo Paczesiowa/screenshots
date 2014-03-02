@@ -6,7 +6,7 @@ from dom2img import _arg_utils, _compat
 def serialize_cookies(cookies):
     '''
     Serializes cookie dictionary to cookie string.
-    cookies can be None, or a dict mapping byte string cookie keys
+    cookies must be a dict mapping byte string cookie keys
     to byte string cookie values. Neither keys nor values should
     contain semicolons. Keys cannot contain '=' character.
     Result is a semicolon-separated byte string with cookie elems
@@ -16,8 +16,6 @@ def serialize_cookies(cookies):
         b'key2=val2;key1=val1'
     True
     '''
-    if cookies is None:
-        cookies = {}
     return ';'.join(map('='.join, cookies.items()))
 
 
@@ -56,10 +54,10 @@ def parse_cookie_string(cookie_string):
 
 def validate_cookies(cookies):
     '''
-    Check if cookies is None or a dict:
-    * dict keys can be byte strings or ascii-only unicode test strings,
+    Check if cookies is a dict:
+    * dict keys can be byte strings or ascii-only unicode text strings,
       they cannot contain ';' and '=' characters.
-    * dict values can be byte strings or ascii-only unicode test strings,
+    * dict values can be byte strings or ascii-only unicode text strings,
       they cannot contain ';'.
     Returns validated dict, where keys and values are byte strings.
     Raises exception if cookie keys/values contain illegal characters,
@@ -69,11 +67,9 @@ def validate_cookies(cookies):
         {b'key1': b'val1', b'key2': b'val2'}
     True
     '''
-    if cookies is None:
-        return {}
     if type(cookies) is not dict:
         raise _arg_utils.Dom2ImgArgumentException(
-            'cookies must be a dict or None')
+            'cookies must be a dict')
 
     def validate_cookie_string(s):
         if type(s) not in [_compat.byte_string, _compat.text]:

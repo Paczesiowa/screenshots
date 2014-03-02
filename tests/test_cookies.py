@@ -9,7 +9,6 @@ class CookiesTest(unittest2.TestCase):
     def test_serialize_cookies(self):
         fun = _cookies.serialize_cookies
         self.assertEqual(fun({}), b'')
-        self.assertEqual(fun(None), b'')
 
         self.assertEqual(fun({b'foo': b'bar'}), b'foo=bar')
 
@@ -52,13 +51,12 @@ class CookiesTest(unittest2.TestCase):
         exc = _arg_utils.Dom2ImgArgumentException
 
         self.assertEqual(fun({}), {})
-        self.assertEqual(fun(None), {})
         self.assertEqual(fun({b'foo': b'bar'}), {b'foo': b'bar'})
         self.assertEqual(fun({u'foo': u'bar'}), {b'foo': b'bar'})
         self.assertEqual(fun({b'foo': b'bar', u'baz': u'quux'}),
                          {b'foo': b'bar', b'baz': b'quux'})
 
-        self.assertRaisesRegexp(exc, 'cookies must be a dict or None',
+        self.assertRaisesRegexp(exc, 'cookies must be a dict',
                                 fun, [])
         self.assertRaisesRegexp(exc, 'cookies key/values must be strings',
                                 fun, {u'foo': []})
