@@ -9,10 +9,10 @@ def main():
         print('[cookie_string] < file.html')
         print('''
 Parameters:
-* height - string containing non-negative int with
-           the height of virtual render viewport (using pixels unit)
 * width - string containing non-negative int with
           the width of virtual render viewport (using pixels unit)
+* height - string containing non-negative int with
+           the height of virtual render viewport (using pixels unit)
 * top - string containing non-negative int with
         offset from the top of the page that should be rendered
         (using pixels unit)
@@ -36,8 +36,8 @@ Return status can be:
         sys.exit(1)
 
     content = sys.stdin.read()
-    height = sys.argv[1]
-    width = sys.argv[2]
+    width = sys.argv[1]
+    height = sys.argv[2]
     top = sys.argv[3]
     left = sys.argv[4]
     scale = sys.argv[5]
