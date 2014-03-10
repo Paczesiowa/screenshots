@@ -2,6 +2,7 @@
 * test with 2.6, 2.7, 3.3
 * test exectuion time with many pages pdfs
 * investigate the execution time
+* fix script installer
 * phantomjs timeout http://stackoverflow.com/questions/16854788/phantomjs-webpage-timeout
 * add page debugging support to render_file.phantom.js
 * get_html_node and get_doctype in js need to be finished
