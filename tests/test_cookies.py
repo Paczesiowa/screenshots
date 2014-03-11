@@ -26,12 +26,14 @@ class CookiesTest(unittest2.TestCase):
         self.assertEqual(fun(u'foo=bar=baz'), {b'foo': b'bar=baz'})
         self.assertEqual(fun(u'foo=bar=baz===;quux=plonk'),
                          {b'foo': b'bar=baz===', b'quux': b'plonk'})
+        self.assertEqual(fun(b'foo=bar=baz===;quux=plonk'),
+                         {b'foo': b'bar=baz===', b'quux': b'plonk'})
 
         self.assertRaisesRegexp(exc, 'cookie_string must be an ascii-only ' +
-                                'unicode text string', fun, 'foo')
+                                'unicode text or a byte string', fun, None)
 
-        self.assertRaisesRegexp(exc, 'cookie_string must be an ascii-only ' +
-                                'unicode text string', fun, u'föö=bär')
+        self.assertRaisesRegexp(exc, 'unicode cookie_string must ' +
+                                'be ascii-only', fun, u'föö=bär')
 
     def test_parse_serialize_cookies(self):
         fun1 = _cookies.serialize_cookies

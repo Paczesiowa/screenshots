@@ -1,5 +1,9 @@
 from __future__ import print_function
 
+import sys
+import os
+from dom2img import _cookies, _dom2img, _arg_utils
+
 
 def main():
     if len(sys.argv) < 7 or len(sys.argv) > 8 or '--help' in sys.argv:
@@ -44,14 +48,23 @@ Return status can be:
     prefix = sys.argv[6]
     if len(sys.argv) == 8:
         cookie_string = sys.argv[7]
-        cookies = _utils.parse_cookie_string(cookie_string)
+        cookies = _cookies.parse_cookie_string(cookie_string)
     else:
         cookies = None
 
     try:
-        result = dom2img(content, height, width, top,
-                         left, scale, prefix, cookies)
+        result = _dom2img.dom2img(content=content,
+                                  width=width,
+                                  height=height,
+                                  top=top,
+                                  left=left,
+                                  scale=scale,
+                                  prefix=prefix,
+                                  cookies=cookies)
         os.write(sys.stdout.fileno(), result)
-    except _utils.Dom2ImgArgumentException as e:
+    except _arg_utils.Dom2ImgArgumentException as e:
         print(e, file=sys.stderr)
         sys.exit(1)
+
+if __name__ == '__main__':
+    main()

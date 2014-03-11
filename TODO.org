@@ -1,4 +1,7 @@
-* write proper tests
+* fix tests
+** black box only
+** separate tests, so there's more paralelization
+** factor out all the code
 * test with 2.6, 2.7, 3.3
 * test exectuion time with many pages pdfs
 * investigate the execution time
@@ -11,7 +14,6 @@
 * make dom2img.js camel case
 * write readme
 * clean backend
-* przetestowac z innymi pythonami
 * unlicense
 * eggsecutable
 * opt parse

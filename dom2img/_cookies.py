@@ -21,8 +21,8 @@ def serialize_cookies(cookies):
 
 def parse_cookie_string(cookie_string):
     '''
-    Parse cookie dictionary from a unicode text string,
-    containing only ascii characters, using format key1=val1;key2=val2.
+    Parse cookie dictionary from a byte string or ascii-only unicode text,
+    using format key1=val1;key2=val2.
     Returns dictionary mapping byte string cookie keys to byte string
     cookie values.
 
@@ -33,23 +33,26 @@ def parse_cookie_string(cookie_string):
         {b'key1': b'val1', b'key2': b'val2'}
     True
     '''
-    if type(cookie_string) is not _compat.text:
-        raise _arg_utils.Dom2ImgArgumentException(
-            'cookie_string must be an ascii-only unicode text string')
-    if u'=' not in cookie_string:
+    if isinstance(cookie_string, _compat.text):
+        try:
+            cookie_string = cookie_string.encode('ascii')
+        except UnicodeEncodeError:
+            err_msg = 'unicode cookie_string must be ascii-only'
+            raise _arg_utils.Dom2ImgArgumentException(err_msg)
+    if not isinstance(cookie_string, _compat.byte_string):
+        err_msg = 'cookie_string must be an ascii-only ' +\
+            'unicode text or a byte string'
+        raise _arg_utils.Dom2ImgArgumentException(err_msg)
+    if b'=' not in cookie_string:
         return {}
     cookies = {}
-    cookie_elems = cookie_string.split(u';')
-    try:
-        for cookie_elem in cookie_elems:
-            cookie = cookie_elem.split(u'=')
-            cookie_key = cookie.pop(0).encode('ascii')
-            cookie_value = '='.join(cookie).encode('ascii')
-            cookies[cookie_key] = cookie_value
-        return cookies
-    except UnicodeEncodeError:
-        raise _arg_utils.Dom2ImgArgumentException(
-            'cookie_string must be an ascii-only unicode text string')
+    cookie_elems = cookie_string.split(b';')
+    for cookie_elem in cookie_elems:
+        cookie = cookie_elem.split(b'=')
+        cookie_key = cookie.pop(0)
+        cookie_value = b'='.join(cookie)
+        cookies[cookie_key] = cookie_value
+    return cookies
 
 
 def validate_cookies(cookies):
