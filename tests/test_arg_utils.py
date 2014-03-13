@@ -1,4 +1,5 @@
 # coding=utf-8
+import argparse
 import unittest2
 
 from dom2img import _arg_utils
@@ -8,7 +9,7 @@ class ArgUtilsTest(unittest2.TestCase):
 
     def test_non_negative_int(self):
         fun = _arg_utils.non_negative_int
-        exc = _arg_utils.Dom2ImgArgumentException
+        exc = argparse.ArgumentTypeError
 
         self.assertEqual(0, fun(u'0', u'x'))
         self.assertEqual(1, fun(u'1', u'x'))

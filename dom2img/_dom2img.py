@@ -1,3 +1,4 @@
+import argparse
 import sys
 from subprocess import Popen, PIPE
 import StringIO
@@ -155,7 +156,7 @@ def dom2img(content, width, height, prefix,
     if isinstance(content, _compat.text):
         content = content.encode('utf-8')
     if not isinstance(content, _compat.byte_string):
-        raise _arg_utils.Dom2ImgArgumentException(
+        raise argparse.ArgumentTypeError(
             'content must be utf-8 encoded byte string or unicode')
     height = _arg_utils.non_negative_int(height, 'height')
     width = _arg_utils.non_negative_int(width, 'width')
@@ -166,13 +167,13 @@ def dom2img(content, width, height, prefix,
         try:
             prefix = prefix.encode('ascii')
         except UnicodeEncodeError:
-            raise _arg_utils.Dom2ImgArgumentException(
+            raise argparse.ArgumentTypeError(
                 'unicode prefix must be ascii-only')
     if not isinstance(prefix, _compat.byte_string):
-        raise _arg_utils.Dom2ImgArgumentException(
+        raise argparse.ArgumentTypeError(
             'prefix must be a byte-string or an unicode text')
     if not _url_utils.is_absolute_url(prefix):
-        raise _arg_utils.Dom2ImgArgumentException(
+        raise argparse.ArgumentTypeError(
             'prefix must be an absolute URL')
     if cookies is None:
         cookies = {}
@@ -183,12 +184,12 @@ def dom2img(content, width, height, prefix,
         try:
             cookie_string = cookies.encode('ascii')
         except UnicodeEncodeError:
-            raise _arg_utils.Dom2ImgArgumentException(
+            raise argparse.ArgumentTypeError(
                 'unicode cookies must be ascii-only')
     elif isinstance(cookies, _compat.byte_string):
         cookie_string = cookies
     else:
-        raise _arg_utils.Dom2ImgArgumentException(
+        raise argparse.ArgumentTypeError(
             'cookies must be None/string/dict')
 
     return _dom2img(content=content, width=width, height=height,

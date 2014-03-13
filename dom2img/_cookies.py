@@ -1,6 +1,7 @@
+import argparse
 import re
 
-from dom2img import _arg_utils, _compat
+from dom2img import _compat
 
 
 def serialize_cookies(cookies):
@@ -38,11 +39,11 @@ def parse_cookie_string(cookie_string):
             cookie_string = cookie_string.encode('ascii')
         except UnicodeEncodeError:
             err_msg = 'unicode cookie_string must be ascii-only'
-            raise _arg_utils.Dom2ImgArgumentException(err_msg)
+            raise argparse.ArgumentTypeError(err_msg)
     if not isinstance(cookie_string, _compat.byte_string):
         err_msg = 'cookie_string must be an ascii-only ' +\
             'unicode text or a byte string'
-        raise _arg_utils.Dom2ImgArgumentException(err_msg)
+        raise argparse.ArgumentTypeError(err_msg)
     if b'=' not in cookie_string:
         return {}
     cookies = {}
@@ -71,21 +72,21 @@ def validate_cookies(cookies):
     True
     '''
     if type(cookies) is not dict:
-        raise _arg_utils.Dom2ImgArgumentException(
+        raise argparse.ArgumentTypeError(
             'cookies must be a dict')
 
     def validate_cookie_string(s):
         if type(s) not in [_compat.byte_string, _compat.text]:
-            raise _arg_utils.Dom2ImgArgumentException(
+            raise argparse.ArgumentTypeError(
                 'cookies key/values must be strings')
         if type(s) is _compat.text:
             try:
                 s = s.encode('ascii')
             except UnicodeEncodeError:
-                raise _arg_utils.Dom2ImgArgumentException(
+                raise argparse.ArgumentTypeError(
                     'cookies keys/values must be ascii-only')
         if b';' in s:
-            raise _arg_utils.Dom2ImgArgumentException(
+            raise argparse.ArgumentTypeError(
                 "cookies keys/values cannot use ';' character")
         return s
 
@@ -93,7 +94,7 @@ def validate_cookies(cookies):
     for key, val in cookies.items():
         new_key = validate_cookie_string(key)
         if b'=' in new_key:
-            raise _arg_utils.Dom2ImgArgumentException(
+            raise argparse.ArgumentTypeError(
                 "cookies keys cannot use '=' character")
         new_val = validate_cookie_string(val)
         result[new_key] = new_val

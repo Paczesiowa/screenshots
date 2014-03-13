@@ -2,10 +2,18 @@ from __future__ import print_function
 
 import sys
 import os
+import argparse
 from dom2img import _cookies, _dom2img, _arg_utils
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--width', type=int,
+                        help='non-negative int with the width ' +
+                        'of virtual render viewport (using pixels unit)')
+    args = parser.parse_args()
+    print(args)
+    sys.exit(0)
     if len(sys.argv) < 7 or len(sys.argv) > 8 or '--help' in sys.argv:
         print('Render html using PhantomJS.')
         print('usage:', sys.argv[0], 'height width top left scale prefix',

@@ -1,7 +1,8 @@
 # coding=utf-8
+import argparse
 import unittest2
 
-from dom2img import _cookies, _arg_utils
+from dom2img import _cookies
 
 
 class CookiesTest(unittest2.TestCase):
@@ -17,7 +18,7 @@ class CookiesTest(unittest2.TestCase):
 
     def test_parse_cookie_string(self):
         fun = _cookies.parse_cookie_string
-        exc = _arg_utils.Dom2ImgArgumentException
+        exc = argparse.ArgumentTypeError
 
         self.assertEqual(fun(u''), {})
         self.assertEqual(fun(u'test'), {})
@@ -50,7 +51,7 @@ class CookiesTest(unittest2.TestCase):
 
     def test_validate_cookies(self):
         fun = _cookies.validate_cookies
-        exc = _arg_utils.Dom2ImgArgumentException
+        exc = argparse.ArgumentTypeError
 
         self.assertEqual(fun({}), {})
         self.assertEqual(fun({b'foo': b'bar'}), {b'foo': b'bar'})

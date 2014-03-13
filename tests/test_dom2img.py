@@ -1,4 +1,5 @@
 # coding=utf-8
+import argparse
 import StringIO
 import multiprocessing
 import unittest2
@@ -7,7 +8,7 @@ from PIL import Image
 from bs4 import BeautifulSoup
 from flask import Flask, request, Response
 
-from dom2img import _dom2img, _arg_utils
+from dom2img import _dom2img
 
 
 class Process(object):
@@ -364,7 +365,7 @@ class Dom2ImgTest(unittest2.TestCase):
 
     def test_dom2img_wrapper(self):
         fun = _dom2img.dom2img
-        exc = _arg_utils.Dom2ImgArgumentException
+        exc = argparse.ArgumentTypeError
 
         worker_args = {}
 

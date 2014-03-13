@@ -1,3 +1,4 @@
+* opt parse
 * fix tests
 ** black box only
 ** separate tests, so there's more paralelization
@@ -16,7 +17,6 @@
 * clean backend
 * unlicense
 * eggsecutable
-* opt parse
 * pylint
 * dodac mozliwosc kontrolowania sciezki do phantomjsa
 * wywalic kod do innych plikow niz __init__.py, zeby tam zostalo tylko to co ipython by dopelnial przy 'from dom2img import ..'
