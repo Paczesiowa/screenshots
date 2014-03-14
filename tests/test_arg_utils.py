@@ -18,16 +18,23 @@ class ArgUtilsTest(unittest2.TestCase):
         self.assertEqual(4, fun(4, u'x'))
         self.assertEqual(5, fun(5, u'x'))
 
-        self.assertRaisesRegexp(exc,
-                                u'x must be int or byte string or unicode',
-                                fun, [], u'x')
+        self.assertEqual(0, fun(u'0'))
+        self.assertEqual(1, fun(b'1'))
 
         self.assertRaisesRegexp(exc,
-                                u'x must be int or byte string or unicode',
-                                fun, {}, u'x')
+                                u'x must be int/byte string/unicode',
+                                fun, [], u'x')
+
+        self.assertRaisesRegexp(exc, u'non_negative_int arg must be ' +
+                                'int/byte string/unicode',
+                                fun, {})
 
         self.assertRaisesRegexp(exc, u'y must be ascii-only unicode',
                                 fun, u'ä', u'y')
+
+        self.assertRaisesRegexp(exc,
+                                u'non_negative_int arg must be ascii-only',
+                                fun, u'ä')
 
         self.assertRaisesRegexp(exc, u'val cannot be parsed as an int',
                                 fun, u'something', u'val')
@@ -35,5 +42,11 @@ class ArgUtilsTest(unittest2.TestCase):
         self.assertRaisesRegexp(exc, u'val cannot be parsed as an int',
                                 fun, b'3.2', u'val')
 
+        self.assertRaisesRegexp(exc, u'cannot parse as an int',
+                                fun, b'3.2')
+
         self.assertRaisesRegexp(exc, u'Unexpected negative integer for x',
                                 fun, u'-2', u'x')
+
+        self.assertRaisesRegexp(exc, u'Unexpected negative integer',
+                                fun, u'-2')

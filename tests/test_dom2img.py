@@ -469,7 +469,7 @@ class Dom2ImgTest(unittest2.TestCase):
                 fun, [], 0, 0, b'http://example.com/', 0, 0, 0, {})
 
             self.assertRaisesRegexp(
-                exc, u'width must be int or byte string or unicode',
+                exc, u'width must be int/byte string/unicode',
                 fun, b'', None, 0, b'http://example.com/', 0, 0, 0, {})
 
             self.assertRaisesRegexp(
@@ -485,7 +485,7 @@ class Dom2ImgTest(unittest2.TestCase):
                 fun, b'', -1, 0, b'http://example.com/', 0, 0, 0, {})
 
             self.assertRaisesRegexp(
-                exc, u'height must be int or byte string or unicode',
+                exc, u'height must be int/byte string/unicode',
                 fun, b'', 0, None, b'http://example.com/', 0, 0, 0, {})
 
             self.assertRaisesRegexp(
@@ -501,7 +501,7 @@ class Dom2ImgTest(unittest2.TestCase):
                 fun, b'', 0, -1, b'http://example.com/', 0, 0, 0, {})
 
             self.assertRaisesRegexp(
-                exc, u'top must be int or byte string or unicode',
+                exc, u'top must be int/byte string/unicode',
                 fun, b'', 0, 0, b'http://example.com/', None, 0, 0, {})
 
             self.assertRaisesRegexp(
@@ -517,7 +517,7 @@ class Dom2ImgTest(unittest2.TestCase):
                 fun, b'', 0, 0, b'http://example.com/', -1, 0, 0, {})
 
             self.assertRaisesRegexp(
-                exc, u'left must be int or byte string or unicode',
+                exc, u'left must be int/byte string/unicode',
                 fun, b'', 0, 0, b'http://example.com/', 0, None, 0, {})
 
             self.assertRaisesRegexp(
@@ -533,7 +533,7 @@ class Dom2ImgTest(unittest2.TestCase):
                 fun, b'', 0, 0, b'http://example.com/', 0, -1, 0, {})
 
             self.assertRaisesRegexp(
-                exc, u'scale must be int or byte string or unicode',
+                exc, u'scale must be int/byte string/unicode',
                 fun, b'', 0, 0, b'http://example.com/', 0, 0, None, {})
 
             self.assertRaisesRegexp(

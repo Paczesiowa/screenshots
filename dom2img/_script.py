@@ -8,7 +8,7 @@ from dom2img import _cookies, _dom2img, _arg_utils
 
 def main():
     parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('--width', type=int,
+    parser.add_argument('--width', type=_arg_utils.non_negative_int,
                         help='non-negative int with the width ' +
                         'of virtual render viewport (using pixels unit)')
     args = parser.parse_args()

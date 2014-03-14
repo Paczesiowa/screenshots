@@ -31,3 +31,4 @@
 * sprawdzic co sie w kazdej funkcji moze zjebac
 * zobaczyc czy setup.py wszystko moze odpalic poprawnie na golym pythonie
 * kazdy plik pep8+pyflakes+rope-organize-imports+pylint
+* rzeczy jak non_negative_int nie musze az tak sie jebac z unicodem
