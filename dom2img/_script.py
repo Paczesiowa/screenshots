@@ -6,11 +6,41 @@ import argparse
 from dom2img import _cookies, _dom2img, _arg_utils
 
 
+def foo(s):
+    raise ValueError('dupa')
+
+
 def main():
     parser = argparse.ArgumentParser(description='Process some integers.')
+
     parser.add_argument('--width', type=_arg_utils.non_negative_int,
+                        required=True,
                         help='non-negative int with the width ' +
                         'of virtual render viewport (using pixels unit)')
+    parser.add_argument('--height', type=_arg_utils.non_negative_int,
+                        required=True,
+                        help='non-negative int with the height ' +
+                        'of virtual render viewport (using pixels unit)')
+    parser.add_argument('--top', type=_arg_utils.non_negative_int,
+                        default=0,
+                        help='non-negative int with offset from the top of ' +
+                        'the page that should be rendered of virtual ' +
+                        'render viewport (using pixels unit)')
+    parser.add_argument('--left', type=_arg_utils.non_negative_int,
+                        default=0,
+                        help='non-negative int with offset from the left ' +
+                        'border of the page that should be rendered ' +
+                        'of virtual render viewport (using pixels unit)')
+    parser.add_argument('--scale', type=_arg_utils.non_negative_int,
+                        default=100,
+                        help='non-negative int with percentage number ' +
+                        'that the screenshot will be scaled to ' +
+                        '(50 means half the original size)')
+    parser.add_argument('--prefix', type=foo,
+                        default=100,
+                        help='non-negative int with percentage number ' +
+                        'that the screenshot will be scaled to ' +
+                        '(50 means half the original size)')
     args = parser.parse_args()
     print(args)
     sys.exit(0)
@@ -21,19 +51,6 @@ def main():
         print('[cookie_string] < file.html')
         print('''
 Parameters:
-* width - string containing non-negative int with
-          the width of virtual render viewport (using pixels unit)
-* height - string containing non-negative int with
-           the height of virtual render viewport (using pixels unit)
-* top - string containing non-negative int with
-        offset from the top of the page that should be rendered
-        (using pixels unit)
-* left - string containing non-negative int with
-         offset from the left border of the page that should be rendered
-         (using pixels unit)
-* scale - string containing non-negative int with percentage number
-          that the screenshot will be scaled to (50 means half the
-          original size)
 * prefix - string containing absolute urls that will be used
            to handle relative urls in html (for images, css scripts)
            and optionally for cookies

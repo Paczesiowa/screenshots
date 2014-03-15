@@ -50,3 +50,38 @@ class ArgUtilsTest(unittest2.TestCase):
 
         self.assertRaisesRegexp(exc, u'Unexpected negative integer',
                                 fun, u'-2')
+
+    def test_absolute_url(self):
+        fun = _arg_utils.absolute_url
+
+        self.assertEqual(b'http://example.com/',
+                         fun(b'http://example.com/'))
+
+        self.assertEqual(u'http://example.com/',
+                         fun(b'http://example.com/'))
+
+        self.assertEqual(b'http://example.com/foo/bar',
+                         fun(b'http://example.com/foo/bar'))
+
+        self.assertEqual(u'http://example.com/foo/bar/',
+                         fun(b'http://example.com/foo/bar/'))
+
+        self.assertRaisesRegexp(TypeError,
+                                u'absolute_url\\(\\) argument must be ' +
+                                u'a byte string or unicode text',
+                                fun, None)
+
+        self.assertRaisesRegexp(ValueError,
+                                u'absolute_url\\(\\) unicode text argument ' +
+                                u'must be ascii-only',
+                                fun, u'http://exämple.com/')
+
+        self.assertRaisesRegexp(ValueError,
+                                u'absolute_url\\(\\) argument must be ' +
+                                u'an absolute url',
+                                fun, b'example.com/')
+
+        self.assertRaisesRegexp(ValueError,
+                                u'absolute_url\\(\\) argument must be ' +
+                                u'an absolute url',
+                                fun, u'//example.com/')

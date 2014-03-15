@@ -549,27 +549,27 @@ class Dom2ImgTest(unittest2.TestCase):
                 fun, b'', 0, 0, b'http://example.com/', 0, 0, -1, {})
 
             self.assertRaisesRegexp(
-                exc, u'unicode prefix must be ascii-only',
+                ValueError, u'unicode prefix must be ascii-only',
                 fun, b'', 0, 0, u'http://example.com/föö', 0, 0, 0, {})
 
             self.assertRaisesRegexp(
-                exc, u'prefix must be a byte-string or an unicode text',
+                TypeError, u'prefix must be a byte-string or an unicode text',
                 fun, b'', 0, 0, None, 0, 0, 0, {})
 
             self.assertRaisesRegexp(
-                exc, u'prefix must be an absolute URL',
+                ValueError, u'prefix must be an absolute url',
                 fun, b'', 0, 0, b'example.com', 0, 0, 0, {})
 
             self.assertRaisesRegexp(
-                exc, u'prefix must be an absolute URL',
+                ValueError, u'prefix must be an absolute url',
                 fun, b'', 0, 0, b'example.com/', 0, 0, 0, {})
 
             self.assertRaisesRegexp(
-                exc, u'prefix must be an absolute URL',
+                ValueError, u'prefix must be an absolute url',
                 fun, b'', 0, 0, b'//example.com', 0, 0, 0, {})
 
             self.assertRaisesRegexp(
-                exc, u'prefix must be an absolute URL',
+                ValueError, u'prefix must be an absolute url',
                 fun, b'', 0, 0, b'//example.com/', 0, 0, 0, {})
 
             self.assertRaisesRegexp(

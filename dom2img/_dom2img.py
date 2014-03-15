@@ -158,23 +158,12 @@ def dom2img(content, width, height, prefix,
     if not isinstance(content, _compat.byte_string):
         raise argparse.ArgumentTypeError(
             'content must be utf-8 encoded byte string or unicode')
-    height = _arg_utils.non_negative_int(height, 'height')
-    width = _arg_utils.non_negative_int(width, 'width')
-    top = _arg_utils.non_negative_int(top, 'top')
-    left = _arg_utils.non_negative_int(left, 'left')
-    scale = _arg_utils.non_negative_int(scale, 'scale')
-    if isinstance(prefix, _compat.text):
-        try:
-            prefix = prefix.encode('ascii')
-        except UnicodeEncodeError:
-            raise argparse.ArgumentTypeError(
-                'unicode prefix must be ascii-only')
-    if not isinstance(prefix, _compat.byte_string):
-        raise argparse.ArgumentTypeError(
-            'prefix must be a byte-string or an unicode text')
-    if not _url_utils.is_absolute_url(prefix):
-        raise argparse.ArgumentTypeError(
-            'prefix must be an absolute URL')
+    height = _arg_utils.non_negative_int(height, u'height')
+    width = _arg_utils.non_negative_int(width, u'width')
+    top = _arg_utils.non_negative_int(top, u'top')
+    left = _arg_utils.non_negative_int(left, u'left')
+    scale = _arg_utils.non_negative_int(scale, u'scale')
+    prefix = _arg_utils.absolute_url(prefix, u'prefix')
     if cookies is None:
         cookies = {}
     if isinstance(cookies, dict):
