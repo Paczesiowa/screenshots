@@ -7,10 +7,6 @@ from dom2img import _cookies, _dom2img, _arg_utils
 import dom2img
 
 
-def foo(s):
-    raise ValueError('dupa')
-
-
 def main():
     prolog = '''Render html using PhantomJS.
 
