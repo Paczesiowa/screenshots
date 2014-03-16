@@ -1,4 +1,3 @@
-* opt parse
 * fix tests
 ** black box only
 ** separate tests, so there's more paralelization

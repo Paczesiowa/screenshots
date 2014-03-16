@@ -4,6 +4,7 @@ import sys
 import os
 import argparse
 from dom2img import _cookies, _dom2img, _arg_utils
+import dom2img
 
 
 def foo(s):
@@ -57,6 +58,8 @@ Return status can be:
                         default='',
                         help='semicolon-separated string containing ' +
                         'cookie elems using key=val format')
+    parser.add_argument('-v', '-V', '--version', action='version',
+                        version='%(prog)s ' + dom2img.__version__)
 
     args = vars(parser.parse_args())
     args['content'] = sys.stdin.read()
