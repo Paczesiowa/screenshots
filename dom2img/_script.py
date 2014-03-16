@@ -40,17 +40,17 @@ Return status can be:
                         'relative urls in html (for images, css scripts) ' +
                         'and optionally for cookies')
     parser.add_argument('--top', type=_arg_utils.non_negative_int,
-                        default=0,
+                        default='0',
                         help='non-negative int with offset from the top of ' +
                         'the page that should be rendered of virtual ' +
                         'render viewport (using pixels unit)')
     parser.add_argument('--left', type=_arg_utils.non_negative_int,
-                        default=0,
+                        default='0',
                         help='non-negative int with offset from the left ' +
                         'border of the page that should be rendered ' +
                         'of virtual render viewport (using pixels unit)')
     parser.add_argument('--scale', type=_arg_utils.non_negative_int,
-                        default=100,
+                        default='100',
                         help='non-negative int with percentage number ' +
                         'that the screenshot will be scaled to ' +
                         '(50 means half the original size)')
