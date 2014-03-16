@@ -1,40 +1,38 @@
-import unittest2
-
 import bs4
 
 from dom2img import _url_utils
 
+import tests.utils as utils
 
-class IsAbsoluteURLTest(unittest2.TestCase):
 
-    def is_abs(self, url):
-        self.assertTrue(_url_utils.is_absolute_url(url))
+class NonNegativeIntTest(utils.TestCase):
 
-    def is_not_abs(self, url):
-        self.assertFalse(_url_utils.is_absolute_url(url))
+    FUN = _url_utils.is_absolute_url
 
     def test_simple(self):
-        self.is_abs(b'http://example.com/')
+        self._check_result_true(b'http://example.com/')
 
     def test_url_with_path(self):
-        self.is_abs(b'https://example.com/something/something_else.txt')
+        self._check_result_true(
+            b'https://example.com/something/something_else.txt')
 
     def test_url_with_path_using_parent_references(self):
-        self.is_abs(b'http://example.com/something/../something.txt')
+        self._check_result_true(
+            b'http://example.com/something/../something.txt')
 
     def test_url_without_scheme(self):
-        self.is_not_abs(b'/something.txt')
+        self._check_result_false(b'/something.txt')
 
     def test_url_without_scheme_using_parent_references(self):
-        self.is_not_abs(b'/../something.txt')
+        self._check_result_false(b'/../something.txt')
 
     def test_url_with_protocol_relative_scheme(self):
-        self.is_not_abs(b'//something/something.txt')
+        self._check_result_false(b'//something/something.txt')
 
 
-class AbsolutizeURLsTest(unittest2.TestCase):
+class AbsolutizeURLsTest(utils.TestCase):
 
-    def check(self, html_in, html_out, tag, attribute):
+    def _check(self, html_in, html_out, tag, attribute):
         bs = bs4.BeautifulSoup
         prefix = 'http://example.com/something'
         doc_in = bs(html_in)
@@ -44,21 +42,21 @@ class AbsolutizeURLsTest(unittest2.TestCase):
         self.assertEqual(str(doc_in), str(doc_out))
 
     def test_simple(self):
-        self.check(b'<a href="something"></a>',
-                   b'<a href="http://example.com/something"></a>',
-                   b'a', b'href')
+        self._check(b'<a href="something"></a>',
+                    b'<a href="http://example.com/something"></a>',
+                    b'a', b'href')
 
     def test_other_tags_are_not_changed(self):
-        self.check(b'<a href="something"></a>',
-                   b'<a href="something"></a>',
-                   b'b', b'href')
+        self._check(b'<a href="something"></a>',
+                    b'<a href="something"></a>',
+                    b'b', b'href')
 
     def test_other_attributes_are_not_changed(self):
-        self.check(b'<a href="something"></a>',
-                   b'<a href="something"></a>',
-                   b'a', b'src')
+        self._check(b'<a href="something"></a>',
+                    b'<a href="something"></a>',
+                    b'a', b'src')
 
     def test_absolute_urls_are_not_changed(self):
-        self.check(b'<a href="http://example.com/"></a>',
-                   b'<a href="http://example.com/"></a>',
-                   b'a', b'href')
+        self._check(b'<a href="http://example.com/"></a>',
+                    b'<a href="http://example.com/"></a>',
+                    b'a', b'href')
