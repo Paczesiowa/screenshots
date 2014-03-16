@@ -186,7 +186,7 @@ class Dom2ImgTest(unittest2.TestCase):
                                   '--scale=100',
                                   '--width=500',
                                   '--top=50',
-                                  '--cookies=key=val'
+                                  '--cookies=key=val',
                                   '--prefix=http://127.0.0.1:1111/',
                                   '--left=50'],
                                  content)[0]
@@ -212,15 +212,15 @@ class Dom2ImgTest(unittest2.TestCase):
 
     def test_script_missing_arg(self):
         base_args = ['python', 'dom2img/_script.py', '--cookies=key=val']
-        extra_args = ['--height=300', '--scale=100', '--width=500',
-                      '--prefix=http://127.0.0.1:1111/', '--left=50']
+        extra_args = ['--height=300', '--width=500',
+                      '--prefix=http://127.0.0.1:1111/']
         for i in range(len(extra_args)):
-            args = extra_args.copy()
+            args = list(extra_args)
             args.pop(i)
             result = call_script(base_args + args, '')
             self.assertTrue(b'usage' in result[1])
             self.assertEqual(b'', result[0])
-            self.assertEqual(1, result[2])
+            self.assertEqual(2, result[2])
 
     def test_script_optional_cookie_string(self):
         '''

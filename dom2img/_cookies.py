@@ -56,6 +56,9 @@ def parse_cookie_string(cookie_string):
     return cookies
 
 
+parse_cookie_string.__name__ = 'cookie string'
+
+
 def validate_cookies(cookies):
     '''
     Check if cookies is a dict:

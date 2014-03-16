@@ -11,7 +11,19 @@ def foo(s):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Process some integers.')
+    prolog = '''Render html using PhantomJS.
+
+UTF-8 encoded HTML is taken from stdin.
+
+Returns on stdout string containing png image with the screenshot.
+
+Return status can be:
+0: success
+2: if arguments are in improper format
+'''
+    formatter = argparse.RawDescriptionHelpFormatter
+    parser = argparse.ArgumentParser(description=prolog,
+                                     formatter_class=formatter)
 
     parser.add_argument('--width', type=_arg_utils.non_negative_int,
                         required=True,
@@ -21,6 +33,11 @@ def main():
                         required=True,
                         help='non-negative int with the height ' +
                         'of virtual render viewport (using pixels unit)')
+    parser.add_argument('--prefix', type=_arg_utils.absolute_url,
+                        required=True,
+                        help='absolute url that will be used to handle ' +
+                        'relative urls in html (for images, css scripts) ' +
+                        'and optionally for cookies')
     parser.add_argument('--top', type=_arg_utils.non_negative_int,
                         default=0,
                         help='non-negative int with offset from the top of ' +
@@ -36,60 +53,16 @@ def main():
                         help='non-negative int with percentage number ' +
                         'that the screenshot will be scaled to ' +
                         '(50 means half the original size)')
-    parser.add_argument('--prefix', type=foo,
-                        default=100,
-                        help='non-negative int with percentage number ' +
-                        'that the screenshot will be scaled to ' +
-                        '(50 means half the original size)')
-    args = parser.parse_args()
-    print(args)
-    sys.exit(0)
-    if len(sys.argv) < 7 or len(sys.argv) > 8 or '--help' in sys.argv:
-        print('Render html using PhantomJS.')
-        print('usage:', sys.argv[0], 'height width top left scale prefix',
-              end='')
-        print('[cookie_string] < file.html')
-        print('''
-Parameters:
-* prefix - string containing absolute urls that will be used
-           to handle relative urls in html (for images, css scripts)
-           and optionally for cookies
-* cookie_string - semicolon-separated string containing cookie elems
-                  using key=val format
+    parser.add_argument('--cookies', type=_cookies.parse_cookie_string,
+                        default='',
+                        help='semicolon-separated string containing ' +
+                        'cookie elems using key=val format')
 
-Returns on stdout string containing png image with the screenshot.
+    args = vars(parser.parse_args())
+    args['content'] = sys.stdin.read()
 
-Return status can be:
-0: success
-1: if arguments are in improper format''')
-        sys.exit(1)
-
-    content = sys.stdin.read()
-    width = sys.argv[1]
-    height = sys.argv[2]
-    top = sys.argv[3]
-    left = sys.argv[4]
-    scale = sys.argv[5]
-    prefix = sys.argv[6]
-    if len(sys.argv) == 8:
-        cookie_string = sys.argv[7]
-        cookies = _cookies.parse_cookie_string(cookie_string)
-    else:
-        cookies = None
-
-    try:
-        result = _dom2img.dom2img(content=content,
-                                  width=width,
-                                  height=height,
-                                  top=top,
-                                  left=left,
-                                  scale=scale,
-                                  prefix=prefix,
-                                  cookies=cookies)
-        os.write(sys.stdout.fileno(), result)
-    except _arg_utils.Dom2ImgArgumentException as e:
-        print(e, file=sys.stderr)
-        sys.exit(1)
+    result = _dom2img.dom2img(**args)
+    os.write(sys.stdout.fileno(), result)
 
 if __name__ == '__main__':
     main()
