@@ -1,307 +1,46 @@
 # coding=utf-8
 import argparse
 import StringIO
-import multiprocessing
 import unittest2
 
 from PIL import Image
 from bs4 import BeautifulSoup
-from flask import Flask, request, Response
 
 from dom2img import _dom2img
 
-
-class Process(object):
-
-    def __init__(self, fun, *args, **kwargs):
-        self.server = multiprocessing.Process(target=fun, args=args,
-                                              kwargs=kwargs)
-
-    def __enter__(self):
-        self.server.start()
-
-    def __exit__(self, type, value, traceback):
-        self.server.terminate()
-        self.server.join()
+import tests.utils as utils
 
 
-class MonkeyPatch(object):
+class CleanUpHTMLTest(utils.TestCase):
 
-    def __init__(self, obj, attr, new_attr):
-        self._obj = obj
-        self._attr = attr
-        self._new_attr = new_attr
+    FUN = lambda x: _dom2img._clean_up_html(x, b'http://example.com')
 
-    def __enter__(self):
-        self._old = getattr(self._obj, self._attr)
-        setattr(self._obj, self._attr, self._new_attr)
+    def test_script_tag_removal(self):
+        self._check_result(b'', b'<script src="test.js"></script>')
 
-    def __exit__(self, type, value, traceback):
-        setattr(self._obj, self._attr, self._old)
+    def test_script_tag_removal_without_closing_tag(self):
+        self._check_result(b'', b'<script src="test.js">')
 
+    def test_script_tag_removal_with_implicit_closing_tag(self):
+        self._check_result(b'', b'<script src="test.js" />')
 
-class Dom2ImgTest(unittest2.TestCase):
+    def test_script_tag_removal_with_inline_js(self):
+        self._check_result(b'', b'<script>alert("test");</script>')
 
-    def _image_from_bytestring(self, content):
-        return Image.open(StringIO.StringIO(content))
-
-    def _validate_render_pixels(self, expected_pixel, *args):
-        output = _dom2img._render(*args)
-        image = self._image_from_bytestring(output)
-        width, height = image.size
-        for i in range(width):
-            for j in range(height):
-                self.assertEqual(image.getpixel((i, j)),
-                                 expected_pixel(i, j),
-                                 msg=str((i, j)))
-
-    def test_clean_up_html(self):
-        prefix = b'http://example.com'
-        fun = lambda x: _dom2img._clean_up_html(x, prefix)
-        bs = BeautifulSoup
-
-        self.assertEqual(fun(b'<script src="test.js"></script>'),
-                         b'')
-        self.assertEqual(fun(b'<script src="test.js">'),
-                         b'')
-        self.assertEqual(fun(b'<script src="test.js" />'),
-                         b'')
-        self.assertEqual(fun(b'<script>alert("test");</script>'),
-                         b'')
-
+    def test_complex(self):
         content = u'''
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="test.css">
-    <link rel="stylesheet" type="text/css" href="http://sample.com/test.css">
-    <script src="test.js"></script>
-    <script src="test.js" />
-    <style></style>
-    <style>
-      p {
-        color: #ff0000;
-      }
-    </style>
-    <script src="http://example.com/test.js"></script>
-    <script type="text/javascript">
-      var x = 'hello';
-      alert(x);
-    </script>
-  </head>
-  <body>
-    <script type="text/javascript">
-      var x = 'hello';
-      alert(x);
-    </script>
-    <p>
-      föö=bär
-      <img src="test.png" />
-    </p>
-    <a href="test.html">
-      <img src="http://sample.com/test.jpg" />
-    </a>
-  </body>
-</html>
-'''
-        content2 = u'''
-<!DOCTYPE html>
-<html>
-  <head>
+    <link rel="stylesheet" href="http://example.com/div_bg_color.css">
     <link rel="stylesheet" type="text/css" href="http://example.com/test.css">
-    <link rel="stylesheet" type="text/css" href="http://sample.com/test.css">
     <style></style>
-    <style>
-      p {
-        color: #ff0000;
-      }
-    </style>
-  </head>
-  <body>
-    <p>
-      föö=bär
-      <img src="http://example.com/test.png" />
-    </p>
-    <a href="http://example.com/test.html">
-      <img src="http://sample.com/test.jpg" />
-    </a>
-  </body>
-</html>
-'''
-        self.assertEqual(bs(fun(content.encode('utf-8'))).prettify(),
-                         bs(content2).prettify())
-
-    def test_render_size(self):
-        content = b'<html></html>'
-        output = _dom2img._render(content, 100, 200, 0, 0, '', '')
-        image = self._image_from_bytestring(output)
-        self.assertEqual(image.size, (100, 200))
-
-    def test_simple_render(self):
-        '''
-        Test that rendering works
-        '''
-        content = b'''
-<!DOCTYPE html>
-<html>
-  <body style="margin: 0;
-               background-color: white;">
-    <div style="width: 200px;
-                height: 100px;
-                background-color: red;
-                margin: 50px;">
-    </div>
-  </body>
-</html>
-'''
-
-        def expected_pixel(i, j):
-            if (50 <= i < 250) and (50 <= j < 150):
-                return (255, 0, 0, 255)
-            else:
-                return (255, 255, 255, 255)
-
-        self._validate_render_pixels(expected_pixel, content,
-                                     300, 200, 0, 0, '', '')
-
-    def test_offset_render(self):
-        '''
-        Test that scrolled (with offsets) rendering works
-        '''
-        content = b'''
-<!DOCTYPE html>
-<html>
-  <body style="margin: 0;
-               background-color: white;
-               width: 600px;
-               height: 800px;">
-    <div style="width: 200px;
-                height: 100px;
-                background-color: red;
-                margin: 50px;">
-    </div>
-  </body>
-</html>
-'''
-
-        def expected_pixel(i, j):
-            if (i < 200) and (25 <= j < 125):
-                return (255, 0, 0, 255)
-            else:
-                return (255, 255, 255, 255)
-
-        self._validate_render_pixels(expected_pixel, content,
-                                     250, 150, 25, 50, '', '')
-
-    def test_cookie_render(self):
-        '''
-        Test that cookies are correctly passed to referenced resources
-        '''
-        content = b'''
-<!DOCTYPE html>
-<html>
-  <head>
-    <link rel="stylesheet" href="http://127.0.0.1:1111/test.css">
-    <style>
-      body {
-        margin: 0px;
-        background-color: white;
-      }
-      div {
-        width: 200px;
-        height: 100px;
-        background-color: red;
-        margin: 50px;
-      }
-    </style>
-  </head>
-  <body>
-    <div>
-    </div>
-  </body>
-</html>
-'''
-        app = Flask('test')
-
-        # test.css overrides body bgcolor to black
-        # if cookie key=val is present
-        @app.route('/test.css', methods=['GET'])
-        def test_css():
-            if request.cookies.get('key') == 'val':
-                css = 'body { background-color: black !important; }'
-            else:
-                css = ''
-            return Response(css, mimetype='text/css')
-
-        # pixels inside div are red, rest are of color
-        def expected_pixel_for_bgcolor(*color):
-            def aux(i, j):
-                if (50 <= i < 250) and (50 <= j < 150):
-                    return (255, 0, 0, 255)
-                else:
-                    return tuple(color)
-            return aux
-
-        # bg is not changed if /test.css is empty (because no cookie)
-        with Process(app.run, port=1111):
-            self._validate_render_pixels(
-                expected_pixel_for_bgcolor(255, 255, 255, 255),
-                content, 300, 200, 0, 0, '', '')
-
-        # bg is changed with correct cookie passed to /test.css
-        with Process(app.run, port=1111):
-            self._validate_render_pixels(
-                expected_pixel_for_bgcolor(0, 0, 0, 255),
-                content, 300, 200, 0, 0, '127.0.0.1', 'key=val')
-
-        # bg is not changed with correct cookie passed, but wrong domain
-        with Process(app.run, port=1111):
-            self._validate_render_pixels(
-                expected_pixel_for_bgcolor(255, 255, 255, 255),
-                content, 300, 200, 0, 0, 'example.com', 'key=val')
-
-    def test_resize(self):
-        img = Image.new('RGBA', (80, 40))
-
-        def pixel_color(i, j):
-            if (20 <= i < 60) and (10 <= j < 30):
-                return (255, 0, 0, 255)
-            else:
-                return (255, 255, 255, 255)
-
-        for i in range(80):
-            for j in range(40):
-                img.putpixel((i, j), pixel_color(i, j))
-
-        buff = StringIO.StringIO()
-        img.save(buff, format='PNG')
-        img_string = buff.getvalue()
-
-        # default antialias filter looks better, but the result
-        # is hard to unittest
-        result_string = _dom2img._resize(img_string, 50, Image.NEAREST)
-
-        result = Image.open(StringIO.StringIO(result_string))
-        self.assertEqual(result.size, (40, 20))
-        for i in range(40):
-            for j in range(20):
-                self.assertEqual(result.getpixel((i, j)),
-                                 pixel_color(2 * i, 2 * j))
-
-    def test_dom2img(self):
-        '''
-        Test all the features!
-        '''
-        content = b'''
-<!DOCTYPE html>
-<html>
-  <head>
-    <link rel="stylesheet" href="http://127.0.0.1:1111/test.css">
-    <link rel="stylesheet" href="body_margin.css">
     <style>
       body {
         width: 800px;
         height: 800px;
+        margin: 0;
+        background-color: white;
       }
       div {
         width: 400px;
@@ -310,37 +49,124 @@ class Dom2ImgTest(unittest2.TestCase):
         margin: 100px;
       }
     </style>
-    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-    <script>
-      $(document).ready(function() {
-        $('div').remove();
-      });
-    </script>
   </head>
   <body>
     <div>
     </div>
+    <div style="display: none;">
+      föö=bär
+      <img src="http://example.com/test.png" />
+      <a href="http://example.com/test.html">
+        <img src="http://sample.com/test.jpg" />
+      </a>
+    </div>
   </body>
 </html>
+
 '''
-        app = Flask('test')
+        self._check_result(content, utils.dirty_html_doc,
+                           comparator=lambda c: BeautifulSoup(c).prettify())
 
-        # result is empty if there's no cookie key=val
-        # test.css overrides body bgcolor to white
-        # body_margin.css sets body margin to 0
-        @app.route('/<path>', methods=['GET'])
-        def test_css(path):
-            if request.cookies.get('key') == 'val':
-                if path == 'test.css':
-                    css = 'body { background-color: white;}'
-                elif path == 'body_margin.css':
-                    css = 'body { margin: 0;}'
+
+class RenderTest(utils.TestCase):
+
+    FUN = _dom2img._render
+
+    def test_render_size(self):
+        content = b'<html></html>'
+        output = _dom2img._render(content=content,
+                                  width=100,
+                                  height=200,
+                                  top=0,
+                                  left=0,
+                                  cookie_domain=b'',
+                                  cookie_string=b'')
+        image = utils.image_from_bytestring(output)
+        self.assertEqual(image.size, (100, 200))
+
+    def test_simple_render(self):
+        output = _dom2img._render(content=utils.html_doc(),
+                                  width=600,
+                                  height=400,
+                                  top=0,
+                                  left=0,
+                                  cookie_domain='',
+                                  cookie_string='')
+        self._validate_render_pixels(output)
+
+    def test_offset_render(self):
+        output = _dom2img._render(content=utils.html_doc(),
+                                  width=600,
+                                  height=400,
+                                  top=50,
+                                  left=50,
+                                  cookie_domain='',
+                                  cookie_string='')
+        self._validate_render_pixels(output, top=50, left=50)
+
+    def test_cookie_render_with_wrong_cookie(self):
+        with utils.FlaskApp() as app:
+            output = _dom2img._render(content=utils.html_doc(app.port),
+                                      width=600,
+                                      height=400,
+                                      top=0,
+                                      left=0,
+                                      cookie_domain='127.0.0.1',
+                                      cookie_string='key=val2')
+            self._validate_render_pixels(output)
+
+    def test_cookie_render(self):
+        with utils.FlaskApp() as app:
+            output = _dom2img._render(content=utils.html_doc(app.port),
+                                      width=600,
+                                      height=400,
+                                      top=0,
+                                      left=0,
+                                      cookie_domain='127.0.0.1',
+                                      cookie_string='key=val')
+            self._validate_render_pixels(output, div_color=(0, 0, 0))
+
+    def test_cookie_render_wrong_cookie_domain(self):
+        with utils.FlaskApp() as app:
+            output = _dom2img._render(content=utils.html_doc(app.port),
+                                      width=600,
+                                      height=400,
+                                      top=0,
+                                      left=0,
+                                      cookie_domain='example.com',
+                                      cookie_string='key=val')
+            self._validate_render_pixels(output)
+
+
+class ResizeTest(utils.TestCase):
+
+    def test_resize(self):
+        img = Image.new('RGBA', (600, 400))
+
+        for i in range(600):
+            for j in range(400):
+                if (100 <= i < 500) and (100 <= j < 300):
+                    color = (255, 0, 0, 255)
                 else:
-                    css = ''
-            else:
-                css = ''
-            return Response(css, mimetype='text/css')
+                    color = (255, 255, 255, 255)
+                img.putpixel((i, j), color)
 
+        buff = StringIO.StringIO()
+        img.save(buff, format='PNG')
+        img_string = buff.getvalue()
+
+        # default antialias filter looks better, but the result
+        # is hard to unittest
+        result_string = _dom2img._resize(img_string, 50, Image.NEAREST)
+        self._validate_render_pixels(result_string, scale=.5)
+
+        result_img = utils.image_from_bytestring(result_string)
+        self.assertEqual((300, 200), result_img.size)
+
+
+class Dom2ImgWorkerTest(utils.TestCase):
+
+    def test_complex(self):
         # override _resize to use 'nearest' resize filter
         # to make unit testing possible
         old_resize = _dom2img._resize
@@ -348,20 +174,23 @@ class Dom2ImgTest(unittest2.TestCase):
         def _new_resize(img_string, scale):
             return old_resize(img_string, scale, Image.NEAREST)
 
-        with MonkeyPatch(_dom2img, '_resize', _new_resize):
-            with Process(app.run, port=1111):
-                output = _dom2img._dom2img(content, 500, 300, 50, 50, 50,
-                                           'http://127.0.0.1:1111/', 'key=val')
-                image = self._image_from_bytestring(output)
-                self.assertEqual(image.size, (250, 150))
-                for i in range(250):
-                    for j in range(150):
-                        if (25 <= i < 225) and (25 <= j < 125):
-                            expected_pixel = (255, 0, 0, 255)
-                        else:
-                            expected_pixel = (255, 255, 255, 255)
-                        self.assertEqual(image.getpixel((i, j)),
-                                         expected_pixel, str((i, j)))
+        with utils.MonkeyPatch(_dom2img, '_resize', _new_resize):
+            with utils.FlaskApp() as app:
+                port = app.port
+                prefix = b'http://127.0.0.1:' + str(port) + b'/'
+                output = _dom2img._dom2img(content=utils.html_doc(port),
+                                           width=600,
+                                           height=400,
+                                           top=50,
+                                           left=50,
+                                           scale=50,
+                                           prefix=prefix,
+                                           cookie_string=b'key=val')
+                self._validate_render_pixels(output, left=50, top=50, scale=.5,
+                                             div_color=(0, 0, 0))
+
+
+class Dom2ImgTest(unittest2.TestCase):
 
     def test_dom2img_wrapper(self):
         fun = _dom2img.dom2img
@@ -374,7 +203,7 @@ class Dom2ImgTest(unittest2.TestCase):
             for key, val in kwargs.items():
                 worker_args[key] = val
 
-        with MonkeyPatch(_dom2img, '_dom2img', grab_worker_args):
+        with utils.MonkeyPatch(_dom2img, '_dom2img', grab_worker_args):
             fun(b'content', 100, 100, b'http://example.com/', 0, 0, 100, None)
             self.assertEqual(worker_args['content'], b'content')
 

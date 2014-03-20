@@ -1,6 +1,5 @@
 # coding=utf-8
 import argparse
-import unittest2
 
 from dom2img import _cookies
 
