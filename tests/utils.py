@@ -26,6 +26,14 @@ class TestCase(unittest2.TestCase):
         fun = self.FUN.__func__
         self.assertEqual(comparator(output), comparator(fun(*args, **kwargs)))
 
+    def _check_results(self, kwargs, arg, val1, val2):
+        fun = self.FUN.__func__
+        kwargs1 = kwargs.copy()
+        kwargs1[arg] = val1
+        kwargs2 = kwargs.copy()
+        kwargs2[arg] = val2
+        self.assertEqual(fun(**kwargs1), fun(**kwargs2))
+
     def _check_result_true(self, *args, **kwargs):
         self._check_result(True, *args, **kwargs)
 
