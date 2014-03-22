@@ -1,7 +1,9 @@
 # coding=utf-8
 import StringIO
 import multiprocessing
+import os
 import socket
+from subprocess import Popen, PIPE
 
 import flask
 import unittest2
@@ -161,3 +163,11 @@ class MonkeyPatch(object):
 
     def __exit__(self, type, value, traceback):
         setattr(self._obj, self._attr, self._old)
+
+
+def call_script(args, stdin):
+    new_env = os.environ.copy()
+    new_env['PYTHONPATH'] = '.'
+    proc = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE, env=new_env)
+    result = proc.communicate(stdin)
+    return result[0], result[1], proc.returncode

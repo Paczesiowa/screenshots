@@ -15,7 +15,7 @@ def _clean_up_html(content, prefix):
     and making relative urls absolute.
     content is an utf-8 encoded byte string with html
     prefix is a url byte string that will be user to make absolute url.
-    Returns cleaned up html string
+    Returns cleaned up, utf-8 encoded html byte string
     '''
     doc = BeautifulSoup(content)
 
@@ -26,7 +26,7 @@ def _clean_up_html(content, prefix):
     _url_utils.absolutize_urls(doc, 'a', 'href', prefix)
     _url_utils.absolutize_urls(doc, 'img', 'src', prefix)
 
-    return doc.prettify()
+    return doc.prettify().encode('utf-8')
 
 
 def _render(content, width, height, top, left, cookie_domain, cookie_string):

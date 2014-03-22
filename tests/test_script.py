@@ -1,299 +1,70 @@
 # coding=utf-8
-import StringIO
-import multiprocessing
-import unittest2
-import os
+import itertools
+import random
 
-from PIL import Image
-from flask import Flask, request, Response
-from subprocess import Popen, PIPE
+import tests.utils as utils
 
 
-def call_script(args, stdin):
-    new_env = os.environ.copy()
-    new_env['PYTHONPATH'] = '.'
-    proc = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE, env=new_env)
-    result = proc.communicate(stdin)
-    return result[0], result[1], proc.returncode
+def dom2img_script(input_, kwargs_list):
+    args = ['python', 'dom2img/_script.py']
+    for key, val in kwargs_list:
+        args.append('--' + key + ('=' + str(val) if val else ''))
+    return utils.call_script(args, input_)
 
 
-class Process(object):
+class ScriptTest(utils.TestCase):
 
-    def __init__(self, fun, *args, **kwargs):
-        self.server = multiprocessing.Process(target=fun, args=args,
-                                              kwargs=kwargs)
+    ARGS = [('width', 600),
+            ('height', 400),
+            ('top', 50),
+            ('left', 50),
+            ('scale', 100),
+            ('prefix', None),
+            ('cookies', b'key=val')]
 
-    def __enter__(self):
-        self.server.start()
+    def _test_with_args(self, port, args):
+        for i, (key, val) in enumerate(args):
+            if key == 'prefix':
+                args[i] = (key, b'http://127.0.0.1:' + str(port) + b'/')
+        return dom2img_script(utils.html_doc(port), args)
 
-    def __exit__(self, type, value, traceback):
-        self.server.terminate()
-        self.server.join()
+    def _check_output(self, port, args, div_color=(0, 0, 0)):
+        output = self._test_with_args(port, args)[0]
+        self._validate_render_pixels(output, left=50, top=50,
+                                     div_color=div_color)
 
+    def test_complex(self):
+        with utils.FlaskApp() as app:
+            self._check_output(app.port, list(self.ARGS))
 
-class MonkeyPatch(object):
-
-    def __init__(self, obj, attr, new_attr):
-        self._obj = obj
-        self._attr = attr
-        self._new_attr = new_attr
-
-    def __enter__(self):
-        self._old = getattr(self._obj, self._attr)
-        setattr(self._obj, self._attr, self._new_attr)
-
-    def __exit__(self, type, value, traceback):
-        setattr(self._obj, self._attr, self._old)
-
-
-class Dom2ImgTest(unittest2.TestCase):
-
-    def _image_from_bytestring(self, content):
-        return Image.open(StringIO.StringIO(content))
-
-    def test_script(self):
-        '''
-        Test all the features!
-        '''
-        content = b'''
-<!DOCTYPE html>
-<html>
-  <head>
-    <link rel="stylesheet" href="http://127.0.0.1:1111/test.css">
-    <link rel="stylesheet" href="body_margin.css">
-    <style>
-      body {
-        width: 800px;
-        height: 800px;
-      }
-      div {
-        width: 400px;
-        height: 200px;
-        background-color: red;
-        margin: 100px;
-      }
-    </style>
-    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-    <script>
-      $(document).ready(function() {
-        $('div').remove();
-      });
-    </script>
-  </head>
-  <body>
-    <div>
-    </div>
-  </body>
-</html>
-'''
-        app = Flask('test')
-
-        # result is empty if there's no cookie key=val
-        # test.css overrides body bgcolor to white
-        # body_margin.css sets body margin to 0
-        @app.route('/<path>', methods=['GET'])
-        def test_css(path):
-            if request.cookies.get('key') == 'val':
-                if path == 'test.css':
-                    css = 'body { background-color: white;}'
-                elif path == 'body_margin.css':
-                    css = 'body { margin: 0;}'
-                else:
-                    css = ''
-            else:
-                css = ''
-            return Response(css, mimetype='text/css')
-
-        with Process(app.run, port=1111):
-            output = call_script(['python',
-                                  'dom2img/_script.py',
-                                  '--width=500',
-                                  '--height=300',
-                                  '--top=50',
-                                  '--left=50',
-                                  '--scale=100',
-                                  '--prefix=http://127.0.0.1:1111/',
-                                  '--cookies=key=val'],
-                                 content)[0]
-            image = self._image_from_bytestring(output)
-            self.assertEqual(image.size, (500, 300))
-            for i in range(500):
-                for j in range(300):
-                    if (50 <= i < 450) and (50 <= j < 250):
-                        expected_pixel = (255, 0, 0, 255)
-                    else:
-                        expected_pixel = (255, 255, 255, 255)
-                    self.assertEqual(image.getpixel((i, j)),
-                                     expected_pixel, str((i, j)))
-
-    def test_script_permuted_args(self):
-        '''
-        Test all the features!
-        '''
-        content = b'''
-<!DOCTYPE html>
-<html>
-  <head>
-    <link rel="stylesheet" href="http://127.0.0.1:1111/test.css">
-    <link rel="stylesheet" href="body_margin.css">
-    <style>
-      body {
-        width: 800px;
-        height: 800px;
-      }
-      div {
-        width: 400px;
-        height: 200px;
-        background-color: red;
-        margin: 100px;
-      }
-    </style>
-    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-    <script>
-      $(document).ready(function() {
-        $('div').remove();
-      });
-    </script>
-  </head>
-  <body>
-    <div>
-    </div>
-  </body>
-</html>
-'''
-        app = Flask('test')
-
-        # result is empty if there's no cookie key=val
-        # test.css overrides body bgcolor to white
-        # body_margin.css sets body margin to 0
-        @app.route('/<path>', methods=['GET'])
-        def test_css(path):
-            if request.cookies.get('key') == 'val':
-                if path == 'test.css':
-                    css = 'body { background-color: white;}'
-                elif path == 'body_margin.css':
-                    css = 'body { margin: 0;}'
-                else:
-                    css = ''
-            else:
-                css = ''
-            return Response(css, mimetype='text/css')
-
-        with Process(app.run, port=1111):
-            output = call_script(['python',
-                                  'dom2img/_script.py',
-                                  '--height=300',
-                                  '--scale=100',
-                                  '--width=500',
-                                  '--top=50',
-                                  '--cookies=key=val',
-                                  '--prefix=http://127.0.0.1:1111/',
-                                  '--left=50'],
-                                 content)[0]
-            image = self._image_from_bytestring(output)
-            self.assertEqual(image.size, (500, 300))
-            for i in range(500):
-                for j in range(300):
-                    if (50 <= i < 450) and (50 <= j < 250):
-                        expected_pixel = (255, 0, 0, 255)
-                    else:
-                        expected_pixel = (255, 255, 255, 255)
-                    self.assertEqual(image.getpixel((i, j)),
-                                     expected_pixel, str((i, j)))
+    def test_permuted_args(self):
+        all_permutations = list(itertools.permutations(self.ARGS))
+        random.shuffle(all_permutations)
+        with utils.FlaskApp() as app:
+            for permuted_args in all_permutations[:2]:
+                self._check_output(app.port, list(permuted_args))
 
     def test_script_usage(self):
-        '''
-        Test all the features!
-        '''
-        result = call_script(['python', 'dom2img/_script.py', '--help'], '')
+        result = dom2img_script('', [('help', None)])
         self.assertTrue(b'usage' in result[0])
         self.assertEqual(result[1], '')
         self.assertEqual(result[2], 0)
 
     def test_script_missing_arg(self):
-        base_args = ['python', 'dom2img/_script.py', '--cookies=key=val']
-        extra_args = ['--height=300', '--width=500',
-                      '--prefix=http://127.0.0.1:1111/']
-        for i in range(len(extra_args)):
-            args = list(extra_args)
-            args.pop(i)
-            result = call_script(base_args + args, '')
+        for arg_to_skip in ['height', 'width', 'prefix']:
+            args = list(self.ARGS)
+            for i, (arg, _) in enumerate(args):
+                if arg == arg_to_skip:
+                    args.pop(i)
+            result = dom2img_script('', args)
             self.assertTrue(b'usage' in result[1])
-            self.assertEqual(b'', result[0])
-            self.assertEqual(2, result[2])
+            self.assertEqual(result[0], '')
+            self.assertEqual(result[2], 2)
 
-    def test_script_optional_cookie_string(self):
-        '''
-        Test all the features!
-        '''
-        content = b'''
-<!DOCTYPE html>
-<html>
-  <head>
-    <link rel="stylesheet" href="http://127.0.0.1:1111/test.css">
-    <link rel="stylesheet" href="body_margin.css">
-    <style>
-      body {
-        width: 800px;
-        height: 800px;
-        margin: 0;
-        background-color: black !important;
-      }
-      div {
-        width: 400px;
-        height: 200px;
-        background-color: red;
-        margin: 100px;
-      }
-    </style>
-    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-    <script>
-      $(document).ready(function() {
-        $('div').remove();
-      });
-    </script>
-  </head>
-  <body>
-    <div>
-    </div>
-  </body>
-</html>
-'''
-        app = Flask('test')
-
-        # result is empty if there's no cookie key=val
-        # test.css overrides body bgcolor to white
-        # body_margin.css sets body margin to 0
-        @app.route('/<path>', methods=['GET'])
-        def test_css(path):
-            if request.cookies.get('key') == 'val':
-                if path == 'test.css':
-                    css = 'body { background-color: white;}'
-                elif path == 'body_margin.css':
-                    css = 'body { margin: 0;}'
-                else:
-                    css = ''
-            else:
-                css = ''
-            return Response(css, mimetype='text/css')
-
-        with Process(app.run, port=1111):
-            output = call_script(['python',
-                                  'dom2img/_script.py',
-                                  '--height=300',
-                                  '--scale=100',
-                                  '--width=500',
-                                  '--top=50',
-                                  '--prefix=http://127.0.0.1:1111/',
-                                  '--left=50'],
-                                 content)[0]
-            image = self._image_from_bytestring(output)
-            self.assertEqual(image.size, (500, 300))
-            for i in range(500):
-                for j in range(300):
-                    if (50 <= i < 450) and (50 <= j < 250):
-                        expected_pixel = (255, 0, 0, 255)
-                    else:
-                        expected_pixel = (0, 0, 0, 255)
-                    self.assertEqual(image.getpixel((i, j)),
-                                     expected_pixel, str((i, j)))
+    def test_optional_cookies_param(self):
+        args = list(self.ARGS)
+        for i, (arg, _) in enumerate(args):
+            if arg == 'cookies':
+                args.pop(i)
+        with utils.FlaskApp() as app:
+            self._check_output(app.port, args, div_color=(255, 0, 0))
