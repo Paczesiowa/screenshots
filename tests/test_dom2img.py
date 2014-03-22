@@ -6,7 +6,7 @@ from PIL import Image
 from bs4 import BeautifulSoup
 
 import tests.utils as utils
-from dom2img import _dom2img
+from dom2img import _compat, _dom2img
 
 
 class CleanUpHTMLTest(utils.TestCase):
@@ -24,6 +24,12 @@ class CleanUpHTMLTest(utils.TestCase):
 
     def test_script_tag_removal_with_inline_js(self):
         self._check_result(b'', b'<script>alert("test");</script>')
+
+    def test_result_is_utf8_byte_string(self):
+        result = _dom2img._clean_up_html(utils.dirty_html_doc,
+                                         b'http://example.com')
+        self.assertTrue(isinstance(result, _compat.byte_string))
+        result.decode('utf-8')
 
     def test_complex(self):
         content = u'''
