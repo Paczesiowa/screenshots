@@ -17,6 +17,10 @@ if sys.version_info < (3,):
 else:
     tests_require.append('unittest2py3k == 0.5.1')
 
+install_require = ['BeautifulSoup4 == 4.3.2', 'pillow == 2.3.0']
+if sys.version_info < (2, 7):
+    install_require.append('argparse == 1.2.1')
+
 
 setup(name='dom2img',
       version=__version__,
@@ -55,7 +59,7 @@ Currently only PhantomJS renderer is supported.
       platforms=['Linux'],
       package_data={'dom2img': ['render_file.phantom.js']},
       zip_safe=True,
-      install_requires=['BeautifulSoup4 == 4.3.2', 'pillow == 2.3.0'],
+      install_requires=install_require,
       entry_points={'console_scripts': 'dom2img = dom2img:main'},
       test_suite='nose.collector',
       tests_require=tests_require)
