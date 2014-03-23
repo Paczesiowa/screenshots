@@ -1,3 +1,5 @@
+import sys
+
 try:
     import urlparse as urllib
 except ImportError:
@@ -6,5 +8,10 @@ except ImportError:
 
 urlparse = urllib.urlparse
 urljoin = urllib.urljoin
-text = unicode
-byte_string = str
+
+if sys.version_info < (3,):
+    text = unicode
+    byte_string = str
+else:
+    text = str
+    byte_string = bytes
