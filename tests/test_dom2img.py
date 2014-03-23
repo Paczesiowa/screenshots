@@ -199,14 +199,14 @@ class Dom2ImgTest(utils.TestCase):
     EXC = argparse.ArgumentTypeError
 
     def _make_kwargs(self, port):
-        return {b'content': utils.html_doc(port),
-                b'width': 200,
-                b'height': 200,
-                b'top': 0,
-                b'left': 0,
-                b'scale': 100,
-                b'prefix': u'http://example.com/',
-                b'cookies': 'key=val'}
+        return {'content': utils.html_doc(port),
+                'width': 200,
+                'height': 200,
+                'top': 0,
+                'left': 0,
+                'scale': 100,
+                'prefix': u'http://example.com/',
+                'cookies': 'key=val'}
 
     def _check_images(self, arg, val1, val2):
         with utils.FlaskApp() as app:
@@ -222,29 +222,27 @@ class Dom2ImgTest(utils.TestCase):
 
     def test_content_gets_decoded_properly(self):
         content = u'<html>fööbär</html>'
-        self._check_images(b'content',
-                           content,
-                           content.encode('utf-8'))
+        self._check_images('content', content, content.encode('utf-8'))
 
     def test_width_gets_parsed_properly(self):
-        self._check_images(b'width', 100, b'100')
-        self._check_images(b'width', 100, u'100')
+        self._check_images('width', 100, b'100')
+        self._check_images('width', 100, u'100')
 
     def test_height_gets_parsed_properly(self):
-        self._check_images(b'height', 200, b'200')
-        self._check_images(b'height', 200, u'200')
+        self._check_images('height', 200, b'200')
+        self._check_images('height', 200, u'200')
 
     def test_top_gets_parsed_properly(self):
-        self._check_images(b'top', 30, b'30')
-        self._check_images(b'top', 30, u'30')
+        self._check_images('top', 30, b'30')
+        self._check_images('top', 30, u'30')
 
     def test_left_gets_parsed_properly(self):
-        self._check_images(b'left', 40, b'40')
-        self._check_images(b'left', 40, u'40')
+        self._check_images('left', 40, b'40')
+        self._check_images('left', 40, u'40')
 
     def test_scale_gets_parsed_properly(self):
-        self._check_images(b'scale', 50, b'50')
-        self._check_images(b'scale', 50, u'50')
+        self._check_images('scale', 50, b'50')
+        self._check_images('scale', 50, u'50')
 
     def test_prefix_gets_parsed_properly(self):
         with utils.FlaskApp() as app:
@@ -252,145 +250,145 @@ class Dom2ImgTest(utils.TestCase):
                 b'http://127.0.0.1:' + str(app.port).encode('utf-8') + b'/'
             prefix2 = prefix1.decode('utf-8')
             self._check_results(self._make_kwargs(app.port),
-                                b'prefix', prefix1, prefix2)
+                                'prefix', prefix1, prefix2)
 
     def test_empty_cookies_get_serialized_properly(self):
-        self._check_images(b'cookies', b'', u'')
-        self._check_images(b'cookies', b'', None)
-        self._check_images(b'cookies', b'', {})
+        self._check_images('cookies', b'', u'')
+        self._check_images('cookies', b'', None)
+        self._check_images('cookies', b'', {})
 
     def test_non_empty_cookies_get_serialized_properly(self):
-        self._check_images(b'cookies', b'key=val', u'key=val')
-        self._check_images(b'cookies', {b'key': b'val'}, {u'key': u'val'})
-        self._check_images(b'cookies', {b'key': u'val'}, {u'key': b'val'})
+        self._check_images('cookies', b'key=val', u'key=val')
+        self._check_images('cookies', {b'key': b'val'}, {u'key': u'val'})
+        self._check_images('cookies', {b'key': u'val'}, {u'key': b'val'})
 
     def test_content_wrong_type(self):
         self._check_exception(
             u'content must be utf-8 encoded byte string or unicode',
-            b'content', [])
+            'content', [])
 
     def test_width_wrong_type(self):
         self._check_exception(u'width must be int/byte string/unicode',
-                              b'width', None)
+                              'width', None)
 
     def test_width_non_ascii_unicode(self):
         self._check_exception(u'width must be ascii-only unicode',
-                              b'width', u'föö')
+                              'width', u'föö')
 
     def test_width_unparseable(self):
         self._check_exception(u'width cannot be parsed as an int',
-                              b'width', b'1.5')
+                              'width', b'1.5')
 
     def test_width_negative(self):
         self._check_exception(u'Unexpected negative integer for width',
-                              b'width', -1)
+                              'width', -1)
 
     def test_height_wrong_type(self):
         self._check_exception(u'height must be int/byte string/unicode',
-                              b'height', None)
+                              'height', None)
 
     def test_height_non_ascii_unicode(self):
         self._check_exception(u'height must be ascii-only unicode',
-                              b'height', u'föö')
+                              'height', u'föö')
 
     def test_height_unparseable(self):
         self._check_exception(u'height cannot be parsed as an int',
-                              b'height', b'1.5')
+                              'height', b'1.5')
 
     def test_height_negative(self):
         self._check_exception(u'Unexpected negative integer for height',
-                              b'height', -1)
+                              'height', -1)
 
     def test_top_wrong_type(self):
         self._check_exception(u'top must be int/byte string/unicode',
-                              b'top', None)
+                              'top', None)
 
     def test_top_non_ascii_unicode(self):
         self._check_exception(u'top must be ascii-only unicode',
-                              b'top', u'föö')
+                              'top', u'föö')
 
     def test_top_unparseable(self):
         self._check_exception(u'top cannot be parsed as an int',
-                              b'top', b'1.5')
+                              'top', b'1.5')
 
     def test_top_negative(self):
         self._check_exception(u'Unexpected negative integer for top',
-                              b'top', -1)
+                              'top', -1)
 
     def test_left_wrong_type(self):
         self._check_exception(u'left must be int/byte string/unicode',
-                              b'left', None)
+                              'left', None)
 
     def test_left_non_ascii_unicode(self):
         self._check_exception(u'left must be ascii-only unicode',
-                              b'left', u'föö')
+                              'left', u'föö')
 
     def test_left_unparseable(self):
         self._check_exception(u'left cannot be parsed as an int',
-                              b'left', b'1.5')
+                              'left', b'1.5')
 
     def test_left_negative(self):
         self._check_exception(u'Unexpected negative integer for left',
-                              b'left', -1)
+                              'left', -1)
 
     def test_scale_wrong_type(self):
         self._check_exception(u'scale must be int/byte string/unicode',
-                              b'scale', None)
+                              'scale', None)
 
     def test_scale_non_ascii_unicode(self):
         self._check_exception(u'scale must be ascii-only unicode',
-                              b'scale', u'föö')
+                              'scale', u'föö')
 
     def test_scale_unparseable(self):
         self._check_exception(u'scale cannot be parsed as an int',
-                              b'scale', b'1.5')
+                              'scale', b'1.5')
 
     def test_scale_negative(self):
         self._check_exception(u'Unexpected negative integer for scale',
-                              b'scale', -1)
+                              'scale', -1)
 
     def test_prefix_non_ascii_unicode(self):
         self._check_exception(u'unicode prefix must be ascii-only',
-                              b'prefix', u'http://example.com/föö',
+                              'prefix', u'http://example.com/föö',
                               exc=ValueError)
 
     def test_prefix_wrong_type(self):
         self._check_exception(
             u'prefix must be a byte-string or an unicode text',
-            b'prefix', None, exc=TypeError)
+            'prefix', None, exc=TypeError)
 
     def test_prefix_non_absolute_url(self):
         self._check_exception(u'prefix must be an absolute url',
-                              b'prefix', u'example.com', exc=ValueError)
+                              'prefix', u'example.com', exc=ValueError)
         self._check_exception(u'prefix must be an absolute url',
-                              b'prefix', u'example.com/', exc=ValueError)
+                              'prefix', u'example.com/', exc=ValueError)
         self._check_exception(u'prefix must be an absolute url',
-                              b'prefix', u'//example.com', exc=ValueError)
+                              'prefix', u'//example.com', exc=ValueError)
 
     def test_cookies_wrong_type(self):
         self._check_exception(u'cookies must be None/string/dict',
-                              b'cookies', 7)
+                              'cookies', 7)
 
     def test_cookies_non_ascii_unicode(self):
         self._check_exception(u'unicode cookies must be ascii-only',
-                              b'cookies', u'föö')
+                              'cookies', u'föö')
 
     def test_cookies_key_values_non_ascii_unicode(self):
         self._check_exception(u'cookies keys/values must be ascii-only',
-                              b'cookies', {u'föö': u'bär'.encode('utf-8')})
+                              'cookies', {u'föö': u'bär'.encode('utf-8')})
 
     def test_cookies_key_values_wrong_type(self):
         self._check_exception(u'cookies key/values must be strings',
-                              b'cookies', {u'foo': []})
+                              'cookies', {u'foo': []})
         self._check_exception(u'cookies key/values must be strings',
-                              b'cookies', {3: b'bar'})
+                              'cookies', {3: b'bar'})
 
     def test_cookies_key_with_equals_char(self):
         self._check_exception(u"cookies keys cannot use '=' character",
-                              b'cookies', {u'f=o': b'bar'})
+                              'cookies', {u'f=o': b'bar'})
 
     def test_cookies_key_values_with_semicolon(self):
         self._check_exception(u"cookies keys/values cannot use ';' character",
-                              b'cookies', {u'f;o': b'bar'})
+                              'cookies', {u'f;o': b'bar'})
         self._check_exception(u"cookies keys/values cannot use ';' character",
-                              b'cookies', {u'foo': b'b;r'})
+                              'cookies', {u'foo': b'b;r'})
