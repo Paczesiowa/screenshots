@@ -71,15 +71,15 @@ class AbsoluteURLTest(utils.TestCase):
         self._check_result(b'http://example.com/', b'http://example.com/')
 
     def test_simple_unicode(self):
-        self._check_result(u'http://example.com/', b'http://example.com/')
+        self._check_result(b'http://example.com/', u'http://example.com/')
 
     def test_url_with_path_byte_string(self):
         self._check_result(b'http://example.com/foo/bar',
                            b'http://example.com/foo/bar')
 
     def test_url_with_path_unicode(self):
-        self._check_result(u'http://example.com/foo/bar',
-                           b'http://example.com/foo/bar')
+        self._check_result(b'http://example.com/foo/bar',
+                           u'http://example.com/foo/bar')
 
     def test_wrong_type(self):
         err_msg = u'absolute_url() argument must be ' + \
