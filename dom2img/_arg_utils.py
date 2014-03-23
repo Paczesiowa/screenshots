@@ -17,11 +17,6 @@ def non_negative_int(val, variable_name=None):
 
     >>> non_negative_int(u'7', 'x')
     7
-
-    >>> non_negative_int(u'seven', 'x')
-    Traceback (most recent call last):
-    ...
-    ArgumentTypeError: x cannot be parsed as an int
     '''
     exc = argparse.ArgumentTypeError
     if isinstance(val, _compat.text):
