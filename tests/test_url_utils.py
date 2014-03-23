@@ -34,7 +34,7 @@ class AbsolutizeURLsTest(utils.TestCase):
 
     def _check(self, html_in, html_out, tag, attribute):
         bs = bs4.BeautifulSoup
-        prefix = 'http://example.com/something'
+        prefix = u'http://example.com/something'
         doc_in = bs(html_in)
         doc_out = bs(html_out)
         result = _url_utils.absolutize_urls(doc_in, tag, attribute, prefix)

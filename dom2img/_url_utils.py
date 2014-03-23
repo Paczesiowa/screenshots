@@ -24,12 +24,12 @@ def absolutize_urls(doc, tag_name, attr, prefix):
     tag_name is a byte string of html tag to look for
     attr is a ascii-only unicode text of tag's attribute
       which value will be fixed
-    prefix is a url byte string that will be user to make absolute url.
+    prefix is an ascii-only unicode url that will be used to make absolute url
     doc is modified and also returned.
 
     >>> import bs4
     >>> absolutize_urls(bs4.BeautifulSoup('<a href="something"></a>'),\
-                        b'a', u'href', b'http://127.0.0.1:8000/something')
+                        b'a', u'href', u'http://127.0.0.1:8000/something')
     <a href="http://127.0.0.1:8000/something"></a>
     '''
     for tag in doc.findAll(tag_name):

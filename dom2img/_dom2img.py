@@ -12,7 +12,7 @@ def _clean_up_html(content, prefix):
     Clean up html by removing all script tags
     and making relative urls absolute.
     content is an utf-8 encoded byte string with html
-    prefix is a url byte string that will be user to make absolute url.
+    prefix is an ascii-only unicode url that will be used to make absolute url
     Returns cleaned up, utf-8 encoded html byte string
     '''
     doc = BeautifulSoup(content)
@@ -94,7 +94,7 @@ def _dom2img(content, width, height, top, left, scale, prefix, cookie_string):
     * scale - non-negative int with percentage number,
               that the screenshot will be scaled to (50 means half the
               original size)
-    * prefix - byte string containing absolute url that will be used
+    * prefix - ascii-only unicode containing absolute url that will be used
                to handle relative urls in html (for images, css scripts)
                and optionally for cookies
     * cookie_string - byte string containing cookies keys and values

@@ -112,7 +112,7 @@ dirty_html_doc = u'''
 
 
 def prefix_for_port(port):
-    return b'http://127.0.0.1:' + str(port).encode('ascii') + b'/'
+    return 'http://127.0.0.1:' + str(port) + '/'
 
 
 def html_doc(port=8000):

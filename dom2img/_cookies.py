@@ -108,16 +108,17 @@ def get_cookie_domain(url):
     '''
     Returns server domain that can be used as a cookie domain.
     Port number is stripped from the url.
-    url must be an byte string with absolute URL containing scheme.
+    url bust be an ascii-only unicode with absolute URL containing scheme
     Result is a byte string.
 
-    >>> get_cookie_domain(b'http://google.com:7000/path/' + \
-                           b'something?key=val&key2=val2') == \
+    >>> get_cookie_domain(u'http://google.com:7000/path/' + \
+                           u'something?key=val&key2=val2') == \
         b'google.com'
     True
     '''
     parsed_prefix = _compat.urlparse(url)
     if parsed_prefix.port is not None:
-        return re.search(b'([^:]+)(:[0-9]+)?', parsed_prefix.netloc).group(1)
+        result = re.search(u'([^:]+)(:[0-9]+)?', parsed_prefix.netloc).group(1)
     else:
-        return parsed_prefix.netloc
+        result = parsed_prefix.netloc
+    return result.encode('utf-8')

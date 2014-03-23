@@ -143,20 +143,20 @@ class GetCookieDomainTest(utils.TestCase):
     FUN = _cookies.get_cookie_domain
 
     def test_simple(self):
-        self._check_result(b'example.com', b'http://example.com')
+        self._check_result(b'example.com', u'http://example.com')
 
     def test_with_ending_slash(self):
-        self._check_result(b'example.com', b'http://example.com/')
+        self._check_result(b'example.com', u'http://example.com/')
 
     def test_with_path(self):
-        self._check_result(b'example.com', b'http://example.com/something')
+        self._check_result(b'example.com', u'http://example.com/something')
 
     def test_with_query_part(self):
-        self._check_result(b'example.com', b'http://example.com/?key=val')
+        self._check_result(b'example.com', u'http://example.com/?key=val')
 
     def test_with_port(self):
-        self._check_result(b'example.com', b'http://example.com:8000')
+        self._check_result(b'example.com', u'http://example.com:8000')
 
     def test_complex(self):
-        input_ = b'http://example.com:7000/path/something?key=val&key2=val2'
+        input_ = u'http://example.com:7000/path/something?key=val&key2=val2'
         self._check_result(b'example.com', input_)

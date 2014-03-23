@@ -10,7 +10,7 @@ from dom2img import _compat, _dom2img
 
 class CleanUpHTMLTest(utils.TestCase):
 
-    FUN = lambda x: _dom2img._clean_up_html(x, b'http://example.com')
+    FUN = lambda x: _dom2img._clean_up_html(x, u'http://example.com')
 
     def test_script_tag_removal(self):
         self._check_result(b'', b'<script src="test.js"></script>')
@@ -26,7 +26,7 @@ class CleanUpHTMLTest(utils.TestCase):
 
     def test_result_is_utf8_byte_string(self):
         result = _dom2img._clean_up_html(utils.dirty_html_doc,
-                                         b'http://example.com')
+                                         u'http://example.com')
         self.assertTrue(isinstance(result, _compat.byte_string))
         result.decode('utf-8')
 
@@ -205,7 +205,7 @@ class Dom2ImgTest(utils.TestCase):
                 b'top': 0,
                 b'left': 0,
                 b'scale': 100,
-                b'prefix': b'http://example.com/',
+                b'prefix': u'http://example.com/',
                 b'cookies': 'key=val'}
 
     def _check_images(self, arg, val1, val2):
@@ -248,7 +248,8 @@ class Dom2ImgTest(utils.TestCase):
 
     def test_prefix_gets_parsed_properly(self):
         with utils.FlaskApp() as app:
-            prefix1 = b'http://127.0.0.1:' + str(app.port) + b'/'
+            prefix1 = \
+                b'http://127.0.0.1:' + str(app.port).encode('utf-8') + b'/'
             prefix2 = prefix1.decode('utf-8')
             self._check_results(self._make_kwargs(app.port),
                                 b'prefix', prefix1, prefix2)
@@ -360,11 +361,11 @@ class Dom2ImgTest(utils.TestCase):
 
     def test_prefix_non_absolute_url(self):
         self._check_exception(u'prefix must be an absolute url',
-                              b'prefix', b'example.com', exc=ValueError)
+                              b'prefix', u'example.com', exc=ValueError)
         self._check_exception(u'prefix must be an absolute url',
-                              b'prefix', b'example.com/', exc=ValueError)
+                              b'prefix', u'example.com/', exc=ValueError)
         self._check_exception(u'prefix must be an absolute url',
-                              b'prefix', b'//example.com', exc=ValueError)
+                              b'prefix', u'//example.com', exc=ValueError)
 
     def test_cookies_wrong_type(self):
         self._check_exception(u'cookies must be None/string/dict',
