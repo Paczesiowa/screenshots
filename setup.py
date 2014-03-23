@@ -60,6 +60,6 @@ Currently only PhantomJS renderer is supported.
       package_data={'dom2img': ['render_file.phantom.js']},
       zip_safe=True,
       install_requires=install_require,
-      entry_points={'console_scripts': 'dom2img = dom2img:main'},
+      entry_points={'console_scripts': 'dom2img = dom2img._script:main'},
       test_suite='nose.collector',
       tests_require=tests_require)

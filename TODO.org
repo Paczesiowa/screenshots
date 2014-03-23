@@ -1,22 +1,15 @@
-* fix script installer
+* script tests fail from bare setup.py
 * phantomjs timeout http://stackoverflow.com/questions/16854788/phantomjs-webpage-timeout
 * add page debugging support to render_file.phantom.js
-* get_html_node and get_doctype in js need to be finished
 * document possible exceptions
-* make dom2img.js camel case
 * write readme
 * clean backend
 * unlicense
 * eggsecutable
 * pylint
-* dodac mozliwosc kontrolowania sciezki do phantomjsa
 * setup
 ** dodac backend do exampli
 * coverage testow, generowanie dokumentacji - format docstringow
-* dodac typ ascii string
-* dodact typ cookies
-* wyciagac prefix w jsie
-* zamiast screenshot w jsie, zwracac slownik, zeby w backendzie mozna go przekazac
 * przejrzec i upiekszyc kod w libce
 * sprawdzic co sie w kazdej funkcji moze zjebac
 * zobaczyc czy setup.py wszystko moze odpalic poprawnie na golym pythonie
@@ -26,5 +19,11 @@
 * always use "URL"
 * non_negative_int(u'ä') powinno zwracac taki sam wyjatek jak dla u'a'
 * research unicodedecodeerrors
-* test exectuion time with many pages pdfs
-* investigate the execution time
+* js
+** zamiast screenshot w jsie, zwracac slownik, zeby w backendzie mozna go przekazac
+** wyciagac prefix w jsie
+** make dom2img.js camel case
+** get_html_node and get_doctype in js need to be finished
+* other
+** test exectuion time with many pages pdfs
+** investigate the execution time
