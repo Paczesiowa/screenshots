@@ -5,6 +5,13 @@ try:
 except ImportError:
     import urllib.parse as urllib
 
+try:
+    import StringIO
+    BytesIO = StringIO.StringIO
+except ImportError:
+    import io
+    BytesIO = io.BytesIO
+
 
 urlparse = urllib.urlparse
 urljoin = urllib.urljoin

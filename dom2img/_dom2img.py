@@ -1,8 +1,6 @@
 import argparse
 import sys
 from subprocess import Popen, PIPE
-import StringIO
-
 from dom2img import _cookies, _url_utils, _arg_utils, _compat
 from PIL import Image
 import pkg_resources
@@ -67,12 +65,12 @@ def _resize(img_string, scale, resize_filter=Image.ANTIALIAS):
     resize_filter is a PIL filter used for resizing
     '''
     if scale != 100:  # no point in resizing to 100%
-        img = Image.open(StringIO.StringIO(img_string))
+        img = Image.open(_compat.BytesIO(img_string))
         width, height = img.size
         new_width = int(round(width * (scale / 100.)))
         new_height = int(round(height * (scale / 100.)))
         result = img.resize((new_width, new_height), resize_filter)
-        buff = StringIO.StringIO()
+        buff = _compat.BytesIO()
         result.save(buff, format='PNG')
         return buff.getvalue()
     else:

@@ -1,5 +1,4 @@
 # coding=utf-8
-import StringIO
 import multiprocessing
 import os
 import socket
@@ -9,11 +8,11 @@ import flask
 import unittest2
 from PIL import Image
 
-from dom2img import _dom2img
+from dom2img import _dom2img, _compat
 
 
 def image_from_bytestring(content):
-    return Image.open(StringIO.StringIO(content))
+    return Image.open(_compat.BytesIO(content))
 
 
 class TestCase(unittest2.TestCase):

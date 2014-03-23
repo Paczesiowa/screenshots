@@ -1,5 +1,4 @@
 # coding=utf-8
-import StringIO
 import argparse
 
 from PIL import Image
@@ -155,7 +154,7 @@ class ResizeTest(utils.TestCase):
                     color = (255, 255, 255, 255)
                 img.putpixel((i, j), color)
 
-        buff = StringIO.StringIO()
+        buff = _compat.BytesIO()
         img.save(buff, format='PNG')
         img_string = buff.getvalue()
 
