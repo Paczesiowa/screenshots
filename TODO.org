@@ -30,3 +30,4 @@
 * use "byte-string" everywhere
 * always use "URL"
 * non_negative_int(u'ä') powinno zwracac taki sam wyjatek jak dla u'a'
+* research unicodedecodeerrors

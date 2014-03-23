@@ -69,16 +69,18 @@ def absolute_url(val, variable_name=None):
 
     variable_name is a unicode string used for exception message (or None).
 
-    Returns byte string containing absolute url.
+    Returns ascii-only unicode text containing absolute url.
 
     Raises:
     * TypeError if val is not a byte-string or unicode text
     * ValueError if val is a non ascii-only unicode text
     * ValueError if val is not an absolute url
     '''
+    if isinstance(val, _compat.byte_string):
+        val = val.decode('ascii')
     if isinstance(val, _compat.text):
         try:
-            val = val.encode('ascii')
+            val.encode('ascii')
         except UnicodeEncodeError:
             if variable_name is None:
                 err_msg = u'absolute_url() unicode text argument ' + \
@@ -86,7 +88,7 @@ def absolute_url(val, variable_name=None):
             else:
                 err_msg = u'unicode ' + variable_name + u' must be ascii-only'
             raise ValueError(err_msg)
-    if not isinstance(val, _compat.byte_string):
+    if not isinstance(val, _compat.text):
         if variable_name is None:
             err_msg = u'absolute_url() argument must be ' + \
                 u'a byte string or unicode text'
