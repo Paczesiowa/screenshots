@@ -44,19 +44,19 @@ class AbsolutizeURLsTest(utils.TestCase):
     def test_simple(self):
         self._check(b'<a href="something"></a>',
                     b'<a href="http://example.com/something"></a>',
-                    b'a', b'href')
+                    b'a', u'href')
 
     def test_other_tags_are_not_changed(self):
         self._check(b'<a href="something"></a>',
                     b'<a href="something"></a>',
-                    b'b', b'href')
+                    b'b', u'href')
 
     def test_other_attributes_are_not_changed(self):
         self._check(b'<a href="something"></a>',
                     b'<a href="something"></a>',
-                    b'a', b'src')
+                    b'a', u'src')
 
     def test_absolute_urls_are_not_changed(self):
         self._check(b'<a href="http://example.com/"></a>',
                     b'<a href="http://example.com/"></a>',
-                    b'a', b'href')
+                    b'a', u'href')

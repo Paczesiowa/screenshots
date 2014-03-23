@@ -20,9 +20,9 @@ def _clean_up_html(content, prefix):
     for tag in doc.findAll('script'):
         tag.decompose()
 
-    _url_utils.absolutize_urls(doc, 'link', 'href', prefix)
-    _url_utils.absolutize_urls(doc, 'a', 'href', prefix)
-    _url_utils.absolutize_urls(doc, 'img', 'src', prefix)
+    _url_utils.absolutize_urls(doc, 'link', u'href', prefix)
+    _url_utils.absolutize_urls(doc, 'a', u'href', prefix)
+    _url_utils.absolutize_urls(doc, 'img', u'src', prefix)
 
     return doc.prettify().encode('utf-8')
 
