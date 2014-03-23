@@ -17,7 +17,7 @@ def serialize_cookies(cookies):
         b'key2=val2;key1=val1'
     True
     '''
-    return ';'.join(map('='.join, cookies.items()))
+    return b';'.join(map(b'='.join, cookies.items()))
 
 
 def parse_cookie_string(cookie_string):
