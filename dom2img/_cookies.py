@@ -118,6 +118,6 @@ def get_cookie_domain(url):
     '''
     parsed_prefix = _compat.urlparse(url)
     if parsed_prefix.port is not None:
-        return re.search('([^:]+)(:[0-9]+)?', parsed_prefix.netloc).group(1)
+        return re.search(b'([^:]+)(:[0-9]+)?', parsed_prefix.netloc).group(1)
     else:
         return parsed_prefix.netloc
