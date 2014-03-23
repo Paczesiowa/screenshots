@@ -2,12 +2,15 @@
 import itertools
 import random
 
+from dom2img import _compat
 import tests.utils as utils
 
 
 def dom2img_script(input_, kwargs_list):
     args = ['python', 'dom2img/_script.py']
     for key, val in kwargs_list:
+        if val and isinstance(val, _compat.byte_string):
+            val = val.decode('ascii')
         args.append('--' + key + ('=' + str(val) if val else ''))
     return utils.call_script(args, input_)
 
@@ -47,7 +50,7 @@ class ScriptTest(utils.TestCase):
     def test_script_usage(self):
         result = dom2img_script('', [('help', None)])
         self.assertTrue(b'usage' in result[0])
-        self.assertEqual(result[1], '')
+        self.assertEqual(result[1], b'')
         self.assertEqual(result[2], 0)
 
     def test_script_missing_arg(self):
@@ -58,7 +61,7 @@ class ScriptTest(utils.TestCase):
                     args.pop(i)
             result = dom2img_script('', args)
             self.assertTrue(b'usage' in result[1])
-            self.assertEqual(result[0], '')
+            self.assertEqual(result[0], b'')
             self.assertEqual(result[2], 2)
 
     def test_optional_cookies_param(self):
