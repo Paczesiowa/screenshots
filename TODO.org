@@ -2,7 +2,6 @@
 * phantomjs timeout http://stackoverflow.com/questions/16854788/phantomjs-webpage-timeout
 * add page debugging support to render_file.phantom.js
 * get_html_node and get_doctype in js need to be finished
-* check if imagemagick is installed
 * document possible exceptions
 * make dom2img.js camel case
 * write readme
@@ -11,7 +10,6 @@
 * eggsecutable
 * pylint
 * dodac mozliwosc kontrolowania sciezki do phantomjsa
-* wywalic kod do innych plikow niz __init__.py, zeby tam zostalo tylko to co ipython by dopelnial przy 'from dom2img import ..'
 * setup
 ** dodac backend do exampli
 * coverage testow, generowanie dokumentacji - format docstringow
