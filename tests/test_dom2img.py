@@ -376,7 +376,7 @@ class Dom2ImgTest(utils.TestCase):
 
     def test_cookies_key_values_non_ascii_unicode(self):
         self._check_exception(u'cookies keys/values must be ascii-only',
-                              b'cookies', {u'föö': b'bär'})
+                              b'cookies', {u'föö': u'bär'.encode('utf-8')})
 
     def test_cookies_key_values_wrong_type(self):
         self._check_exception(u'cookies key/values must be strings',
