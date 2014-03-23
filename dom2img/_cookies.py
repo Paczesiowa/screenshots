@@ -12,10 +12,6 @@ def serialize_cookies(cookies):
     contain semicolons. Keys cannot contain '=' character.
     Result is a semicolon-separated byte string with cookie elems
     in key=value format.
-
-    >>> serialize_cookies({b'key1': b'val1', b'key2': b'val2'}) == \
-        b'key2=val2;key1=val1'
-    True
     '''
     return b';'.join(map(b'='.join, cookies.items()))
 
