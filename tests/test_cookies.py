@@ -17,8 +17,11 @@ class SerializeCookiesTest(utils.TestCase):
         self._check_result(b'foo=bar', {b'foo': b'bar'})
 
     def test_complex(self):
-        self._check_result(b'foo=bar;baz=quux',
-                           {b'foo': b'bar', b'baz': b'quux'})
+        result = _cookies.serialize_cookies({b'foo': b'bar', b'baz': b'quux'})
+        self.assertTrue(b'foo=bar' in result)
+        self.assertTrue(b'baz=quux' in result)
+        self.assertTrue(b';' in result)
+        self.assertEqual(16, len(result))
 
 
 class ParseCookieStringTest(utils.TestCase):
