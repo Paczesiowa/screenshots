@@ -180,7 +180,7 @@ class Dom2ImgWorkerTest(utils.TestCase):
         with utils.MonkeyPatch(_dom2img, '_resize', _new_resize):
             with utils.FlaskApp() as app:
                 port = app.port
-                prefix = b'http://127.0.0.1:' + str(port) + b'/'
+                prefix = utils.prefix_for_port(port)
                 output = _dom2img._dom2img(content=utils.html_doc(port),
                                            width=600,
                                            height=400,

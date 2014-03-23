@@ -111,8 +111,12 @@ dirty_html_doc = u'''
 '''.encode('utf-8')
 
 
+def prefix_for_port(port):
+    return b'http://127.0.0.1:' + str(port).encode('ascii') + b'/'
+
+
 def html_doc(port=8000):
-    prefix = 'http://127.0.0.1:' + str(port) + '/'
+    prefix = prefix_for_port(port)
     return _dom2img._clean_up_html(dirty_html_doc, prefix)
 
 

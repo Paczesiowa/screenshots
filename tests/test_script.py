@@ -25,7 +25,7 @@ class ScriptTest(utils.TestCase):
     def _test_with_args(self, port, args):
         for i, (key, val) in enumerate(args):
             if key == 'prefix':
-                args[i] = (key, b'http://127.0.0.1:' + str(port) + b'/')
+                args[i] = (key, utils.prefix_for_port(port))
         return dom2img_script(utils.html_doc(port), args)
 
     def _check_output(self, port, args, div_color=(0, 0, 0)):
