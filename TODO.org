@@ -1,4 +1,3 @@
-* script tests fail from bare setup.py
 * phantomjs timeout http://stackoverflow.com/questions/16854788/phantomjs-webpage-timeout
 * add page debugging support to render_file.phantom.js
 * document possible exceptions

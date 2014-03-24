@@ -2,6 +2,7 @@
 import multiprocessing
 import os
 import socket
+import sys
 from subprocess import Popen, PIPE
 
 import flask
@@ -170,7 +171,7 @@ class MonkeyPatch(object):
 
 def call_script(args, stdin):
     new_env = os.environ.copy()
-    new_env['PYTHONPATH'] = '.'
+    new_env['PYTHONPATH'] = ':'.join(sys.path)
     proc = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE, env=new_env)
     result = proc.communicate(stdin)
     return result[0], result[1], proc.returncode
