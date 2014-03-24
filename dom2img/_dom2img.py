@@ -48,12 +48,6 @@ def _render(content, width, height, top, left, cookie_domain, cookie_string):
                       str(width), str(height), str(top),
                       str(left), cookie_domain, cookie_string]
     proc = Popen(phantomjs_args, stdin=PIPE, stdout=PIPE)
-    if sys.version > '3':
-        if type(content) == str:
-            content = content.encode('utf-8')
-    else:
-        if type(content) == unicode:
-            content = content.encode('utf-8')
     return proc.communicate(content)[0]
 
 
