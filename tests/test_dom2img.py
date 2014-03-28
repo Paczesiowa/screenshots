@@ -1,11 +1,29 @@
 # coding=utf-8
 import argparse
+import os
+import signal
+import threading
 
 from PIL import Image
 from bs4 import BeautifulSoup
 
 import tests.utils as utils
 from dom2img import _compat, _dom2img
+
+
+class PhantomJSFailureTest(utils.TestCase):
+
+    def test_string_empty(self):
+        exc_inst = _dom2img.PhantomJSFailure(return_code=1)
+        self.assertEqual(str(exc_inst),
+                         u'PhantomJS failed with status 1')
+
+    def test_string(self):
+        exc_inst = _dom2img.PhantomJSFailure(return_code=1,
+                                             stderr='some output')
+        err_msg = u'PhantomJS failed with status 1, and stderr output:\n'
+        err_msg += u'some output'
+        self.assertEqual(str(exc_inst), err_msg)
 
 
 class CleanUpHTMLTest(utils.TestCase):
@@ -139,6 +157,27 @@ class RenderTest(utils.TestCase):
                                       cookie_domain='example.com',
                                       cookie_string='key=val')
             self._validate_render_pixels(output)
+
+    def test_crashy_render(self):
+        killer_should_stop = [False]
+        threading.Thread(target=utils.killer,
+                         args=[os.getpid(), killer_should_stop]).start()
+
+        err_msg = u'PhantomJS failed with status -' + \
+            str(signal.SIGKILL) + '.*'
+        try:
+            kwargs = {'content': b'',
+                      'width': 100,
+                      'height': 200,
+                      'top': 0,
+                      'left': 0,
+                      'cookie_domain': b'',
+                      'cookie_string': b''}
+            self.assertRaisesRegexp(_dom2img.PhantomJSFailure,
+                                    err_msg, _dom2img._render,
+                                    **kwargs)
+        finally:
+            killer_should_stop[0] = True
 
 
 class ResizeTest(utils.TestCase):

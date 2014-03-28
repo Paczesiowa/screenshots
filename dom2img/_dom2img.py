@@ -1,10 +1,24 @@
 import argparse
-import sys
 from subprocess import Popen, PIPE
-from dom2img import _cookies, _url_utils, _arg_utils, _compat
-from PIL import Image
+
 import pkg_resources
+from PIL import Image
 from bs4 import BeautifulSoup
+
+from dom2img import _cookies, _url_utils, _arg_utils, _compat
+
+
+class PhantomJSFailure(Exception):
+
+    def __init__(self, return_code, stderr=None):
+        self.return_code = return_code
+        self.stderr = stderr
+
+    def __str__(self):
+        result = u'PhantomJS failed with status ' + str(self.return_code)
+        if self.stderr:
+            result += u', and stderr output:\n' + self.stderr
+        return result
 
 
 def _clean_up_html(content, prefix):
@@ -40,7 +54,9 @@ def _render(content, width, height, top, left, cookie_domain, cookie_string):
       horizontal scroll position
     cookie_domain is a byte string containing url (just the host part)
     cookie_string is a byte string containing cookies keys and values
-    using format key1=val1;key2=val2
+      using format key1=val1;key2=val2
+
+    Raises PhantomJSFailure if PhantomJS process fails/crashes.
     '''
     render_file_phantom_js_location = \
         pkg_resources.resource_filename(__name__, 'render_file.phantom.js')
@@ -48,7 +64,12 @@ def _render(content, width, height, top, left, cookie_domain, cookie_string):
                       str(width), str(height), str(top),
                       str(left), cookie_domain, cookie_string]
     proc = Popen(phantomjs_args, stdin=PIPE, stdout=PIPE)
-    return proc.communicate(content)[0]
+    stdout, stderr = proc.communicate(content)
+    if proc.returncode:
+        raise PhantomJSFailure(return_code=proc.returncode,
+                               stderr=stderr or None)
+    else:
+        return stdout
 
 
 def _resize(img_string, scale, resize_filter=Image.ANTIALIAS):
@@ -95,6 +116,8 @@ def _dom2img(content, width, height, top, left, scale, prefix, cookie_string):
                       using format key1=val1;key2=val2
 
     Returns string containing png image with the screenshot.
+
+    Raises PhantomJSFailure if PhantomJS process fails/crashes.
     '''
     cookie_domain = _cookies.get_cookie_domain(prefix)
     cleaned_up_content = _clean_up_html(content, prefix)
@@ -142,8 +165,8 @@ def dom2img(content, width, height, prefix,
     Returns byte string containing png image with the screenshot.
 
     Raises:
-    * Dom2ImgArgumentException (subclass of ValueError) if arguments are
-      in improper format
+    * argparse.ArgumentTypeError if arguments are in improper format
+    * PhantomJSFailure if PhantomJS process fails/crashes.
     '''
     if isinstance(content, _compat.text):
         content = content.encode('utf-8')

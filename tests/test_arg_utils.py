@@ -1,9 +1,8 @@
 # coding=utf-8
 import argparse
 
-from dom2img import _arg_utils
-
 import tests.utils as utils
+from dom2img import _arg_utils
 
 
 class NonNegativeIntTest(utils.TestCase):

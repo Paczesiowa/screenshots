@@ -1,17 +1,24 @@
 # coding=utf-8
 import itertools
 import random
+import signal
+import threading
 
-from dom2img import _compat
+import dom2img
 import tests.utils as utils
 
 
-def dom2img_script(input_, kwargs_list):
+def serialize_args_for_dom2img_script(kwargs_list):
     args = ['python', 'dom2img/_script.py']
     for key, val in kwargs_list:
-        if val and isinstance(val, _compat.byte_string):
+        if val and isinstance(val, dom2img._compat.byte_string):
             val = val.decode('ascii')
         args.append('--' + key + ('=' + str(val) if val else ''))
+    return args
+
+
+def dom2img_script(input_, kwargs_list):
+    args = serialize_args_for_dom2img_script(kwargs_list)
     return utils.call_script(args, input_)
 
 
@@ -22,7 +29,7 @@ class ScriptTest(utils.TestCase):
             ('top', 50),
             ('left', 50),
             ('scale', 100),
-            ('prefix', None),
+            ('prefix', b'http://example.com/'),
             ('cookies', b'key=val')]
 
     def _test_with_args(self, port, args):
@@ -71,3 +78,21 @@ class ScriptTest(utils.TestCase):
                 args.pop(i)
         with utils.FlaskApp() as app:
             self._check_output(app.port, args, div_color=(255, 0, 0))
+
+    def test_crash(self):
+        args = serialize_args_for_dom2img_script(self.ARGS)
+        proc = utils.start_script(args)
+
+        killer_should_stop = [False]
+        threading.Thread(target=utils.killer,
+                         args=[proc.pid, killer_should_stop]).start()
+
+        stdout, stderr = proc.communicate(b'')
+        try:
+            self.assertEqual(stdout, b'')
+            self.assertEqual(stderr,
+                             b'PhantomJS failed with status -' +
+                             str(signal.SIGKILL).encode('ascii'))
+            self.assertEqual(proc.returncode, 1)
+        finally:
+            killer_should_stop[0] = True

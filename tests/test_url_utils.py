@@ -1,8 +1,7 @@
 import bs4
 
-from dom2img import _url_utils
-
 import tests.utils as utils
+from dom2img import _url_utils
 
 
 class NonNegativeIntTest(utils.TestCase):

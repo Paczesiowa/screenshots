@@ -1,9 +1,11 @@
 # coding=utf-8
 import multiprocessing
 import os
+import signal
 import socket
+import subprocess
 import sys
-from subprocess import Popen, PIPE
+import time
 
 import flask
 import unittest2
@@ -169,9 +171,49 @@ class MonkeyPatch(object):
         setattr(self._obj, self._attr, self._old)
 
 
-def call_script(args, stdin):
+def start_script(args):
     new_env = os.environ.copy()
     new_env['PYTHONPATH'] = ':'.join(sys.path)
-    proc = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE, env=new_env)
+    pipe = subprocess.PIPE
+    return subprocess.Popen(args, stdin=pipe, stdout=pipe,
+                            stderr=pipe, env=new_env)
+
+
+def call_script(args, stdin):
+    proc = start_script(args)
     result = proc.communicate(stdin)
     return result[0], result[1], proc.returncode
+
+
+def check_output(*popenargs, **kwargs):
+    '''
+    copy of subprocess.check_output, which is not present in python-2.6
+    '''
+    if 'stdout' in kwargs:
+        raise ValueError('stdout argument not allowed, it will be overridden.')
+    process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
+    output, unused_err = process.communicate()
+    retcode = process.poll()
+    if retcode:
+        cmd = kwargs.get("args")
+        if cmd is None:
+            cmd = popenargs[0]
+        raise subprocess.CalledProcessError(retcode, cmd)
+    return output
+
+
+def killer(parent_pid, killer_should_stop):
+    output = b''
+    while not killer_should_stop[0] and b' phantomjs ' not in output:
+        time.sleep(.01)
+        try:
+            output = check_output(
+                ['ps', '--ppid', str(parent_pid), '-o', 'pid,cmd'])
+        except subprocess.CalledProcessError:
+            pass
+    if killer_should_stop[0]:
+        return
+    output = output.split(b'\n')[1:]  # skip header line
+    line = list(filter(lambda l: b' phantomjs ' in l, output))[0]
+    pid = int(line.split()[0])
+    os.kill(pid, signal.SIGKILL)

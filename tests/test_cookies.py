@@ -1,9 +1,8 @@
 # coding=utf-8
 import argparse
 
-from dom2img import _cookies
-
 import tests.utils as utils
+from dom2img import _cookies
 
 
 class SerializeCookiesTest(utils.TestCase):

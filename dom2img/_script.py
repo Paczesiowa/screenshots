@@ -1,10 +1,11 @@
 from __future__ import print_function
 
-import sys
-import os
 import argparse
-from dom2img import _cookies, _dom2img, _arg_utils
+import os
+import sys
+
 import dom2img
+from dom2img import _cookies, _dom2img, _arg_utils
 
 
 def main():
@@ -16,6 +17,7 @@ Returns on stdout string containing png image with the screenshot.
 
 Return status can be:
 0: success
+1: if PhantomJS process failed
 2: if arguments are in improper format
 '''
     formatter = argparse.RawDescriptionHelpFormatter
@@ -60,8 +62,12 @@ Return status can be:
     args = vars(parser.parse_args())
     args['content'] = sys.stdin.read()
 
-    result = _dom2img.dom2img(**args)
-    os.write(sys.stdout.fileno(), result)
+    try:
+        result = _dom2img.dom2img(**args)
+        os.write(sys.stdout.fileno(), result)
+    except _dom2img.PhantomJSFailure as e:
+        os.write(sys.stderr.fileno(), str(e).encode('utf-8'))
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
