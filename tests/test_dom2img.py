@@ -431,3 +431,25 @@ class Dom2ImgTest(utils.TestCase):
                               'cookies', {u'f;o': b'bar'})
         self._check_exception(u"cookies keys/values cannot use ';' character",
                               'cookies', {u'foo': b'b;r'})
+
+    def test_crashy_phantomjs(self):
+        killer_should_stop = [False]
+        threading.Thread(target=utils.killer,
+                         args=[os.getpid(), killer_should_stop]).start()
+
+        err_msg = u'PhantomJS failed with status -' + \
+            str(signal.SIGKILL) + '.*'
+        try:
+            kwargs = {'content': b'',
+                      'width': 100,
+                      'height': 200,
+                      'top': 0,
+                      'left': 0,
+                      'scale': 100,
+                      'prefix': b'http://example.com/',
+                      'cookies': {}}
+            self.assertRaisesRegexp(_dom2img.PhantomJSFailure,
+                                    err_msg, _dom2img.dom2img,
+                                    **kwargs)
+        finally:
+            killer_should_stop[0] = True
