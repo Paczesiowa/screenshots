@@ -11,4 +11,5 @@ except pkg_resources.DistributionNotFound:
 
 dom2img = _dom2img.dom2img
 PhantomJSFailure = _dom2img.PhantomJSFailure
-__all__ = ['dom2img', 'PhantomJSFailure']
+PhantomJSTimeout = _dom2img.PhantomJSTimeout
+__all__ = ['dom2img', 'PhantomJSFailure', 'PhantomJSTimeout']

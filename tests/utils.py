@@ -138,6 +138,11 @@ class FlaskApp(object):
                 css = ''
             return flask.Response(css, mimetype='text/css')
 
+        # freeze.css requests freezes
+        @self._app.route('/freeze.css', methods=['GET'])
+        def freeze_css():
+            time.sleep(60)
+
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.bind(('127.0.0.1', 0))
         port = sock.getsockname()[1]

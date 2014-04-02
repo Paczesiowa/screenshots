@@ -1,11 +1,11 @@
 import argparse
-from subprocess import Popen, PIPE
+import subprocess
 
 import pkg_resources
 from PIL import Image
 from bs4 import BeautifulSoup
 
-from dom2img import _cookies, _url_utils, _arg_utils, _compat
+from dom2img import _cookies, _url_utils, _arg_utils, _compat, _subprocess
 
 
 class PhantomJSFailure(Exception):
@@ -19,6 +19,10 @@ class PhantomJSFailure(Exception):
         if self.stderr:
             result += u', and stderr output:\n' + self.stderr
         return result
+
+
+class PhantomJSTimeout(Exception):
+    pass
 
 
 def _clean_up_html(content, prefix):
@@ -41,7 +45,8 @@ def _clean_up_html(content, prefix):
     return doc.prettify().encode('utf-8')
 
 
-def _render(content, width, height, top, left, cookie_domain, cookie_string):
+def _render(content, width, height, top, left, cookie_domain,
+            cookie_string, timeout):
     '''
     Renders html content using PhantomJS
     content is an utf-8 encoded byte string with html.
@@ -55,21 +60,31 @@ def _render(content, width, height, top, left, cookie_domain, cookie_string):
     cookie_domain is a byte string containing url (just the host part)
     cookie_string is a byte string containing cookies keys and values
       using format key1=val1;key2=val2
+    timeout is an int with number of seconds after which PhantomJS
+      will be killed and PhantomJSTimeout will be raised
 
-    Raises PhantomJSFailure if PhantomJS process fails/crashes.
+    Raises:
+    * PhantomJSFailure if PhantomJS process fails/crashes.
+    * PhantomJSTimeout if PhantomJS takes more than timeout seconds to finish
     '''
     render_file_phantom_js_location = \
         pkg_resources.resource_filename(__name__, 'render_file.phantom.js')
     phantomjs_args = ['phantomjs', render_file_phantom_js_location,
                       str(width), str(height), str(top),
                       str(left), cookie_domain, cookie_string]
-    proc = Popen(phantomjs_args, stdin=PIPE, stdout=PIPE)
-    stdout, stderr = proc.communicate(content)
-    if proc.returncode:
-        raise PhantomJSFailure(return_code=proc.returncode,
-                               stderr=stderr or None)
+    proc = subprocess.Popen(phantomjs_args,
+                            stdin=subprocess.PIPE,
+                            stdout=subprocess.PIPE)
+    result = _subprocess.communicate_with_timeout(proc, timeout, content)
+    if result is None:
+        raise PhantomJSTimeout()
     else:
-        return stdout
+        stdout, stderr = result
+        if proc.returncode:
+            raise PhantomJSFailure(return_code=proc.returncode,
+                                   stderr=stderr or None)
+        else:
+            return stdout
 
 
 def _resize(img_string, scale, resize_filter=Image.ANTIALIAS):
@@ -92,7 +107,8 @@ def _resize(img_string, scale, resize_filter=Image.ANTIALIAS):
         return img_string
 
 
-def _dom2img(content, width, height, top, left, scale, prefix, cookie_string):
+def _dom2img(content, width, height, top, left, scale, prefix,
+             cookie_string, timeout):
     '''
     Renders html using PhantomJS.
 
@@ -114,21 +130,30 @@ def _dom2img(content, width, height, top, left, scale, prefix, cookie_string):
                and optionally for cookies
     * cookie_string - byte string containing cookies keys and values
                       using format key1=val1;key2=val2
+    * timeout - non-negative int with number of seconds after which PhantomJS
+                will be killed and PhantomJSTimeout will be raised
 
     Returns string containing png image with the screenshot.
 
-    Raises PhantomJSFailure if PhantomJS process fails/crashes.
+    Raises:
+    * PhantomJSFailure if PhantomJS process fails/crashes.
+    * PhantomJSTimeout if PhantomJS takes more than timeout seconds to finish
     '''
     cookie_domain = _cookies.get_cookie_domain(prefix)
     cleaned_up_content = _clean_up_html(content, prefix)
-    img_string = _render(cleaned_up_content, width, height, top,
-                         left, cookie_domain, cookie_string)
-
+    img_string = _render(content=cleaned_up_content,
+                         width=width,
+                         height=height,
+                         top=top,
+                         left=left,
+                         cookie_domain=cookie_domain,
+                         cookie_string=cookie_string,
+                         timeout=timeout)
     return _resize(img_string, scale)
 
 
-def dom2img(content, width, height, prefix,
-            top=0, left=0, scale=100, cookies=None):
+def dom2img(content, width, height, prefix, top=0,
+            left=0, scale=100, cookies=None, timeout=30):
     '''
     Renders html using PhantomJS.
 
@@ -145,9 +170,12 @@ def dom2img(content, width, height, prefix,
     * scale - non-negative int with percentage number
               that the screenshot will be scaled to (50 means half the
               original size)
+    * timeout - non-negative int with number of seconds after which PhantomJS
+                will be killed and PhantomJSTimeout will be raised
 
-     height, width, top, left: int or byte string/unicode text containing
-                               decimal representation of the integer number
+     height, width, top, left, timeout:
+       int or byte string/unicode text containing
+       decimal representation of the integer number
     * prefix - absolute url that will be used
                to resolve relative urls in html (for images, css scripts)
                and to derive cookie domain for cookies
@@ -167,6 +195,7 @@ def dom2img(content, width, height, prefix,
     Raises:
     * argparse.ArgumentTypeError if arguments are in improper format
     * PhantomJSFailure if PhantomJS process fails/crashes.
+    * PhantomJSTimeout if PhantomJS takes more than timeout seconds to finish
     '''
     if isinstance(content, _compat.text):
         content = content.encode('utf-8')
@@ -178,6 +207,7 @@ def dom2img(content, width, height, prefix,
     top = _arg_utils.non_negative_int(top, u'top')
     left = _arg_utils.non_negative_int(left, u'left')
     scale = _arg_utils.non_negative_int(scale, u'scale')
+    timeout = _arg_utils.non_negative_int(timeout, u'timeout')
     prefix = _arg_utils.absolute_url(prefix, u'prefix')
     if cookies is None:
         cookies = {}
@@ -198,4 +228,4 @@ def dom2img(content, width, height, prefix,
 
     return _dom2img(content=content, width=width, height=height,
                     prefix=prefix, top=top, left=left, scale=scale,
-                    cookie_string=cookie_string)
+                    cookie_string=cookie_string, timeout=timeout)

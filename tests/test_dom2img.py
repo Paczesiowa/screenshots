@@ -101,7 +101,8 @@ class RenderTest(utils.TestCase):
                                   top=0,
                                   left=0,
                                   cookie_domain=b'',
-                                  cookie_string=b'')
+                                  cookie_string=b'',
+                                  timeout=30)
         image = utils.image_from_bytestring(output)
         self.assertEqual(image.size, (100, 200))
 
@@ -112,7 +113,8 @@ class RenderTest(utils.TestCase):
                                   top=0,
                                   left=0,
                                   cookie_domain='',
-                                  cookie_string='')
+                                  cookie_string='',
+                                  timeout=30)
         self._validate_render_pixels(output)
 
     def test_offset_render(self):
@@ -122,7 +124,8 @@ class RenderTest(utils.TestCase):
                                   top=50,
                                   left=50,
                                   cookie_domain='',
-                                  cookie_string='')
+                                  cookie_string='',
+                                  timeout=30)
         self._validate_render_pixels(output, top=50, left=50)
 
     def test_cookie_render_with_wrong_cookie(self):
@@ -133,7 +136,8 @@ class RenderTest(utils.TestCase):
                                       top=0,
                                       left=0,
                                       cookie_domain='127.0.0.1',
-                                      cookie_string='key=val2')
+                                      cookie_string='key=val2',
+                                      timeout=30)
             self._validate_render_pixels(output)
 
     def test_cookie_render(self):
@@ -144,7 +148,8 @@ class RenderTest(utils.TestCase):
                                       top=0,
                                       left=0,
                                       cookie_domain='127.0.0.1',
-                                      cookie_string='key=val')
+                                      cookie_string='key=val',
+                                      timeout=30)
             self._validate_render_pixels(output, div_color=(0, 0, 0))
 
     def test_cookie_render_wrong_cookie_domain(self):
@@ -155,7 +160,8 @@ class RenderTest(utils.TestCase):
                                       top=0,
                                       left=0,
                                       cookie_domain='example.com',
-                                      cookie_string='key=val')
+                                      cookie_string='key=val',
+                                      timeout=30)
             self._validate_render_pixels(output)
 
     def test_crashy_render(self):
@@ -172,12 +178,39 @@ class RenderTest(utils.TestCase):
                       'top': 0,
                       'left': 0,
                       'cookie_domain': b'',
-                      'cookie_string': b''}
+                      'cookie_string': b'',
+                      'timeout': 30}
             self.assertRaisesRegexp(_dom2img.PhantomJSFailure,
                                     err_msg, _dom2img._render,
                                     **kwargs)
         finally:
             killer_should_stop[0] = True
+
+    def test_timeout(self):
+        content = b'''
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="http://127.0.0.1:%d/freeze.css">
+  </had>
+  <body>
+  </body>
+</html>
+'''
+        with utils.FlaskApp() as app:
+            kwargs = {'content': content.replace(b'%d',
+                                                 str(app.port).encode()),
+                      'width': 600,
+                      'height': 400,
+                      'top': 0,
+                      'left': 0,
+                      'cookie_domain': b'127.0.0.1',
+                      'cookie_string': b'',
+                      'timeout': 1}
+            err_msg = u''
+            self.assertRaisesRegexp(_dom2img.PhantomJSTimeout,
+                                    err_msg, _dom2img._render,
+                                    **kwargs)
 
 
 class ResizeTest(utils.TestCase):
@@ -227,7 +260,8 @@ class Dom2ImgWorkerTest(utils.TestCase):
                                            left=50,
                                            scale=50,
                                            prefix=prefix,
-                                           cookie_string=b'key=val')
+                                           cookie_string=b'key=val',
+                                           timeout=30)
                 self._validate_render_pixels(output, left=50, top=50, scale=.5,
                                              div_color=(0, 0, 0))
 

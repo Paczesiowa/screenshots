@@ -19,6 +19,7 @@ Return status can be:
 0: success
 1: if PhantomJS process failed
 2: if arguments are in improper format
+3: if PhantomJS process timed out
 '''
     formatter = argparse.RawDescriptionHelpFormatter
     parser = argparse.ArgumentParser(description=prolog,
@@ -52,6 +53,10 @@ Return status can be:
                         help='non-negative int with percentage number ' +
                         'that the screenshot will be scaled to ' +
                         '(50 means half the original size)')
+    parser.add_argument('--timeout', type=_arg_utils.non_negative_int,
+                        default='30',
+                        help='non-negative int with number of seconds after ' +
+                        'which PhantomJS will be killed')
     parser.add_argument('--cookies', type=_cookies.parse_cookie_string,
                         default='',
                         help='semicolon-separated string containing ' +
@@ -68,6 +73,12 @@ Return status can be:
     except _dom2img.PhantomJSFailure as e:
         os.write(sys.stderr.fileno(), str(e).encode('utf-8'))
         sys.exit(1)
+    except _dom2img.PhantomJSTimeout:
+        err_msg = u'PhantomJS process has been killed, ' + \
+            u'because it took longer than ' + str(args['timeout']) + \
+            u' seconds to finish.'
+        os.write(sys.stderr.fileno(), err_msg.encode('utf-8'))
+        sys.exit(3)
 
 if __name__ == '__main__':
     main()
