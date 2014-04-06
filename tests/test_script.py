@@ -30,6 +30,7 @@ class ScriptTest(utils.TestCase):
             ('left', 50),
             ('scale', 100),
             ('prefix', b'http://example.com/'),
+            ('timeout', b'30'),
             ('cookies', b'key=val')]
 
     def _test_with_args(self, port, args):
@@ -96,3 +97,16 @@ class ScriptTest(utils.TestCase):
             self.assertEqual(proc.returncode, 1)
         finally:
             killer_should_stop[0] = True
+
+    def test_timeout(self):
+        with utils.FlaskApp() as app:
+            args = dict(self.ARGS)
+            args['prefix'] = utils.prefix_for_port(app.port)
+            args['timeout'] = b'1'
+            result = dom2img_script(utils.freezing_html_doc(app.port),
+                                    args.items())
+            err_msg = b'PhantomJS process has been killed, ' + \
+                b'because it took longer than 1 seconds to finish.'
+            self.assertEqual(result[1], err_msg)
+            self.assertEqual(result[0], b'')
+            self.assertEqual(result[2], 3)

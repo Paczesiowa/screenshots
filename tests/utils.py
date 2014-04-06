@@ -115,12 +115,27 @@ dirty_html_doc = u'''
 
 
 def prefix_for_port(port):
-    return 'http://127.0.0.1:' + str(port) + '/'
+    return u'http://127.0.0.1:' + str(port) + u'/'
 
 
 def html_doc(port=8000):
     prefix = prefix_for_port(port)
     return _dom2img._clean_up_html(dirty_html_doc, prefix)
+
+
+def freezing_html_doc(port=8000):
+    content = b'''
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="%dfreeze.css">
+  </had>
+  <body>
+  </body>
+</html>
+'''
+    prefix = prefix_for_port(port)
+    return content.replace(b'%d', prefix.encode('ascii'))
 
 
 class FlaskApp(object):

@@ -7,11 +7,11 @@ def communicate_with_timeout(proc, timeout, input_=None):
 
     Communicates with subprocess for timeout seconds.
     If process fails to finish in that period, it gets killed
-    using proc.kill() (so its children are will not be killed).
+    using proc.kill() (so its children will not be killed).
     Process shouldn't be communicated with before calling this function.
 
     proc is a Popen object
-    timeout is int with number of seconds to wait for proc to finish
+    timeout is an int with number of seconds to wait for proc to finish
     input_ is optional stdin to pipe into proc
 
     Returns None if timeout seconds have passed,

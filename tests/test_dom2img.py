@@ -187,19 +187,8 @@ class RenderTest(utils.TestCase):
             killer_should_stop[0] = True
 
     def test_timeout(self):
-        content = b'''
-<!DOCTYPE html>
-<html>
-  <head>
-    <link rel="stylesheet" href="http://127.0.0.1:%d/freeze.css">
-  </had>
-  <body>
-  </body>
-</html>
-'''
         with utils.FlaskApp() as app:
-            kwargs = {'content': content.replace(b'%d',
-                                                 str(app.port).encode()),
+            kwargs = {'content': utils.freezing_html_doc(app.port),
                       'width': 600,
                       'height': 400,
                       'top': 0,
@@ -207,9 +196,8 @@ class RenderTest(utils.TestCase):
                       'cookie_domain': b'127.0.0.1',
                       'cookie_string': b'',
                       'timeout': 1}
-            err_msg = u''
             self.assertRaisesRegexp(_dom2img.PhantomJSTimeout,
-                                    err_msg, _dom2img._render,
+                                    u'', _dom2img._render,
                                     **kwargs)
 
 
@@ -477,9 +465,6 @@ class Dom2ImgTest(utils.TestCase):
             kwargs = {'content': b'',
                       'width': 100,
                       'height': 200,
-                      'top': 0,
-                      'left': 0,
-                      'scale': 100,
                       'prefix': b'http://example.com/',
                       'cookies': {}}
             self.assertRaisesRegexp(_dom2img.PhantomJSFailure,
@@ -487,3 +472,15 @@ class Dom2ImgTest(utils.TestCase):
                                     **kwargs)
         finally:
             killer_should_stop[0] = True
+
+    def test_timeout(self):
+        with utils.FlaskApp() as app:
+            prefix = utils.prefix_for_port(app.port)
+            kwargs = {'content': utils.freezing_html_doc(app.port),
+                      'width': 600,
+                      'height': 400,
+                      'prefix': prefix,
+                      'timeout': 1}
+            self.assertRaisesRegexp(_dom2img.PhantomJSTimeout,
+                                    u'', _dom2img.dom2img,
+                                    **kwargs)
