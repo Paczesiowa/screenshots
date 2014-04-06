@@ -1,6 +1,6 @@
 * investigate prefix_gets_parsed_correctly error in 3.3
-* fix script error return statuses
 * add page debugging support to render_file.phantom.js
+* exceptions should derive from single exception type
 * document possible exceptions
 * write readme
 * clean backend

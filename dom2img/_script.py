@@ -17,8 +17,8 @@ Returns on stdout string containing png image with the screenshot.
 
 Return status can be:
 0: success
-1: if PhantomJS process failed
-2: if arguments are in improper format
+1: if arguments are in improper format
+2: if PhantomJS process failed
 3: if PhantomJS process timed out
 '''
     formatter = argparse.RawDescriptionHelpFormatter
@@ -64,7 +64,11 @@ Return status can be:
     parser.add_argument('-v', '-V', '--version', action='version',
                         version='%(prog)s ' + dom2img.__version__)
 
-    args = vars(parser.parse_args())
+    try:
+        args = vars(parser.parse_args())
+    except SystemExit as e:
+        code = 1 if e.code != 0 else 0  # only change failure status
+        sys.exit(code)
     args['content'] = sys.stdin.read()
 
     try:
@@ -72,7 +76,7 @@ Return status can be:
         os.write(sys.stdout.fileno(), result)
     except _dom2img.PhantomJSFailure as e:
         os.write(sys.stderr.fileno(), str(e).encode('utf-8'))
-        sys.exit(1)
+        sys.exit(2)
     except _dom2img.PhantomJSTimeout:
         err_msg = u'PhantomJS process has been killed, ' + \
             u'because it took longer than ' + str(args['timeout']) + \

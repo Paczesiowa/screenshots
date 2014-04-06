@@ -70,7 +70,7 @@ class ScriptTest(utils.TestCase):
             result = dom2img_script('', args)
             self.assertTrue(b'usage' in result[1])
             self.assertEqual(result[0], b'')
-            self.assertEqual(result[2], 2)
+            self.assertEqual(result[2], 1)
 
     def test_optional_cookies_param(self):
         args = list(self.ARGS)
@@ -94,7 +94,7 @@ class ScriptTest(utils.TestCase):
             self.assertEqual(stderr,
                              b'PhantomJS failed with status -' +
                              str(signal.SIGKILL).encode('ascii'))
-            self.assertEqual(proc.returncode, 1)
+            self.assertEqual(proc.returncode, 2)
         finally:
             killer_should_stop[0] = True
 
