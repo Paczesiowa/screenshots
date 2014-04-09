@@ -186,6 +186,28 @@ class RenderTest(utils.TestCase):
         finally:
             killer_should_stop[0] = True
 
+    def test_crash_collects_stderr(self):
+        script = u'''
+#!/bin/sh
+echo ERRÖR 1>&2
+exit 1
+'''.encode('utf-8')
+        with utils.mock_phantom_js_binary(script):
+            kwargs = {'content': b'',
+                      'width': 600,
+                      'height': 400,
+                      'top': 0,
+                      'left': 0,
+                      'cookie_domain': b'127.0.0.1',
+                      'cookie_string': b'',
+                      'timeout': 30}
+            err_msg = \
+                u'PhantomJS failed with status 1, and stderr output:\n' + \
+                u'ERRR\n'
+            self.assertRaisesRegexp(_dom2img.PhantomJSFailure,
+                                    err_msg, _dom2img._render,
+                                    **kwargs)
+
     def test_timeout(self):
         with utils.FlaskApp() as app:
             kwargs = {'content': utils.freezing_html_doc(app.port),
@@ -472,6 +494,25 @@ class Dom2ImgTest(utils.TestCase):
                                     **kwargs)
         finally:
             killer_should_stop[0] = True
+
+    def test_crash_collects_stderr(self):
+        script = u'''
+#!/bin/sh
+echo ERRÖR 1>&2
+exit 1
+'''.encode('utf-8')
+        with utils.mock_phantom_js_binary(script):
+            kwargs = {'content': b'',
+                      'width': 600,
+                      'height': 400,
+                      'prefix': b'http://example.com/',
+                      'cookies': {}}
+            err_msg = \
+                u'PhantomJS failed with status 1, and stderr output:\n' + \
+                u'ERRR\n'
+            self.assertRaisesRegexp(_dom2img.PhantomJSFailure,
+                                    err_msg, _dom2img.dom2img,
+                                    **kwargs)
 
     def test_timeout(self):
         with utils.FlaskApp() as app:

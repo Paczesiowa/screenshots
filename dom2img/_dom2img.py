@@ -69,20 +69,22 @@ def _render(content, width, height, top, left, cookie_domain,
     '''
     render_file_phantom_js_location = \
         pkg_resources.resource_filename(__name__, 'render_file.phantom.js')
-    phantomjs_args = ['phantomjs', render_file_phantom_js_location,
+    phantomjs_args = ['env', 'phantomjs', render_file_phantom_js_location,
                       str(width), str(height), str(top),
                       str(left), cookie_domain, cookie_string]
     proc = subprocess.Popen(phantomjs_args,
                             stdin=subprocess.PIPE,
-                            stdout=subprocess.PIPE)
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
     result = _subprocess.communicate_with_timeout(proc, timeout, content)
     if result is None:
         raise PhantomJSTimeout()
     else:
         stdout, stderr = result
         if proc.returncode:
+            stderr = stderr.decode('ascii', 'ignore') or None
             raise PhantomJSFailure(return_code=proc.returncode,
-                                   stderr=stderr or None)
+                                   stderr=stderr)
         else:
             return stdout
 

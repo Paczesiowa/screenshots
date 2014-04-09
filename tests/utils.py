@@ -1,10 +1,14 @@
 # coding=utf-8
+import contextlib
 import multiprocessing
 import os
+import shutil
 import signal
 import socket
+import stat
 import subprocess
 import sys
+import tempfile
 import time
 
 import flask
@@ -12,6 +16,7 @@ import unittest2
 from PIL import Image
 
 from dom2img import _dom2img, _compat
+
 
 try:
     import urllib2 as urllib
@@ -251,3 +256,20 @@ def killer(parent_pid, killer_should_stop):
     line = list(filter(lambda l: b' phantomjs ' in l, output))[0]
     pid = int(line.split()[0])
     os.kill(pid, signal.SIGKILL)
+
+
+@contextlib.contextmanager
+def mock_phantom_js_binary(script):
+    tmp_dir = tempfile.mkdtemp()
+    tmp_phantomjs_path = os.path.join(tmp_dir, 'phantomjs')
+    with open(tmp_phantomjs_path, 'wb') as f:
+        f.write(script)
+    st = os.stat(tmp_phantomjs_path)
+    os.chmod(tmp_phantomjs_path, st.st_mode | stat.S_IEXEC)
+    old_path = os.environ['PATH']
+    os.environ['PATH'] = tmp_dir + ':' + old_path
+    try:
+        yield
+    finally:
+        os.environ['PATH'] = old_path
+        shutil.rmtree(tmp_dir)

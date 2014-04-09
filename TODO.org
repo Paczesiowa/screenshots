@@ -1,4 +1,3 @@
-* add a test that we capture phantomjs stderr
 * add page debugging support to render_file.phantom.js
 * exceptions should derive from single exception type
 * document possible exceptions

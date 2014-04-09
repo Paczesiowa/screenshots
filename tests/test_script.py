@@ -98,6 +98,22 @@ class ScriptTest(utils.TestCase):
         finally:
             killer_should_stop[0] = True
 
+    def test_crash2(self):
+        script = u'''
+#!/bin/sh
+echo ERRÖR 1>&2
+exit 1
+'''.encode('utf-8')
+        with utils.mock_phantom_js_binary(script):
+            args = list(self.ARGS)
+            result = dom2img_script('', args)
+            err_msg = \
+                b'PhantomJS failed with status 1, and stderr output:\n' + \
+                b'ERRR\n'
+            self.assertEqual(result[1], err_msg)
+            self.assertEqual(result[0], b'')
+            self.assertEqual(result[2], 2)
+
     def test_timeout(self):
         with utils.FlaskApp() as app:
             args = dict(self.ARGS)
