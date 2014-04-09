@@ -13,6 +13,11 @@ from PIL import Image
 
 from dom2img import _dom2img, _compat
 
+try:
+    import urllib2 as urllib
+except ImportError:
+    import urllib.request as urllib
+
 
 def image_from_bytestring(content):
     return Image.open(_compat.BytesIO(content))
@@ -169,6 +174,15 @@ class FlaskApp(object):
 
     def __enter__(self):
         self._server.start()
+        server_started = False
+        while not server_started:
+            try:
+                conn = urllib.urlopen('http://127.0.0.1:' + str(self._app.port)
+                                      + '/div_bg_color.css')
+                conn.close()
+                server_started = True
+            except urllib.URLError:
+                time.sleep(.1)
         return self._app
 
     def __exit__(self, type, value, traceback):
