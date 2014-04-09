@@ -60,7 +60,7 @@ class ParseCookieStringTest(utils.TestCase):
 
     def test_wrong_type(self):
         err_msg = u'cookie_string must be an ascii-only ' + \
-            u'unicode text or a byte string'
+            u'unicode text or a byte-string'
         self._check_exception(err_msg, None)
 
 

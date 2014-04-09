@@ -10,7 +10,7 @@ def non_negative_int(val, variable_name=None):
     '''
     Check if val can be used as an non-negative integer value. it can be:
     * non-negative int
-    * byte string containing decimal representation of non-negative-int
+    * byte-string containing decimal representation of non-negative-int
     * unicode text containing decimal representation of non-negative-int
 
     variable_name is a unicode string used for exception message (or None).
@@ -39,9 +39,9 @@ def non_negative_int(val, variable_name=None):
             raise exc(err_msg)
     if not isinstance(val, int):
         if variable_name is None:
-            err_msg = u'non_negative_int arg must be int/byte string/unicode'
+            err_msg = u'non_negative_int arg must be int/byte-string/unicode'
         else:
-            err_msg = variable_name + u' must be int/byte string/unicode'
+            err_msg = variable_name + u' must be int/byte-string/unicode'
         raise exc(err_msg)
     if val < 0:
         if variable_name is None:
@@ -59,7 +59,7 @@ def absolute_url(val, variable_name=None):
     '''
     Parse absolute URL.
 
-    val is a byte string or ascii-only unicode text containing
+    val is a byte-string or ascii-only unicode text containing
     absolute URL.
 
     variable_name is a unicode string used for exception message (or None).
@@ -86,7 +86,7 @@ def absolute_url(val, variable_name=None):
     if not isinstance(val, _compat.text):
         if variable_name is None:
             err_msg = u'absolute_url() argument must be ' + \
-                u'a byte string or unicode text'
+                u'a byte-string or unicode text'
         else:
             err_msg = \
                 variable_name + u' must be a byte-string or an unicode text'

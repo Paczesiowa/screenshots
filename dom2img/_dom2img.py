@@ -29,9 +29,9 @@ def _clean_up_html(content, prefix):
     '''
     Clean up html by removing all script tags
     and making relative URLs absolute.
-    content is an utf-8 encoded byte string with html
+    content is an utf-8 encoded byte-string with html
     prefix is an ascii-only unicode URL that will be used to make absolute URL
-    Returns cleaned up, utf-8 encoded html byte string
+    Returns cleaned up, utf-8 encoded html byte-string
     '''
     doc = BeautifulSoup(content)
 
@@ -49,7 +49,7 @@ def _render(content, width, height, top, left, cookie_domain,
             cookie_string, timeout):
     '''
     Renders html content using PhantomJS
-    content is an utf-8 encoded byte string with html.
+    content is an utf-8 encoded byte-string with html.
     width is an int with the width size of phantomjs viewport,
       and width of the resulting image
     height is an int with the height size of phantomjs viewport,
@@ -57,8 +57,8 @@ def _render(content, width, height, top, left, cookie_domain,
     top is an int with the pixel offset from the top/vertical scroll position
     left is an int with the pixel offset from the left/
       horizontal scroll position
-    cookie_domain is a byte string containing URL (just the host part)
-    cookie_string is a byte string containing cookies keys and values
+    cookie_domain is a byte-string containing URL (just the host part)
+    cookie_string is a byte-string containing cookies keys and values
       using format key1=val1;key2=val2
     timeout is an int with number of seconds after which PhantomJS
       will be killed and PhantomJSTimeout will be raised
@@ -92,7 +92,7 @@ def _render(content, width, height, top, left, cookie_domain,
 def _resize(img_string, scale, resize_filter=Image.ANTIALIAS):
     '''
     Resizes to <scale>% of original size the img_string
-    img_string is a bytestring containing png image data
+    img_string is a byte-string containing png image data
     scale is an integer percentage number (50 means 2 times smaller image)
     resize_filter is a PIL filter used for resizing
     '''
@@ -115,7 +115,7 @@ def _dom2img(content, width, height, top, left, scale, prefix,
     Renders html using PhantomJS.
 
     Parameters:
-    * content - utf-8 encoded byte string containing html input
+    * content - utf-8 encoded byte-string containing html input
     * width - non-negative int with the width of virtual render viewport
               (using pixels unit)
     * height - non-negative int with the height of virtual render viewport
@@ -130,7 +130,7 @@ def _dom2img(content, width, height, top, left, scale, prefix,
     * prefix - ascii-only unicode containing absolute URL that will be used
                to handle relative URLs in html (for images, css scripts)
                and optionally for cookies
-    * cookie_string - byte string containing cookies keys and values
+    * cookie_string - byte-string containing cookies keys and values
                       using format key1=val1;key2=val2
     * timeout - non-negative int with number of seconds after which PhantomJS
                 will be killed and PhantomJSTimeout will be raised
@@ -160,7 +160,7 @@ def dom2img(content, width, height, prefix, top=0,
     Renders html using PhantomJS.
 
     Parameters:
-    * content - html input (utf-8 encoded byte string or unicode text)
+    * content - html input (utf-8 encoded byte-string or unicode text)
     * width - non-negative int with the width of virtual
               render viewport (using pixels unit)
     * height - non-negative int with the height of virtual
@@ -176,23 +176,23 @@ def dom2img(content, width, height, prefix, top=0,
                 will be killed and PhantomJSTimeout will be raised
 
      height, width, top, left, timeout:
-       int or byte string/unicode text containing
+       int or byte-string/unicode text containing
        decimal representation of the integer number
     * prefix - absolute URL that will be used
                to resolve relative URLs in html (for images, css scripts)
                and to derive cookie domain for cookies
-               can be byte string or ascii-only unicode text.
+               can be byte-string or ascii-only unicode text.
     * cookies - cookies key and values that will be sent with all
                 resource requests (images, css scripts)
       * None
-      * byte string (or ascii-only unicode text) using
+      * byte-string (or ascii-only unicode text) using
         key1=val1;key2=val2 format
       * string dictionary with cookie keys and values.
         Neither keys nor values should contain semicolons.
         Keys cannot contain '=' character.
-        Keys and values can be byte strings or ascii-only unicode texts.
+        Keys and values can be byte-strings or ascii-only unicode texts.
 
-    Returns byte string containing png image with the screenshot.
+    Returns byte-string containing png image with the screenshot.
 
     Raises:
     * argparse.ArgumentTypeError if arguments are in improper format
@@ -203,7 +203,7 @@ def dom2img(content, width, height, prefix, top=0,
         content = content.encode('utf-8')
     if not isinstance(content, _compat.byte_string):
         raise argparse.ArgumentTypeError(
-            'content must be utf-8 encoded byte string or unicode')
+            'content must be utf-8 encoded byte-string or unicode')
     height = _arg_utils.non_negative_int(height, u'height')
     width = _arg_utils.non_negative_int(width, u'width')
     top = _arg_utils.non_negative_int(top, u'top')

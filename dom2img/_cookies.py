@@ -7,10 +7,10 @@ from dom2img import _compat
 def serialize_cookies(cookies):
     '''
     Serializes cookie dictionary to cookie string.
-    cookies must be a dict mapping byte string cookie keys
-    to byte string cookie values. Neither keys nor values should
+    cookies must be a dict mapping byte-string cookie keys
+    to byte-string cookie values. Neither keys nor values should
     contain semicolons. Keys cannot contain '=' character.
-    Result is a semicolon-separated byte string with cookie elems
+    Result is a semicolon-separated byte-string with cookie elems
     in key=value format.
     '''
     return b';'.join(map(b'='.join, cookies.items()))
@@ -18,9 +18,9 @@ def serialize_cookies(cookies):
 
 def parse_cookie_string(cookie_string):
     '''
-    Parse cookie dictionary from a byte string or ascii-only unicode text,
+    Parse cookie dictionary from a byte-string or ascii-only unicode text,
     using format key1=val1;key2=val2.
-    Returns dictionary mapping byte string cookie keys to byte string
+    Returns dictionary mapping byte-string cookie keys to byte string
     cookie values.
 
     Raises exception if cookie_string is not an unicode text string,
@@ -38,7 +38,7 @@ def parse_cookie_string(cookie_string):
             raise argparse.ArgumentTypeError(err_msg)
     if not isinstance(cookie_string, _compat.byte_string):
         err_msg = 'cookie_string must be an ascii-only ' +\
-            'unicode text or a byte string'
+            'unicode text or a byte-string'
         raise argparse.ArgumentTypeError(err_msg)
     if b'=' not in cookie_string:
         return {}
@@ -58,11 +58,11 @@ parse_cookie_string.__name__ = 'cookie string'
 def validate_cookies(cookies):
     '''
     Check if cookies is a dict:
-    * dict keys can be byte strings or ascii-only unicode text strings,
+    * dict keys can be byte-strings or ascii-only unicode text strings,
       they cannot contain ';' and '=' characters.
-    * dict values can be byte strings or ascii-only unicode text strings,
+    * dict values can be byte-strings or ascii-only unicode text strings,
       they cannot contain ';'.
-    Returns validated dict, where keys and values are byte strings.
+    Returns validated dict, where keys and values are byte-strings.
     Raises exception if cookie keys/values contain illegal characters,
     or if they contain non-ascii characters.
 
@@ -105,7 +105,7 @@ def get_cookie_domain(url):
     Returns server domain that can be used as a cookie domain.
     Port number is stripped from the URL.
     url bust be an ascii-only unicode with absolute URL containing scheme
-    Result is a byte string.
+    Result is a byte-string.
 
     >>> get_cookie_domain(u'http://google.com:7000/path/' + \
                            u'something?key=val&key2=val2') == \

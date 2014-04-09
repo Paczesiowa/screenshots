@@ -347,11 +347,11 @@ class Dom2ImgTest(utils.TestCase):
 
     def test_content_wrong_type(self):
         self._check_exception(
-            u'content must be utf-8 encoded byte string or unicode',
+            u'content must be utf-8 encoded byte-string or unicode',
             'content', [])
 
     def test_width_wrong_type(self):
-        self._check_exception(u'width must be int/byte string/unicode',
+        self._check_exception(u'width must be int/byte-string/unicode',
                               'width', None)
 
     def test_width_non_ascii_unicode(self):
@@ -367,7 +367,7 @@ class Dom2ImgTest(utils.TestCase):
                               'width', -1)
 
     def test_height_wrong_type(self):
-        self._check_exception(u'height must be int/byte string/unicode',
+        self._check_exception(u'height must be int/byte-string/unicode',
                               'height', None)
 
     def test_height_non_ascii_unicode(self):
@@ -383,7 +383,7 @@ class Dom2ImgTest(utils.TestCase):
                               'height', -1)
 
     def test_top_wrong_type(self):
-        self._check_exception(u'top must be int/byte string/unicode',
+        self._check_exception(u'top must be int/byte-string/unicode',
                               'top', None)
 
     def test_top_non_ascii_unicode(self):
@@ -399,7 +399,7 @@ class Dom2ImgTest(utils.TestCase):
                               'top', -1)
 
     def test_left_wrong_type(self):
-        self._check_exception(u'left must be int/byte string/unicode',
+        self._check_exception(u'left must be int/byte-string/unicode',
                               'left', None)
 
     def test_left_non_ascii_unicode(self):
@@ -415,7 +415,7 @@ class Dom2ImgTest(utils.TestCase):
                               'left', -1)
 
     def test_scale_wrong_type(self):
-        self._check_exception(u'scale must be int/byte string/unicode',
+        self._check_exception(u'scale must be int/byte-string/unicode',
                               'scale', None)
 
     def test_scale_non_ascii_unicode(self):
@@ -441,11 +441,11 @@ class Dom2ImgTest(utils.TestCase):
             'prefix', None, exc=TypeError)
 
     def test_prefix_non_absolute_url(self):
-        self._check_exception(u'prefix must be an absolute url',
+        self._check_exception(u'prefix must be an absolute URL',
                               'prefix', u'example.com', exc=ValueError)
-        self._check_exception(u'prefix must be an absolute url',
+        self._check_exception(u'prefix must be an absolute URL',
                               'prefix', u'example.com/', exc=ValueError)
-        self._check_exception(u'prefix must be an absolute url',
+        self._check_exception(u'prefix must be an absolute URL',
                               'prefix', u'//example.com', exc=ValueError)
 
     def test_cookies_wrong_type(self):

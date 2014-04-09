@@ -6,7 +6,7 @@ from dom2img import _compat
 
 def is_absolute_url(url):
     '''
-    Test if byte string can be parsed as an absolute URL
+    Test if byte-string can be parsed as an absolute URL
 
     >>> is_absolute_url(b'http://example.com/')
     True
@@ -21,7 +21,7 @@ def absolutize_urls(doc, tag_name, attr, prefix):
     Looks for specific tags in a document and tries to fix their attributes,
     if they contain relative URLs.
     doc is a BeautifulSoup document
-    tag_name is a byte string of html tag to look for
+    tag_name is a byte-string of html tag to look for
     attr is a ascii-only unicode text of tag's attribute
       which value will be fixed
     prefix is an ascii-only unicode URL that will be used to make absolute URL

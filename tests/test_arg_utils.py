@@ -23,10 +23,10 @@ class NonNegativeIntTest(utils.TestCase):
         self._check_result(3, 3)
 
     def test_wrong_type(self):
-        self._check_exception(u'x must be int/byte string/unicode', [], u'x')
+        self._check_exception(u'x must be int/byte-string/unicode', [], u'x')
 
     def test_wrong_type_without_variable_name(self):
-        err_msg = u'non_negative_int arg must be int/byte string/unicode'
+        err_msg = u'non_negative_int arg must be int/byte-string/unicode'
         self._check_exception(err_msg, {})
 
     def test_non_ascii_unicode_input(self):
@@ -82,7 +82,7 @@ class AbsoluteURLTest(utils.TestCase):
 
     def test_wrong_type(self):
         err_msg = u'absolute_url() argument must be ' + \
-            u'a byte string or unicode text'
+            u'a byte-string or unicode text'
         self._check_exception(err_msg, None, exc=TypeError)
 
     def test_non_ascii_unicode(self):
@@ -90,17 +90,17 @@ class AbsoluteURLTest(utils.TestCase):
         self._check_exception(err_msg, u'http://exämple.com/')
 
     def test_simple_relative_url(self):
-        err_msg = u'absolute_url() argument must be an absolute url'
+        err_msg = u'absolute_url() argument must be an absolute URL'
         self._check_exception(err_msg, b'something')
 
     def test_complex_relative_url(self):
-        err_msg = u'absolute_url() argument must be an absolute url'
+        err_msg = u'absolute_url() argument must be an absolute URL'
         self._check_exception(err_msg, b'path/something')
 
     def test_scheme_less_url(self):
-        err_msg = u'absolute_url() argument must be an absolute url'
+        err_msg = u'absolute_url() argument must be an absolute URL'
         self._check_exception(err_msg, b'example.com/')
 
     def test_protocol_relative_url(self):
-        err_msg = u'absolute_url() argument must be an absolute url'
+        err_msg = u'absolute_url() argument must be an absolute URL'
         self._check_exception(err_msg, u'//example.com/')
