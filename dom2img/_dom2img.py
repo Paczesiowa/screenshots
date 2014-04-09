@@ -28,9 +28,9 @@ class PhantomJSTimeout(Exception):
 def _clean_up_html(content, prefix):
     '''
     Clean up html by removing all script tags
-    and making relative urls absolute.
+    and making relative URLs absolute.
     content is an utf-8 encoded byte string with html
-    prefix is an ascii-only unicode url that will be used to make absolute url
+    prefix is an ascii-only unicode URL that will be used to make absolute URL
     Returns cleaned up, utf-8 encoded html byte string
     '''
     doc = BeautifulSoup(content)
@@ -57,7 +57,7 @@ def _render(content, width, height, top, left, cookie_domain,
     top is an int with the pixel offset from the top/vertical scroll position
     left is an int with the pixel offset from the left/
       horizontal scroll position
-    cookie_domain is a byte string containing url (just the host part)
+    cookie_domain is a byte string containing URL (just the host part)
     cookie_string is a byte string containing cookies keys and values
       using format key1=val1;key2=val2
     timeout is an int with number of seconds after which PhantomJS
@@ -127,8 +127,8 @@ def _dom2img(content, width, height, top, left, scale, prefix,
     * scale - non-negative int with percentage number,
               that the screenshot will be scaled to (50 means half the
               original size)
-    * prefix - ascii-only unicode containing absolute url that will be used
-               to handle relative urls in html (for images, css scripts)
+    * prefix - ascii-only unicode containing absolute URL that will be used
+               to handle relative URLs in html (for images, css scripts)
                and optionally for cookies
     * cookie_string - byte string containing cookies keys and values
                       using format key1=val1;key2=val2
@@ -178,8 +178,8 @@ def dom2img(content, width, height, prefix, top=0,
      height, width, top, left, timeout:
        int or byte string/unicode text containing
        decimal representation of the integer number
-    * prefix - absolute url that will be used
-               to resolve relative urls in html (for images, css scripts)
+    * prefix - absolute URL that will be used
+               to resolve relative URLs in html (for images, css scripts)
                and to derive cookie domain for cookies
                can be byte string or ascii-only unicode text.
     * cookies - cookies key and values that will be sent with all

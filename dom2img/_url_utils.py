@@ -1,5 +1,5 @@
 '''
-Utility functions for working with urls.
+Utility functions for working with URLs.
 '''
 from dom2img import _compat
 
@@ -19,12 +19,12 @@ def is_absolute_url(url):
 def absolutize_urls(doc, tag_name, attr, prefix):
     '''
     Looks for specific tags in a document and tries to fix their attributes,
-    if they contain relative urls.
+    if they contain relative URLs.
     doc is a BeautifulSoup document
     tag_name is a byte string of html tag to look for
     attr is a ascii-only unicode text of tag's attribute
       which value will be fixed
-    prefix is an ascii-only unicode url that will be used to make absolute url
+    prefix is an ascii-only unicode URL that will be used to make absolute URL
     doc is modified and also returned.
 
     >>> import bs4

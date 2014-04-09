@@ -57,19 +57,19 @@ non_negative_int.__name__ = 'non-negative integer'
 
 def absolute_url(val, variable_name=None):
     '''
-    Parse absolute url.
+    Parse absolute URL.
 
     val is a byte string or ascii-only unicode text containing
-    absolute url.
+    absolute URL.
 
     variable_name is a unicode string used for exception message (or None).
 
-    Returns ascii-only unicode text containing absolute url.
+    Returns ascii-only unicode text containing absolute URL.
 
     Raises:
     * TypeError if val is not a byte-string or unicode text
     * ValueError if val is a non ascii-only unicode text
-    * ValueError if val is not an absolute url
+    * ValueError if val is not an absolute URL
     '''
     if isinstance(val, _compat.byte_string):
         val = val.decode('ascii')
@@ -93,12 +93,12 @@ def absolute_url(val, variable_name=None):
         raise TypeError(err_msg)
     if not _url_utils.is_absolute_url(val):
         if variable_name is None:
-            err_msg = u'absolute_url() argument must be an absolute url'
+            err_msg = u'absolute_url() argument must be an absolute URL'
         else:
-            err_msg = variable_name + u' must be an absolute url'
+            err_msg = variable_name + u' must be an absolute URL'
         raise ValueError(err_msg)
 
     return val
 
 
-absolute_url.__name__ = 'absolute url'
+absolute_url.__name__ = 'absolute URL'

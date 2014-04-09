@@ -103,7 +103,7 @@ def validate_cookies(cookies):
 def get_cookie_domain(url):
     '''
     Returns server domain that can be used as a cookie domain.
-    Port number is stripped from the url.
+    Port number is stripped from the URL.
     url bust be an ascii-only unicode with absolute URL containing scheme
     Result is a byte string.
 

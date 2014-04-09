@@ -35,8 +35,8 @@ Return status can be:
                         'of virtual render viewport (using pixels unit)')
     parser.add_argument('--prefix', type=_arg_utils.absolute_url,
                         required=True,
-                        help='absolute url that will be used to handle ' +
-                        'relative urls in html (for images, css scripts) ' +
+                        help='absolute URL that will be used to handle ' +
+                        'relative URLs in html (for images, css scripts) ' +
                         'and optionally for cookies')
     parser.add_argument('--top', type=_arg_utils.non_negative_int,
                         default='0',
