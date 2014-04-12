@@ -1,13 +1,13 @@
-* in _compat should only stay thing that are used in dom2img/*
 * add page debugging support to render_file.phantom.js
 * catching sigkill/sigint
 * exceptions should derive from single exception type
 * document possible exceptions
+** that we throw explicitly
+** that could be thrown implicitly
 * write readme
 * clean backend
 * unlicense
 * eggsecutable
-* pylint
 * setup
 ** dodac backend do exampli
 * coverage testow, generowanie dokumentacji - format docstringow
@@ -16,7 +16,6 @@
 * zobaczyc czy setup.py wszystko moze odpalic poprawnie na golym pythonie
 * kazdy plik pep8+pyflakes+rope-organize-imports+pylint
 * rzeczy jak non_negative_int nie musze az tak sie jebac z unicodem
-* research unicodedecodeerrors
 * js
 ** zamiast screenshot w jsie, zwracac slownik, zeby w backendzie mozna go przekazac
 ** wyciagac prefix w jsie
