@@ -1,4 +1,3 @@
-import argparse
 import re
 
 from dom2img import _compat
@@ -23,8 +22,10 @@ def parse_cookie_string(cookie_string):
     Returns dictionary mapping byte-string cookie keys to byte string
     cookie values.
 
-    Raises exception if cookie_string is not an unicode text string,
-    or if it contains non-ascii characters.
+    Raises:
+    * TypeError if cookie_string is not a string
+    * ValueError if cookie_string is an unicode text
+      and it contains non-ascii characters.
 
     >>> parse_cookie_string(u'key1=val1;key2=val2') == \
         {b'key1': b'val1', b'key2': b'val2'}
@@ -34,12 +35,12 @@ def parse_cookie_string(cookie_string):
         try:
             cookie_string = cookie_string.encode('ascii')
         except UnicodeEncodeError:
-            err_msg = 'unicode cookie_string must be ascii-only'
-            raise argparse.ArgumentTypeError(err_msg)
+            err_msg = u'unicode cookie_string must be ascii-only'
+            raise ValueError(err_msg)
     if not isinstance(cookie_string, _compat.byte_string):
-        err_msg = 'cookie_string must be an ascii-only ' +\
-            'unicode text or a byte-string'
-        raise argparse.ArgumentTypeError(err_msg)
+        err_msg = u'cookie_string must be an ascii-only ' +\
+            u'unicode text or a byte-string'
+        raise TypeError(err_msg)
     if b'=' not in cookie_string:
         return {}
     cookies = {}
@@ -70,31 +71,27 @@ def validate_cookies(cookies):
         {b'key1': b'val1', b'key2': b'val2'}
     True
     '''
-    if type(cookies) is not dict:
-        raise argparse.ArgumentTypeError(
-            'cookies must be a dict')
+    if not isinstance(cookies, dict):
+        raise TypeError(u'cookies must be a dict')
 
     def validate_cookie_string(s):
-        if type(s) not in [_compat.byte_string, _compat.text]:
-            raise argparse.ArgumentTypeError(
-                'cookies key/values must be strings')
-        if type(s) is _compat.text:
+        if not isinstance(s, _compat.byte_string) and \
+                not isinstance(s, _compat.text):
+            raise TypeError(u'cookies key/values must be strings')
+        if isinstance(s, _compat.text):
             try:
                 s = s.encode('ascii')
             except UnicodeEncodeError:
-                raise argparse.ArgumentTypeError(
-                    'cookies keys/values must be ascii-only')
+                raise ValueError(u'cookies keys/values must be ascii-only')
         if b';' in s:
-            raise argparse.ArgumentTypeError(
-                "cookies keys/values cannot use ';' character")
+            raise ValueError(u"cookies keys/values cannot use ';' character")
         return s
 
     result = {}
     for key, val in cookies.items():
         new_key = validate_cookie_string(key)
         if b'=' in new_key:
-            raise argparse.ArgumentTypeError(
-                "cookies keys cannot use '=' character")
+            raise ValueError(u"cookies keys cannot use '=' character")
         new_val = validate_cookie_string(val)
         result[new_key] = new_val
     return result

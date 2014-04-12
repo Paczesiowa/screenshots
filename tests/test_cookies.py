@@ -1,6 +1,4 @@
 # coding=utf-8
-import argparse
-
 import tests.utils as utils
 from dom2img import _cookies
 
@@ -26,7 +24,7 @@ class SerializeCookiesTest(utils.TestCase):
 class ParseCookieStringTest(utils.TestCase):
 
     FUN = _cookies.parse_cookie_string
-    EXC = argparse.ArgumentTypeError
+    EXC = ValueError
 
     def test_empty(self):
         self._check_result({}, b'')
@@ -61,7 +59,7 @@ class ParseCookieStringTest(utils.TestCase):
     def test_wrong_type(self):
         err_msg = u'cookie_string must be an ascii-only ' + \
             u'unicode text or a byte-string'
-        self._check_exception(err_msg, None)
+        self._check_exception(err_msg, None, exc=TypeError)
 
 
 def parse_and_serialize_cookies(input_):
@@ -91,7 +89,7 @@ class ParseAndSerializeCookiesTest(utils.TestCase):
 class ValidateCookiesTest(utils.TestCase):
 
     FUN = _cookies.validate_cookies
-    EXC = argparse.ArgumentTypeError
+    EXC = ValueError
 
     def test_empty(self):
         self._check_result({}, {})
@@ -107,15 +105,15 @@ class ValidateCookiesTest(utils.TestCase):
                            {b'foo': b'bar', u'baz': u'quux'})
 
     def test_wrong_type(self):
-        self._check_exception(u'cookies must be a dict', [])
+        self._check_exception(u'cookies must be a dict', [], exc=TypeError)
 
     def test_wrong_type_of_values(self):
         self._check_exception(u'cookies key/values must be strings',
-                              {u'foo': []})
+                              {u'foo': []}, exc=TypeError)
 
     def test_wrong_type_of_keys(self):
         self._check_exception(u'cookies key/values must be strings',
-                              {3: u'bar'})
+                              {3: u'bar'}, exc=TypeError)
 
     def test_non_ascii_unicode_keys(self):
         self._check_exception(u'cookies keys/values must be ascii-only',

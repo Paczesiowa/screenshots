@@ -1,4 +1,3 @@
-import argparse
 import subprocess
 
 import pkg_resources
@@ -195,15 +194,16 @@ def dom2img(content, width, height, prefix, top=0,
     Returns byte-string containing png image with the screenshot.
 
     Raises:
-    * argparse.ArgumentTypeError if arguments are in improper format
+    * TypeError if arguments are not the right type
+    * ValueError if arguments have invalid values
     * PhantomJSFailure if PhantomJS process fails/crashes.
     * PhantomJSTimeout if PhantomJS takes more than timeout seconds to finish
     '''
     if isinstance(content, _compat.text):
         content = content.encode('utf-8')
     if not isinstance(content, _compat.byte_string):
-        raise argparse.ArgumentTypeError(
-            'content must be utf-8 encoded byte-string or unicode')
+        raise TypeError(
+            u'content must be utf-8 encoded byte-string or unicode')
     height = _arg_utils.non_negative_int(height, u'height')
     width = _arg_utils.non_negative_int(width, u'width')
     top = _arg_utils.non_negative_int(top, u'top')
@@ -220,13 +220,11 @@ def dom2img(content, width, height, prefix, top=0,
         try:
             cookie_string = cookies.encode('ascii')
         except UnicodeEncodeError:
-            raise argparse.ArgumentTypeError(
-                'unicode cookies must be ascii-only')
+            raise ValueError(u'unicode cookies must be ascii-only')
     elif isinstance(cookies, _compat.byte_string):
         cookie_string = cookies
     else:
-        raise argparse.ArgumentTypeError(
-            'cookies must be None/string/dict')
+        raise TypeError(u'cookies must be None/string/dict')
 
     return _dom2img(content=content, width=width, height=height,
                     prefix=prefix, top=top, left=left, scale=scale,

@@ -348,7 +348,7 @@ class Dom2ImgTest(utils.TestCase):
     def test_content_wrong_type(self):
         self._check_exception(
             u'content must be utf-8 encoded byte-string or unicode',
-            'content', [], exc=argparse.ArgumentTypeError)
+            'content', [], exc=TypeError)
 
     def test_width_wrong_type(self):
         err_msg = u"width must be an int or a string, not 'None'"
@@ -448,39 +448,31 @@ class Dom2ImgTest(utils.TestCase):
 
     def test_cookies_wrong_type(self):
         err_msg = u'cookies must be None/string/dict'
-        self._check_exception(err_msg, 'cookies', 7,
-                              exc=argparse.ArgumentTypeError)
+        self._check_exception(err_msg, 'cookies', 7, exc=TypeError)
 
     def test_cookies_non_ascii_unicode(self):
         self._check_exception(u'unicode cookies must be ascii-only',
-                              'cookies', u'föö',
-                              exc=argparse.ArgumentTypeError)
+                              'cookies', u'föö')
 
     def test_cookies_key_values_non_ascii_unicode(self):
         self._check_exception(u'cookies keys/values must be ascii-only',
-                              'cookies', {u'föö': u'bär'.encode('utf-8')},
-                              exc=argparse.ArgumentTypeError)
+                              'cookies', {u'föö': u'bär'.encode('utf-8')})
 
     def test_cookies_key_values_wrong_type(self):
         self._check_exception(u'cookies key/values must be strings',
-                              'cookies', {u'foo': []},
-                              exc=argparse.ArgumentTypeError)
+                              'cookies', {u'foo': []}, exc=TypeError)
         self._check_exception(u'cookies key/values must be strings',
-                              'cookies', {3: b'bar'},
-                              exc=argparse.ArgumentTypeError)
+                              'cookies', {3: b'bar'}, exc=TypeError)
 
     def test_cookies_key_with_equals_char(self):
         self._check_exception(u"cookies keys cannot use '=' character",
-                              'cookies', {u'f=o': b'bar'},
-                              exc=argparse.ArgumentTypeError)
+                              'cookies', {u'f=o': b'bar'})
 
     def test_cookies_key_values_with_semicolon(self):
         self._check_exception(u"cookies keys/values cannot use ';' character",
-                              'cookies', {u'f;o': b'bar'},
-                              exc=argparse.ArgumentTypeError)
+                              'cookies', {u'f;o': b'bar'})
         self._check_exception(u"cookies keys/values cannot use ';' character",
-                              'cookies', {u'foo': b'b;r'},
-                              exc=argparse.ArgumentTypeError)
+                              'cookies', {u'foo': b'b;r'})
 
     def test_crashy_phantomjs(self):
         killer_should_stop = [False]
