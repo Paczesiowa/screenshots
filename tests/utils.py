@@ -54,14 +54,22 @@ class TestCase(unittest2.TestCase):
     def _check_result_false(self, *args, **kwargs):
         self._check_result(False, *args, **kwargs)
 
+    def assertRaisesExcStr(self, excClass, excMsg,
+                           callableObj, *args, **kwargs):
+        try:
+            callableObj(*args, **kwargs)
+        except excClass as e:
+            if sys.version_info < (3,):
+                excMsg = excMsg.encode('ascii', 'replace').decode('ascii')
+            self.assertEqual(str(e), excMsg)
+
     def _check_exception(self, err_msg, *args, **kwargs):
-        err_msg = err_msg.replace(u'(', u'\\(').replace(u')', u'\\)')
         try:
             exc = kwargs.pop('exc')
         except KeyError:
             exc = self.EXC
         fun = self.FUN.__func__
-        self.assertRaisesRegexp(exc, err_msg, fun, *args, **kwargs)
+        self.assertRaisesExcStr(exc, err_msg, fun, *args, **kwargs)
 
     def _validate_render_pixels(self, png_data, left=0, top=0, scale=1,
                                 div_color=(255, 0, 0)):

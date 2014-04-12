@@ -279,7 +279,7 @@ class Dom2ImgWorkerTest(utils.TestCase):
 class Dom2ImgTest(utils.TestCase):
 
     FUN = _dom2img.dom2img
-    EXC = argparse.ArgumentTypeError
+    EXC = ValueError
 
     def _make_kwargs(self, port):
         return {'content': utils.html_doc(port),
@@ -348,97 +348,95 @@ class Dom2ImgTest(utils.TestCase):
     def test_content_wrong_type(self):
         self._check_exception(
             u'content must be utf-8 encoded byte-string or unicode',
-            'content', [])
+            'content', [], exc=argparse.ArgumentTypeError)
 
     def test_width_wrong_type(self):
-        self._check_exception(u'width must be int/byte-string/unicode',
-                              'width', None)
+        err_msg = u"width must be an int or a string, not 'None'"
+        self._check_exception(err_msg, 'width', None, exc=TypeError)
 
     def test_width_non_ascii_unicode(self):
-        self._check_exception(u'width must be ascii-only unicode',
-                              'width', u'föö')
+        err_msg = u"invalid value for width: 'föö'"
+        self._check_exception(err_msg, 'width', u'föö')
 
     def test_width_unparseable(self):
-        self._check_exception(u'width cannot be parsed as an int',
-                              'width', b'1.5')
+        err_msg = u"invalid value for width: 'b'1.5''"
+        self._check_exception(err_msg, 'width', b'1.5')
 
     def test_width_negative(self):
-        self._check_exception(u'Unexpected negative integer for width',
-                              'width', -1)
+        err_msg = u'Unexpected negative integer for width: -1'
+        self._check_exception(err_msg, 'width', -1)
 
     def test_height_wrong_type(self):
-        self._check_exception(u'height must be int/byte-string/unicode',
-                              'height', None)
+        err_msg = u"height must be an int or a string, not 'None'"
+        self._check_exception(err_msg, 'height', None, exc=TypeError)
 
     def test_height_non_ascii_unicode(self):
-        self._check_exception(u'height must be ascii-only unicode',
-                              'height', u'föö')
+        err_msg = u"invalid value for height: 'föö'"
+        self._check_exception(err_msg, 'height', u'föö')
 
     def test_height_unparseable(self):
-        self._check_exception(u'height cannot be parsed as an int',
-                              'height', b'1.5')
+        err_msg = u"invalid value for height: 'b'1.5''"
+        self._check_exception(err_msg, 'height', b'1.5')
 
     def test_height_negative(self):
-        self._check_exception(u'Unexpected negative integer for height',
-                              'height', -1)
+        err_msg = u'Unexpected negative integer for height: -1'
+        self._check_exception(err_msg, 'height', -1)
 
     def test_top_wrong_type(self):
-        self._check_exception(u'top must be int/byte-string/unicode',
-                              'top', None)
+        err_msg = u"top must be an int or a string, not 'None'"
+        self._check_exception(err_msg, 'top', None, exc=TypeError)
 
     def test_top_non_ascii_unicode(self):
-        self._check_exception(u'top must be ascii-only unicode',
-                              'top', u'föö')
+        err_msg = u"invalid value for top: 'föö'"
+        self._check_exception(err_msg, 'top', u'föö')
 
     def test_top_unparseable(self):
-        self._check_exception(u'top cannot be parsed as an int',
-                              'top', b'1.5')
+        err_msg = u"invalid value for top: 'b'1.5''"
+        self._check_exception(err_msg, 'top', b'1.5')
 
     def test_top_negative(self):
-        self._check_exception(u'Unexpected negative integer for top',
-                              'top', -1)
+        err_msg = u'Unexpected negative integer for top: -1'
+        self._check_exception(err_msg, 'top', -1)
 
     def test_left_wrong_type(self):
-        self._check_exception(u'left must be int/byte-string/unicode',
-                              'left', None)
+        err_msg = u"left must be an int or a string, not 'None'"
+        self._check_exception(err_msg, 'left', None, exc=TypeError)
 
     def test_left_non_ascii_unicode(self):
-        self._check_exception(u'left must be ascii-only unicode',
-                              'left', u'föö')
+        err_msg = u"invalid value for left: 'föö'"
+        self._check_exception(err_msg, 'left', u'föö')
 
     def test_left_unparseable(self):
-        self._check_exception(u'left cannot be parsed as an int',
-                              'left', b'1.5')
+        err_msg = u"invalid value for left: 'b'1.5''"
+        self._check_exception(err_msg, 'left', b'1.5')
 
     def test_left_negative(self):
-        self._check_exception(u'Unexpected negative integer for left',
-                              'left', -1)
+        err_msg = u'Unexpected negative integer for left: -1'
+        self._check_exception(err_msg, 'left', -1)
 
     def test_scale_wrong_type(self):
-        self._check_exception(u'scale must be int/byte-string/unicode',
-                              'scale', None)
+        err_msg = u"scale must be an int or a string, not 'None'"
+        self._check_exception(err_msg, 'scale', None, exc=TypeError)
 
     def test_scale_non_ascii_unicode(self):
-        self._check_exception(u'scale must be ascii-only unicode',
-                              'scale', u'föö')
+        err_msg = u"invalid value for scale: 'föö'"
+        self._check_exception(err_msg, 'scale', u'föö')
 
     def test_scale_unparseable(self):
-        self._check_exception(u'scale cannot be parsed as an int',
-                              'scale', b'1.5')
+        err_msg = u"invalid value for scale: 'b'1.5''"
+        self._check_exception(err_msg, 'scale', b'1.5')
 
     def test_scale_negative(self):
-        self._check_exception(u'Unexpected negative integer for scale',
-                              'scale', -1)
+        err_msg = u'Unexpected negative integer for scale: -1'
+        self._check_exception(err_msg, 'scale', -1)
 
     def test_prefix_non_ascii_unicode(self):
         self._check_exception(u'unicode prefix must be ascii-only',
-                              'prefix', u'http://example.com/föö',
-                              exc=ValueError)
+                              'prefix', u'http://example.com/föö')
 
     def test_prefix_wrong_type(self):
-        self._check_exception(
-            u'prefix must be a byte-string or an unicode text',
-            'prefix', None, exc=TypeError)
+        err_msg = u'prefix must be a byte-string or an unicode text'
+        self._check_exception(err_msg, 'prefix', None, exc=TypeError)
 
     def test_prefix_non_absolute_url(self):
         self._check_exception(u'prefix must be an absolute URL',
@@ -449,32 +447,40 @@ class Dom2ImgTest(utils.TestCase):
                               'prefix', u'//example.com', exc=ValueError)
 
     def test_cookies_wrong_type(self):
-        self._check_exception(u'cookies must be None/string/dict',
-                              'cookies', 7)
+        err_msg = u'cookies must be None/string/dict'
+        self._check_exception(err_msg, 'cookies', 7,
+                              exc=argparse.ArgumentTypeError)
 
     def test_cookies_non_ascii_unicode(self):
         self._check_exception(u'unicode cookies must be ascii-only',
-                              'cookies', u'föö')
+                              'cookies', u'föö',
+                              exc=argparse.ArgumentTypeError)
 
     def test_cookies_key_values_non_ascii_unicode(self):
         self._check_exception(u'cookies keys/values must be ascii-only',
-                              'cookies', {u'föö': u'bär'.encode('utf-8')})
+                              'cookies', {u'föö': u'bär'.encode('utf-8')},
+                              exc=argparse.ArgumentTypeError)
 
     def test_cookies_key_values_wrong_type(self):
         self._check_exception(u'cookies key/values must be strings',
-                              'cookies', {u'foo': []})
+                              'cookies', {u'foo': []},
+                              exc=argparse.ArgumentTypeError)
         self._check_exception(u'cookies key/values must be strings',
-                              'cookies', {3: b'bar'})
+                              'cookies', {3: b'bar'},
+                              exc=argparse.ArgumentTypeError)
 
     def test_cookies_key_with_equals_char(self):
         self._check_exception(u"cookies keys cannot use '=' character",
-                              'cookies', {u'f=o': b'bar'})
+                              'cookies', {u'f=o': b'bar'},
+                              exc=argparse.ArgumentTypeError)
 
     def test_cookies_key_values_with_semicolon(self):
         self._check_exception(u"cookies keys/values cannot use ';' character",
-                              'cookies', {u'f;o': b'bar'})
+                              'cookies', {u'f;o': b'bar'},
+                              exc=argparse.ArgumentTypeError)
         self._check_exception(u"cookies keys/values cannot use ';' character",
-                              'cookies', {u'foo': b'b;r'})
+                              'cookies', {u'foo': b'b;r'},
+                              exc=argparse.ArgumentTypeError)
 
     def test_crashy_phantomjs(self):
         killer_should_stop = [False]

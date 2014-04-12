@@ -1,6 +1,4 @@
 # coding=utf-8
-import argparse
-
 import tests.utils as utils
 from dom2img import _arg_utils
 
@@ -8,7 +6,7 @@ from dom2img import _arg_utils
 class NonNegativeIntTest(utils.TestCase):
 
     FUN = _arg_utils.non_negative_int
-    EXC = argparse.ArgumentTypeError
+    EXC = ValueError
 
     def test_unicode(self):
         self._check_result(0, u'0', u'x')
@@ -23,42 +21,50 @@ class NonNegativeIntTest(utils.TestCase):
         self._check_result(3, 3)
 
     def test_wrong_type(self):
-        self._check_exception(u'x must be int/byte-string/unicode', [], u'x')
+        err_msg = u"x must be an int or a string, not '[]'"
+        self._check_exception(err_msg, [], u'x', exc=TypeError)
 
     def test_wrong_type_without_variable_name(self):
-        err_msg = u'non_negative_int arg must be int/byte-string/unicode'
-        self._check_exception(err_msg, {})
+        err_msg = u'non_negative_int() argument must be an int or a string' + \
+            u", not '{}'"
+        self._check_exception(err_msg, {}, exc=TypeError)
 
     def test_non_ascii_unicode_input(self):
-        self._check_exception(u'y must be ascii-only unicode', u'ä', u'y')
+        err_msg = u"invalid value for y: 'bär'"
+        self._check_exception(err_msg, u'bär', u'y')
 
     def test_non_ascii_unicode_input_without_variable_name(self):
-        self._check_exception(u'non_negative_int arg must be ascii-only', u'ä')
+        err_msg = u"invalid value for non_negative_int() argument: 'bär'"
+        self._check_exception(err_msg, u'bär')
 
     def test_unparsable_garbage(self):
-        self._check_exception(u'val cannot be parsed as an int',
-                              u'something', u'val')
+        err_msg = u"invalid value for val: 'something'"
+        self._check_exception(err_msg, u'something', u'val')
 
     def test_unparsable_float_byte_string(self):
-        self._check_exception(u'val cannot be parsed as an int',
-                              b'3.2', u'val')
+        err_msg = u"invalid value for val: 'b'3.2''"
+        self._check_exception(err_msg, b'3.2', u'val')
 
     def test_unparsable_float_byte_string_without_variable_name(self):
-        self._check_exception(u'cannot parse as an int', b'3.2')
+        err_msg = u"invalid value for non_negative_int() argument: 'b'3.2''"
+        self._check_exception(err_msg, b'3.2')
 
     def test_negative_byte_string(self):
-        self._check_exception(u'Unexpected negative integer for x',
-                              b'-1', u'x')
+        err_msg = u'Unexpected negative integer for x: -1'
+        self._check_exception(err_msg, b'-1', u'x')
 
     def test_negative_unicode(self):
-        self._check_exception(u'Unexpected negative integer for x',
-                              u'-2', u'x')
+        err_msg = u'Unexpected negative integer for x: -2'
+        self._check_exception(err_msg, u'-2', u'x')
 
     def test_negative_int(self):
-        self._check_exception(u'Unexpected negative integer for x', -3, u'x')
+        err_msg = u'Unexpected negative integer for x: -3'
+        self._check_exception(err_msg, -3, u'x')
 
     def test_negative_without_variable_name(self):
-        self._check_exception(u'Unexpected negative integer', b'-4')
+        err_msg = u'Unexpected negative integer ' + \
+            u'for non_negative_int() argument: -4'
+        self._check_exception(err_msg, b'-4')
 
 
 class AbsoluteURLTest(utils.TestCase):
