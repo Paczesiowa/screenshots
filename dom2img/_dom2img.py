@@ -4,24 +4,8 @@ import pkg_resources
 from PIL import Image
 from bs4 import BeautifulSoup
 
-from dom2img import _cookies, _url_utils, _arg_utils, _compat, _subprocess
-
-
-class PhantomJSFailure(Exception):
-
-    def __init__(self, return_code, stderr=None):
-        self.return_code = return_code
-        self.stderr = stderr
-
-    def __str__(self):
-        result = u'PhantomJS failed with status ' + str(self.return_code)
-        if self.stderr:
-            result += u', and stderr output:\n' + self.stderr
-        return result
-
-
-class PhantomJSTimeout(Exception):
-    pass
+from dom2img import _cookies, _url_utils, _arg_utils, \
+    _compat, _subprocess, _exceptions
 
 
 def _clean_up_html(content, prefix):
@@ -77,13 +61,13 @@ def _render(content, width, height, top, left, cookie_domain,
                             stderr=subprocess.PIPE)
     result = _subprocess.communicate_with_timeout(proc, timeout, content)
     if result is None:
-        raise PhantomJSTimeout()
+        raise _exceptions.PhantomJSTimeout(timeout)
     else:
         stdout, stderr = result
         if proc.returncode:
             stderr = stderr.decode('ascii', 'ignore') or None
-            raise PhantomJSFailure(return_code=proc.returncode,
-                                   stderr=stderr)
+            raise _exceptions.PhantomJSFailure(return_code=proc.returncode,
+                                               stderr=stderr)
         else:
             return stdout
 

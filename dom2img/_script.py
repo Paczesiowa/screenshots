@@ -5,7 +5,7 @@ import os
 import sys
 
 import dom2img
-from dom2img import _cookies, _dom2img, _arg_utils
+from dom2img import _cookies, _dom2img, _arg_utils, _exceptions
 
 
 def main():
@@ -74,14 +74,11 @@ Return status can be:
     try:
         result = _dom2img.dom2img(**args)
         os.write(sys.stdout.fileno(), result)
-    except _dom2img.PhantomJSFailure as e:
+    except _exceptions.PhantomJSFailure as e:
         os.write(sys.stderr.fileno(), str(e).encode('utf-8'))
         sys.exit(2)
-    except _dom2img.PhantomJSTimeout:
-        err_msg = u'PhantomJS process has been killed, ' + \
-            u'because it took longer than ' + str(args['timeout']) + \
-            u' seconds to finish.'
-        os.write(sys.stderr.fileno(), err_msg.encode('utf-8'))
+    except _exceptions.PhantomJSTimeout as e:
+        os.write(sys.stderr.fileno(), str(e).encode('utf-8'))
         sys.exit(3)
 
 if __name__ == '__main__':

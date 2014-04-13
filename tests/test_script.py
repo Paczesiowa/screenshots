@@ -122,7 +122,7 @@ exit 1
             result = dom2img_script(utils.freezing_html_doc(app.port),
                                     args.items())
             err_msg = b'PhantomJS process has been killed, ' + \
-                b'because it took longer than 1 seconds to finish.'
+                b'because it took longer than 1 seconds to finish'
             self.assertEqual(result[1], err_msg)
             self.assertEqual(result[0], b'')
             self.assertEqual(result[2], 3)

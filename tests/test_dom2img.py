@@ -1,5 +1,4 @@
 # coding=utf-8
-import argparse
 import os
 import signal
 import threading
@@ -8,22 +7,7 @@ from PIL import Image
 from bs4 import BeautifulSoup
 
 import tests.utils as utils
-from dom2img import _compat, _dom2img
-
-
-class PhantomJSFailureTest(utils.TestCase):
-
-    def test_string_empty(self):
-        exc_inst = _dom2img.PhantomJSFailure(return_code=1)
-        self.assertEqual(str(exc_inst),
-                         u'PhantomJS failed with status 1')
-
-    def test_string(self):
-        exc_inst = _dom2img.PhantomJSFailure(return_code=1,
-                                             stderr='some output')
-        err_msg = u'PhantomJS failed with status 1, and stderr output:\n'
-        err_msg += u'some output'
-        self.assertEqual(str(exc_inst), err_msg)
+from dom2img import _compat, _dom2img, _exceptions
 
 
 class CleanUpHTMLTest(utils.TestCase):
@@ -180,7 +164,7 @@ class RenderTest(utils.TestCase):
                       'cookie_domain': b'',
                       'cookie_string': b'',
                       'timeout': 30}
-            self.assertRaisesRegexp(_dom2img.PhantomJSFailure,
+            self.assertRaisesRegexp(_exceptions.PhantomJSFailure,
                                     err_msg, _dom2img._render,
                                     **kwargs)
         finally:
@@ -204,7 +188,7 @@ exit 1
             err_msg = \
                 u'PhantomJS failed with status 1, and stderr output:\n' + \
                 u'ERRR\n'
-            self.assertRaisesRegexp(_dom2img.PhantomJSFailure,
+            self.assertRaisesRegexp(_exceptions.PhantomJSFailure,
                                     err_msg, _dom2img._render,
                                     **kwargs)
 
@@ -218,7 +202,7 @@ exit 1
                       'cookie_domain': b'127.0.0.1',
                       'cookie_string': b'',
                       'timeout': 1}
-            self.assertRaisesRegexp(_dom2img.PhantomJSTimeout,
+            self.assertRaisesRegexp(_exceptions.PhantomJSTimeout,
                                     u'', _dom2img._render,
                                     **kwargs)
 
@@ -487,7 +471,7 @@ class Dom2ImgTest(utils.TestCase):
                       'height': 200,
                       'prefix': b'http://example.com/',
                       'cookies': {}}
-            self.assertRaisesRegexp(_dom2img.PhantomJSFailure,
+            self.assertRaisesRegexp(_exceptions.PhantomJSFailure,
                                     err_msg, _dom2img.dom2img,
                                     **kwargs)
         finally:
@@ -508,7 +492,7 @@ exit 1
             err_msg = \
                 u'PhantomJS failed with status 1, and stderr output:\n' + \
                 u'ERRR\n'
-            self.assertRaisesRegexp(_dom2img.PhantomJSFailure,
+            self.assertRaisesRegexp(_exceptions.PhantomJSFailure,
                                     err_msg, _dom2img.dom2img,
                                     **kwargs)
 
@@ -520,6 +504,6 @@ exit 1
                       'height': 400,
                       'prefix': prefix,
                       'timeout': 1}
-            self.assertRaisesRegexp(_dom2img.PhantomJSTimeout,
+            self.assertRaisesRegexp(_exceptions.PhantomJSTimeout,
                                     u'', _dom2img.dom2img,
                                     **kwargs)

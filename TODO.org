@@ -1,6 +1,4 @@
 * add page debugging support to render_file.phantom.js
-* catching sigkill/sigint
-* exceptions should derive from single exception type
 * document possible exceptions
 ** that we throw explicitly
 ** that could be thrown implicitly
