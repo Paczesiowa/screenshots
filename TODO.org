@@ -1,19 +1,23 @@
+* python code
+** ujednolicic jebanie sie z unicodem
+** document possible exceptions
+*** that we throw explicitly
+*** that could be thrown implicitly
+** eggsecutable
+** coverage testow
+** generowanie dokumentacji - format docstringow
+** przejrzec i upiekszyc kod w libce
+** sprawdzic co sie w kazdej funkcji moze zjebac
+** kazdy plik pep8+pyflakes+rope-organize-imports+pylint
+** zobaczyc czy setup.py wszystko moze odpalic poprawnie na golym pythonie
+*** test
+*** install
+*** run backend example
 * add page debugging support to render_file.phantom.js
-* document possible exceptions
-** that we throw explicitly
-** that could be thrown implicitly
 * write readme
 * clean backend
+** dodac backend do exampli w setupy.py
 * unlicense
-* eggsecutable
-* setup
-** dodac backend do exampli
-* coverage testow, generowanie dokumentacji - format docstringow
-* przejrzec i upiekszyc kod w libce
-* sprawdzic co sie w kazdej funkcji moze zjebac
-* zobaczyc czy setup.py wszystko moze odpalic poprawnie na golym pythonie
-* kazdy plik pep8+pyflakes+rope-organize-imports+pylint
-* rzeczy jak non_negative_int nie musze az tak sie jebac z unicodem
 * js
 ** zamiast screenshot w jsie, zwracac slownik, zeby w backendzie mozna go przekazac
 ** wyciagac prefix w jsie
