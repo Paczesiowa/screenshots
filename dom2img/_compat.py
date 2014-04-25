@@ -35,9 +35,18 @@ else:
         return msg
 
 if sys.version_info < (3,):
+    import codecs
+
+    def replace_with_question_mark(exc):
+        return (u'?', exc.end)
+
+    codecs.register_error('replace_with_question_mark',
+                          replace_with_question_mark)
+
     def make_text(val):
         if isinstance(val, str):
-            return u"b'" + unicode(val) + u"'"
+            u_val = unicode(val, errors='replace_with_question_mark')
+            return u"b'" + u_val + u"'"
         else:
             return unicode(val)
 else:

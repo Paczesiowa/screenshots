@@ -335,100 +335,116 @@ class Dom2ImgTest(utils.TestCase):
             'content', [], exc=TypeError)
 
     def test_width_wrong_type(self):
-        err_msg = u"width must be an int or a string, not 'None'"
+        err_msg = u'width must be %s, %s or int, not None'
+        err_msg = err_msg % (_compat.text.__name__,
+                             _compat.byte_string.__name__)
         self._check_exception(err_msg, 'width', None, exc=TypeError)
 
     def test_width_non_ascii_unicode(self):
-        err_msg = u"invalid value for width: 'föö'"
+        err_msg = u'invalid value for width: föö'
         self._check_exception(err_msg, 'width', u'föö')
 
     def test_width_unparseable(self):
-        err_msg = u"invalid value for width: 'b'1.5''"
+        err_msg = u"invalid value for width: b'1.5'"
         self._check_exception(err_msg, 'width', b'1.5')
 
     def test_width_negative(self):
-        err_msg = u'Unexpected negative integer for width: -1'
+        err_msg = u'unexpected negative integer for width: -1'
         self._check_exception(err_msg, 'width', -1)
 
     def test_height_wrong_type(self):
-        err_msg = u"height must be an int or a string, not 'None'"
+        err_msg = u'height must be %s, %s or int, not None'
+        err_msg = err_msg % (_compat.text.__name__,
+                             _compat.byte_string.__name__)
         self._check_exception(err_msg, 'height', None, exc=TypeError)
 
     def test_height_non_ascii_unicode(self):
-        err_msg = u"invalid value for height: 'föö'"
+        err_msg = u'invalid value for height: föö'
         self._check_exception(err_msg, 'height', u'föö')
 
     def test_height_unparseable(self):
-        err_msg = u"invalid value for height: 'b'1.5''"
+        err_msg = u"invalid value for height: b'1.5'"
         self._check_exception(err_msg, 'height', b'1.5')
 
     def test_height_negative(self):
-        err_msg = u'Unexpected negative integer for height: -1'
+        err_msg = u'unexpected negative integer for height: -1'
         self._check_exception(err_msg, 'height', -1)
 
     def test_top_wrong_type(self):
-        err_msg = u"top must be an int or a string, not 'None'"
+        err_msg = u'top must be %s, %s or int, not None'
+        err_msg = err_msg % (_compat.text.__name__,
+                             _compat.byte_string.__name__)
         self._check_exception(err_msg, 'top', None, exc=TypeError)
 
     def test_top_non_ascii_unicode(self):
-        err_msg = u"invalid value for top: 'föö'"
+        err_msg = u'invalid value for top: föö'
         self._check_exception(err_msg, 'top', u'föö')
 
     def test_top_unparseable(self):
-        err_msg = u"invalid value for top: 'b'1.5''"
+        err_msg = u"invalid value for top: b'1.5'"
         self._check_exception(err_msg, 'top', b'1.5')
 
     def test_top_negative(self):
-        err_msg = u'Unexpected negative integer for top: -1'
+        err_msg = u'unexpected negative integer for top: -1'
         self._check_exception(err_msg, 'top', -1)
 
     def test_left_wrong_type(self):
-        err_msg = u"left must be an int or a string, not 'None'"
+        err_msg = u'left must be %s, %s or int, not None'
+        err_msg = err_msg % (_compat.text.__name__,
+                             _compat.byte_string.__name__)
         self._check_exception(err_msg, 'left', None, exc=TypeError)
 
     def test_left_non_ascii_unicode(self):
-        err_msg = u"invalid value for left: 'föö'"
+        err_msg = u'invalid value for left: föö'
         self._check_exception(err_msg, 'left', u'föö')
 
     def test_left_unparseable(self):
-        err_msg = u"invalid value for left: 'b'1.5''"
+        err_msg = u"invalid value for left: b'1.5'"
         self._check_exception(err_msg, 'left', b'1.5')
 
     def test_left_negative(self):
-        err_msg = u'Unexpected negative integer for left: -1'
+        err_msg = u'unexpected negative integer for left: -1'
         self._check_exception(err_msg, 'left', -1)
 
     def test_scale_wrong_type(self):
-        err_msg = u"scale must be an int or a string, not 'None'"
+        err_msg = u'scale must be %s, %s or int, not None'
+        err_msg = err_msg % (_compat.text.__name__,
+                             _compat.byte_string.__name__)
         self._check_exception(err_msg, 'scale', None, exc=TypeError)
 
     def test_scale_non_ascii_unicode(self):
-        err_msg = u"invalid value for scale: 'föö'"
+        err_msg = u'invalid value for scale: föö'
         self._check_exception(err_msg, 'scale', u'föö')
 
     def test_scale_unparseable(self):
-        err_msg = u"invalid value for scale: 'b'1.5''"
+        err_msg = u"invalid value for scale: b'1.5'"
         self._check_exception(err_msg, 'scale', b'1.5')
 
     def test_scale_negative(self):
-        err_msg = u'Unexpected negative integer for scale: -1'
+        err_msg = u'unexpected negative integer for scale: -1'
         self._check_exception(err_msg, 'scale', -1)
 
     def test_prefix_non_ascii_unicode(self):
-        self._check_exception(u'unicode prefix must be ascii-only',
-                              'prefix', u'http://example.com/föö')
+        err_msg = u'invalid, non ascii-only value for prefix: ' + \
+            u'http://example.com/föö'
+        self._check_exception(err_msg, 'prefix', u'http://example.com/föö')
 
     def test_prefix_wrong_type(self):
-        err_msg = u'prefix must be a byte-string or an unicode text'
+        err_msg = u'prefix must be %s or %s, not None'
+        err_msg = err_msg % (_compat.text.__name__,
+                             _compat.byte_string.__name__)
         self._check_exception(err_msg, 'prefix', None, exc=TypeError)
 
     def test_prefix_non_absolute_url(self):
-        self._check_exception(u'prefix must be an absolute URL',
-                              'prefix', u'example.com', exc=ValueError)
-        self._check_exception(u'prefix must be an absolute URL',
-                              'prefix', u'example.com/', exc=ValueError)
-        self._check_exception(u'prefix must be an absolute URL',
-                              'prefix', u'//example.com', exc=ValueError)
+        err_msg = u'invalid, non-absolute URL value for prefix: example.com'
+        self._check_exception(err_msg, 'prefix',
+                              u'example.com', exc=ValueError)
+        err_msg = u'invalid, non-absolute URL value for prefix: example.com/'
+        self._check_exception(err_msg, 'prefix',
+                              u'example.com/', exc=ValueError)
+        err_msg = u'invalid, non-absolute URL value for prefix: //example.com'
+        self._check_exception(err_msg, 'prefix',
+                              u'//example.com', exc=ValueError)
 
     def test_cookies_wrong_type(self):
         err_msg = u'cookies must be None/string/dict'

@@ -2,9 +2,72 @@
 Invalid argument value exception and validation utilities.
 '''
 from dom2img import _compat, _url_utils
+import functools
 
 
-def non_negative_int(val, variable_name=None):
+def concat_alternatives(alternatives):
+    if not alternatives:
+        return u''
+    elif len(alternatives) == 1:
+        return alternatives[0]
+    else:
+        return u', '.join(alternatives[:-1]) + u' or ' + alternatives[-1]
+
+
+def _check_type(val, possible_types, variable_name):
+    if not isinstance(possible_types, (list, tuple)):
+        possible_types = (possible_types,)
+
+    if isinstance(val, possible_types):
+        return
+
+    possible_types_string = \
+        concat_alternatives([type_.__name__ for type_ in possible_types])
+
+    err_msg = u'%s must be %s, not %s'
+    err_msg = _compat.clean_exc_message(
+        err_msg % (variable_name, possible_types_string,
+                   _compat.make_text(val)))
+    raise TypeError(err_msg)
+
+
+def check_type(*possible_types):
+    def wrapper(f):
+        @functools.wraps(f)
+        def aux(val, variable_name):
+            _check_type(val, possible_types, variable_name)
+            return f(val, variable_name)
+        return aux
+    return wrapper
+
+
+def fix_variable_name(f):
+    @functools.wraps(f)
+    def aux(val, variable_name=None):
+        if variable_name is None:
+            variable_name = f.__name__ + u'() argument'
+        return f(val, variable_name)
+    return aux
+
+
+def prettify_value_errors(f):
+    @functools.wraps(f)
+    def aux(val, variable_name):
+        try:
+            return f(val, variable_name)
+        except ValueError as e:
+            (err_msg,) = e.args
+            err_msg += u' for %s: %s' % (variable_name,
+                                         _compat.make_text(val))
+            e.args = (_compat.clean_exc_message(err_msg),)
+            raise e
+    return aux
+
+
+@fix_variable_name
+@check_type(_compat.text, _compat.byte_string, int)
+@prettify_value_errors
+def non_negative_int(val, variable_name):
     '''
     Check if val can be used as an non-negative integer value. it can be:
     * non-negative int
@@ -20,40 +83,27 @@ def non_negative_int(val, variable_name=None):
     >>> non_negative_int(u'7', 'x')
     7
     '''
-    if variable_name is None:
-        variable_name = u'non_negative_int() argument'
-
-    if not isinstance(val, _compat.text) and \
-       not isinstance(val, _compat.byte_string) and \
-       not isinstance(val, int):
-        err_msg = u"%s must be an int or a string, not '%s'"
-        err_msg = _compat.clean_exc_message(
-            err_msg % (variable_name, _compat.make_text(val)))
-        raise TypeError(err_msg)
-
     try:
         val = int(val)
     except (ValueError, UnicodeEncodeError):
-        err_msg = u"invalid value for %s: '%s'"
-        err_msg = _compat.clean_exc_message(
-            err_msg % (variable_name, _compat.make_text(val)))
-        raise ValueError(err_msg)
+        raise ValueError(u'invalid value')
 
     if val < 0:
-        err_msg = u'Unexpected negative integer for %s: %d'
-        raise ValueError(err_msg % (variable_name, val))
+        raise ValueError(u'unexpected negative integer')
 
     return val
 
 non_negative_int.__name__ = 'non-negative integer'
 
 
-def absolute_url(val, variable_name=None):
+@fix_variable_name
+@check_type(_compat.text, _compat.byte_string)
+@prettify_value_errors
+def absolute_url(val, variable_name):
     '''
     Parse absolute URL.
 
-    val is a byte-string or ascii-only unicode text containing
-    absolute URL.
+    val is a ascii-only byte-string or unicode text containing absolute URL.
 
     variable_name is a unicode string used for exception message (or None).
 
@@ -61,35 +111,19 @@ def absolute_url(val, variable_name=None):
 
     Raises:
     * TypeError if val is not a byte-string or unicode text
-    * ValueError if val is a non ascii-only unicode text
+    * ValueError if val is not an ascii-only string
     * ValueError if val is not an absolute URL
     '''
-    if isinstance(val, _compat.byte_string):
-        val = val.decode('ascii')
-    if isinstance(val, _compat.text):
-        try:
-            val.encode('ascii')
-        except UnicodeEncodeError:
-            if variable_name is None:
-                err_msg = u'absolute_url() unicode text argument ' + \
-                    u'must be ascii-only'
-            else:
-                err_msg = u'unicode ' + variable_name + u' must be ascii-only'
-            raise ValueError(err_msg)
-    if not isinstance(val, _compat.text):
-        if variable_name is None:
-            err_msg = u'absolute_url() argument must be ' + \
-                u'a byte-string or unicode text'
+    try:
+        if isinstance(val, _compat.byte_string):
+            val = val.decode('ascii')
         else:
-            err_msg = \
-                variable_name + u' must be a byte-string or an unicode text'
-        raise TypeError(err_msg)
+            val.encode('ascii')  # check if it would work
+    except (UnicodeDecodeError, UnicodeEncodeError):
+        raise ValueError(u'invalid, non ascii-only value')
+
     if not _url_utils.is_absolute_url(val):
-        if variable_name is None:
-            err_msg = u'absolute_url() argument must be an absolute URL'
-        else:
-            err_msg = variable_name + u' must be an absolute URL'
-        raise ValueError(err_msg)
+        raise ValueError(u'invalid, non-absolute URL value')
 
     return val
 
