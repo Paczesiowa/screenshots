@@ -50,23 +50,24 @@ def fix_variable_name(f):
     return aux
 
 
-def prettify_value_errors(f):
-    @functools.wraps(f)
-    def aux(val, variable_name):
+def _prettify_value_errors(fun):
+    'Type-value unifier decorator, that value adds info to thrown ValueErrors'
+    @functools.wraps(fun)
+    def wrapper(val, variable_name):
         try:
-            return f(val, variable_name)
+            return fun(val, variable_name)
         except ValueError as e:
             (err_msg,) = e.args
             err_msg += u' for %s: %s' % (variable_name,
                                          _compat.make_text(val))
             e.args = (_compat.clean_exc_message(err_msg),)
             raise e
-    return aux
+    return wrapper
 
 
 @fix_variable_name
 @check_type(_compat.text, _compat.byte_string, int)
-@prettify_value_errors
+@_prettify_value_errors
 def non_negative_int(val, variable_name):
     '''
     Check if val can be used as an non-negative integer value. it can be:
@@ -98,7 +99,7 @@ non_negative_int.__name__ = 'non-negative integer'
 
 @fix_variable_name
 @check_type(_compat.text, _compat.byte_string)
-@prettify_value_errors
+@_prettify_value_errors
 def absolute_url(val, variable_name):
     '''
     Parse absolute URL.

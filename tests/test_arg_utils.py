@@ -1,6 +1,60 @@
 # coding=utf-8
+import sys
+
 import tests.utils as utils
 from dom2img import _arg_utils, _compat
+
+
+class PrettifyValueErrorsTest(utils.TestCase):
+
+    def test_return_works(self):
+        @_arg_utils._prettify_value_errors
+        def foo(val, variable_name):
+            return val
+        self.assertEqual(2, foo(2, u'x'))
+
+    def test_other_exceptions_pass_through(self):
+        @_arg_utils._prettify_value_errors
+        def foo(val, variable_name):
+            raise TypeError(u'bar')
+        self.assertRaisesRegexp(TypeError, u'bar', foo, 2, u'x')
+
+    def test_simple_value_error(self):
+        @_arg_utils._prettify_value_errors
+        def foo(val, variable_name):
+            raise ValueError(u'invalid value')
+        self.assertRaisesRegexp(ValueError, u'invalid value for x: 2',
+                                foo, 2, u'x')
+
+    def test_byte_string_value(self):
+        @_arg_utils._prettify_value_errors
+        def foo(val, variable_name):
+            raise ValueError(u'error')
+        self.assertRaisesRegexp(ValueError, u"error for x: b'bar'",
+                                foo, b'bar', u'x')
+
+    def test_byte_string_unicode_value(self):
+        @_arg_utils._prettify_value_errors
+        def foo(val, variable_name):
+            raise ValueError(u'error')
+        if sys.version_info < (3,):
+            err_msg = u"error for x: b'b\\?\\?r'"  # escape ? for regexp
+        else:
+            # escape \ for regexp
+            err_msg = u"error for x: b'b\\\\xc3\\\\xa4r'"
+        self.assertRaisesRegexp(ValueError, err_msg,
+                                foo, u'bär'.encode('utf-8'), u'x')
+
+    def test_unicode_error_message(self):
+        @_arg_utils._prettify_value_errors
+        def foo(val, variable_name):
+            raise ValueError(u'errör')
+        if sys.version_info < (3,):
+            err_msg = u'err\\?r for x: 2'  # escape ? for regexp
+        else:
+            err_msg = u'errör for x: 2'
+        self.assertRaisesRegexp(ValueError, err_msg,
+                                foo, 2, u'x')
 
 
 class NonNegativeIntTest(utils.TestCase):
