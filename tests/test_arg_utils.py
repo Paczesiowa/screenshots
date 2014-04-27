@@ -5,6 +5,80 @@ import tests.utils as utils
 from dom2img import _arg_utils, _compat
 
 
+class CheckTypeTest(utils.TestCase):
+
+    def test_single(self):
+        @_arg_utils._check_type(int)
+        def foo(val, variable_name):
+            return variable_name
+        self.assertEqual(u'x', foo(2, u'x'))
+        self.assertRaisesRegexp(TypeError, u'x must be int, not None',
+                                foo, None, u'x')
+
+    def test_double(self):
+        @_arg_utils._check_type(int, float)
+        def foo(val, variable_name):
+            return variable_name
+        self.assertEqual(u'x', foo(2, u'x'))
+        self.assertEqual(u'x', foo(2., u'x'))
+        self.assertRaisesRegexp(TypeError, u'x must be int or float, not None',
+                                foo, None, u'x')
+
+    def test_triple(self):
+        @_arg_utils._check_type(int, dict, list)
+        def foo(val, variable_name):
+            return variable_name
+        self.assertEqual(u'x', foo(2, u'x'))
+        self.assertEqual(u'x', foo({}, u'x'))
+        self.assertEqual(u'x', foo([], u'x'))
+        self.assertRaisesRegexp(TypeError,
+                                u'x must be int, dict or list, not None',
+                                foo, None, u'x')
+
+    def test_byte_string_value(self):
+        @_arg_utils._check_type(int)
+        def foo(val, variable_name):
+            return variable_name
+        self.assertRaisesRegexp(TypeError, u"x must be int, not b'bar'",
+                                foo, b'bar', u'x')
+
+    def test_byte_string_unicode_value(self):
+        @_arg_utils._check_type(int)
+        def foo(val, variable_name):
+            return variable_name
+        if sys.version_info < (3,):
+            err_msg = u"x must be int, not b'b\\?\\?r'"  # escape ? for regexp
+        else:
+            # escape \ for regexp
+            err_msg = u"x must be int, not b'b\\\\xc3\\\\xa4r'"
+        self.assertRaisesRegexp(TypeError, err_msg,
+                                foo, u'bär'.encode('utf-8'), u'x')
+
+    def test_unicode_error_message(self):
+        @_arg_utils._check_type(int)
+        def foo(val, variable_name):
+            return variable_name
+        err_msg = u'bär must be int, not föö'
+        self.assertRaisesExcStr(TypeError, err_msg,
+                                foo, u'föö', u'bär')
+
+
+class FixVariableNameTest(utils.TestCase):
+
+    def test_no_override(self):
+        @_arg_utils._fix_variable_name
+        def foo(val, variable_name):
+            return variable_name
+        self.assertEqual(u'x', foo(2, u'x'))
+
+    def test_override_on_none(self):
+        @_arg_utils._fix_variable_name
+        def foo(val, variable_name):
+            return variable_name
+        self.assertEqual(u'foo() argument', foo(2))
+        self.assertEqual(u'foo() argument', foo(2, None))
+
+
 class PrettifyValueErrorsTest(utils.TestCase):
 
     def test_return_works(self):

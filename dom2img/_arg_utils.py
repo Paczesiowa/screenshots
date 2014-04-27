@@ -5,7 +5,19 @@ from dom2img import _compat, _url_utils
 import functools
 
 
-def concat_alternatives(alternatives):
+def _concat_alternatives(alternatives):
+    '''
+    Return sentence with a list of alternatives
+
+    >>> _concat_alternatives([u'foo']) == u'foo'
+    True
+
+    >>> _concat_alternatives([u'foo', u'bar']) == u'foo or bar'
+    True
+
+    >>> _concat_alternatives([u'foo', u'bar', u'baz']) == u'foo, bar or baz'
+    True
+    '''
     if not alternatives:
         return u''
     elif len(alternatives) == 1:
@@ -14,40 +26,37 @@ def concat_alternatives(alternatives):
         return u', '.join(alternatives[:-1]) + u' or ' + alternatives[-1]
 
 
-def _check_type(val, possible_types, variable_name):
-    if not isinstance(possible_types, (list, tuple)):
-        possible_types = (possible_types,)
+def _check_type(*possible_types):
+    '''Type-value unifier decorator, that checks if value
+    is instance of one of the specified types
+    '''
+    def wrapper(fun):
+        @functools.wraps(fun)
+        def inner_wrapper(val, variable_name):
+            if isinstance(val, possible_types):
+                return fun(val, variable_name)
 
-    if isinstance(val, possible_types):
-        return
+            possible_types_string = \
+                _concat_alternatives([type_.__name__
+                                      for type_ in possible_types])
 
-    possible_types_string = \
-        concat_alternatives([type_.__name__ for type_ in possible_types])
-
-    err_msg = u'%s must be %s, not %s'
-    err_msg = _compat.clean_exc_message(
-        err_msg % (variable_name, possible_types_string,
-                   _compat.make_text(val)))
-    raise TypeError(err_msg)
-
-
-def check_type(*possible_types):
-    def wrapper(f):
-        @functools.wraps(f)
-        def aux(val, variable_name):
-            _check_type(val, possible_types, variable_name)
-            return f(val, variable_name)
-        return aux
+            err_msg = u'%s must be %s, not %s'
+            err_msg = _compat.clean_exc_message(
+                err_msg % (variable_name, possible_types_string,
+                           _compat.make_text(val)))
+            raise TypeError(err_msg)
+        return inner_wrapper
     return wrapper
 
 
-def fix_variable_name(f):
-    @functools.wraps(f)
-    def aux(val, variable_name=None):
+def _fix_variable_name(fun):
+    'Type-value unifier decorator, that sets default variable_name'
+    @functools.wraps(fun)
+    def wrapper(val, variable_name=None):
         if variable_name is None:
-            variable_name = f.__name__ + u'() argument'
-        return f(val, variable_name)
-    return aux
+            variable_name = fun.__name__ + u'() argument'
+        return fun(val, variable_name)
+    return wrapper
 
 
 def _prettify_value_errors(fun):
@@ -65,8 +74,8 @@ def _prettify_value_errors(fun):
     return wrapper
 
 
-@fix_variable_name
-@check_type(_compat.text, _compat.byte_string, int)
+@_fix_variable_name
+@_check_type(_compat.text, _compat.byte_string, int)
 @_prettify_value_errors
 def non_negative_int(val, variable_name):
     '''
@@ -97,8 +106,8 @@ def non_negative_int(val, variable_name):
 non_negative_int.__name__ = 'non-negative integer'
 
 
-@fix_variable_name
-@check_type(_compat.text, _compat.byte_string)
+@_fix_variable_name
+@_check_type(_compat.text, _compat.byte_string)
 @_prettify_value_errors
 def absolute_url(val, variable_name):
     '''
