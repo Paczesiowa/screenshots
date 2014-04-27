@@ -1,6 +1,4 @@
 * python code
-** ujednolicic jebanie sie z unicodem
-** wszedzie gdzie jest dekodowanie z bytestringa, sprawdzic czy sie nie zjebie
 ** document possible exceptions
 *** that we throw explicitly
 *** that could be thrown implicitly
