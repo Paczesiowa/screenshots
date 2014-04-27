@@ -183,11 +183,7 @@ def dom2img(content, width, height, prefix, top=0,
     * PhantomJSFailure if PhantomJS process fails/crashes.
     * PhantomJSTimeout if PhantomJS takes more than timeout seconds to finish
     '''
-    if isinstance(content, _compat.text):
-        content = content.encode('utf-8')
-    if not isinstance(content, _compat.byte_string):
-        raise TypeError(
-            u'content must be utf-8 encoded byte-string or unicode')
+    content = _arg_utils.utf8_byte_string(content, u'content')
     height = _arg_utils.non_negative_int(height, u'height')
     width = _arg_utils.non_negative_int(width, u'width')
     top = _arg_utils.non_negative_int(top, u'top')

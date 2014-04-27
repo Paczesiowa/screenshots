@@ -139,3 +139,26 @@ def absolute_url(val, variable_name):
 
 
 absolute_url.__name__ = 'absolute URL'
+
+
+@_fix_variable_name
+@_check_type(_compat.text, _compat.byte_string)
+def utf8_byte_string(val, variable_name):
+    '''
+    Returns utf-8 encoded byte-string.
+
+    val is either utf-8 encoded byte-string or a unicode text.
+    variable_name is a unicode string used for exception message (or None).
+
+    Raises:
+    * TypeError if val is not a byte-string or unicode text
+    * ValueError if val is a byte-string, that's not properly utf-8 encoded
+    '''
+    if isinstance(val, _compat.text):
+        return val.encode('utf-8')
+    try:
+        val.decode('utf-8')
+    except UnicodeDecodeError:
+        raise ValueError(
+            variable_name + u' byte string is not properly utf-8 encoded')
+    return val

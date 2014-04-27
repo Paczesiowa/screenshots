@@ -330,9 +330,10 @@ class Dom2ImgTest(utils.TestCase):
         self._check_images('cookies', {b'key': u'val'}, {u'key': b'val'})
 
     def test_content_wrong_type(self):
-        self._check_exception(
-            u'content must be utf-8 encoded byte-string or unicode',
-            'content', [], exc=TypeError)
+        err_msg = u'content must be %s or %s, not []'
+        err_msg = err_msg % (_compat.text.__name__,
+                             _compat.byte_string.__name__)
+        self._check_exception(err_msg, 'content', [], exc=TypeError)
 
     def test_width_wrong_type(self):
         err_msg = u'width must be %s, %s or int, not None'

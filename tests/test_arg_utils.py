@@ -255,3 +255,46 @@ class AbsoluteURLTest(utils.TestCase):
         err_msg = u'invalid, non-absolute URL value for absolute_url() ' + \
             u'argument: //example.com/'
         self._check_exception(err_msg, u'//example.com/')
+
+
+class UTF8ByteStringTest(utils.TestCase):
+
+    FUN = _arg_utils.utf8_byte_string
+    EXC = ValueError
+
+    def test_text(self):
+        self._check_result(b'foo', u'foo', u'content')
+        self._check_result(u'bär'.encode('utf-8'), u'bär', u'content')
+
+    def test_byte_string(self):
+        self._check_result(b'foo', b'foo', u'content')
+        bar_bs = u'bär'.encode('utf-8')
+        self._check_result(bar_bs, bar_bs, u'content')
+
+    def test_without_variable_name(self):
+        self._check_result(b'bar', b'bar')
+
+    def test_wrong_type(self):
+        err_msg = u'x must be %s or %s, not []'
+        err_msg = err_msg % (_compat.text.__name__,
+                             _compat.byte_string.__name__)
+        self._check_exception(err_msg, [], u'x', exc=TypeError)
+
+    def test_wrong_type_without_variable_name(self):
+        err_msg = u'utf8_byte_string() argument must be %s or ' + \
+            u'%s, not {}'
+        err_msg = err_msg % (_compat.text.__name__,
+                             _compat.byte_string.__name__)
+        self._check_exception(err_msg, {}, exc=TypeError)
+
+    def test_byte_string_not_utf8(self):
+        bar_bs_16 = u'bär'.encode('utf-16')
+        err_msg = u'content byte string ' + \
+            u'is not properly utf-8 encoded'
+        self._check_exception(err_msg, bar_bs_16, u'content')
+
+    def test_byte_string_not_utf8_without_variable_name(self):
+        bar_bs_16 = u'bär'.encode('utf-16')
+        err_msg = u'utf8_byte_string() argument byte string ' + \
+            u'is not properly utf-8 encoded'
+        self._check_exception(err_msg, bar_bs_16)
