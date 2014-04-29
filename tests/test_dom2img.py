@@ -448,7 +448,11 @@ class Dom2ImgTest(utils.TestCase):
                               u'//example.com', exc=ValueError)
 
     def test_cookies_wrong_type(self):
-        err_msg = u'cookies must be None/string/dict'
+        err_msg = u'cookies must be %s, %s, %s or %s, not 7'
+        err_msg = err_msg % (_compat.text.__name__,
+                             _compat.byte_string.__name__,
+                             type(None).__name__,
+                             dict.__name__)
         self._check_exception(err_msg, 'cookies', 7, exc=TypeError)
 
     def test_cookies_non_ascii_unicode(self):

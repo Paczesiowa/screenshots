@@ -1,6 +1,6 @@
 import re
 
-from dom2img import _compat
+from dom2img import _compat, _arg_utils
 
 
 def serialize_cookies(cookies):
@@ -115,3 +115,20 @@ def get_cookie_domain(url):
     else:
         result = parsed_prefix.netloc
     return result.encode('utf-8')
+
+
+@_arg_utils._fix_variable_name
+@_arg_utils._check_type(_compat.text, _compat.byte_string,
+                        type(None), dict)
+def cookie_string(val, variable_name):
+    if val is None:
+        return b''
+    if isinstance(val, dict):
+        return serialize_cookies(validate_cookies(val))
+    if isinstance(val, _compat.text):
+        try:
+            return val.encode('ascii')
+        except UnicodeEncodeError:
+            err_msg = u'unicode ' + variable_name + u' must be ascii-only'
+            raise ValueError(err_msg)
+    return val

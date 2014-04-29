@@ -191,20 +191,7 @@ def dom2img(content, width, height, prefix, top=0,
     scale = _arg_utils.non_negative_int(scale, u'scale')
     timeout = _arg_utils.non_negative_int(timeout, u'timeout')
     prefix = _arg_utils.absolute_url(prefix, u'prefix')
-    if cookies is None:
-        cookies = {}
-    if isinstance(cookies, dict):
-        cookies = _cookies.validate_cookies(cookies)
-        cookie_string = _cookies.serialize_cookies(cookies)
-    elif isinstance(cookies, _compat.text):
-        try:
-            cookie_string = cookies.encode('ascii')
-        except UnicodeEncodeError:
-            raise ValueError(u'unicode cookies must be ascii-only')
-    elif isinstance(cookies, _compat.byte_string):
-        cookie_string = cookies
-    else:
-        raise TypeError(u'cookies must be None/string/dict')
+    cookie_string = _cookies.cookie_string(cookies, u'cookies')
 
     return _dom2img(content=content, width=width, height=height,
                     prefix=prefix, top=top, left=left, scale=scale,

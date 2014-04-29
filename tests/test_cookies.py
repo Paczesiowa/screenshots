@@ -1,6 +1,6 @@
 # coding=utf-8
 import tests.utils as utils
-from dom2img import _cookies
+from dom2img import _cookies, _compat
 
 
 class SerializeCookiesTest(utils.TestCase):
@@ -157,3 +157,80 @@ class GetCookieDomainTest(utils.TestCase):
     def test_complex(self):
         input_ = u'http://example.com:7000/path/something?key=val&key2=val2'
         self._check_result(b'example.com', input_)
+
+
+class CookieStringTest(utils.TestCase):
+
+    FUN = _cookies.cookie_string
+    EXC = ValueError
+
+    def _check_result(self, output, *args, **kwargs):
+        args = list(args)
+        args.insert(1, u'cookies')
+        super(CookieStringTest, self)._check_result(output, *args, **kwargs)
+
+    def _check_exception(self, err_msg, *args, **kwargs):
+        args = list(args)
+        args.insert(1, u'cookies')
+        super(CookieStringTest, self)._check_exception(err_msg, *args,
+                                                       **kwargs)
+
+    def test_empty(self):
+        self._check_result(b'', None)
+        self._check_result(b'', b'')
+        self._check_result(b'', u'')
+        self._check_result(b'', {})
+
+    def test_non_empty(self):
+        self._check_result(b'key=val', b'key=val')
+        self._check_result(b'key=val', u'key=val')
+        self._check_result(b'key=val', {u'key': u'val'})
+        self._check_result(b'key=val', {u'key': b'val'})
+        self._check_result(b'key=val', {b'key': b'val'})
+        self._check_result(b'key=val', {b'key': u'val'})
+
+    def test_two_keys(self):
+        def comparator(cookie_string):
+            return sorted(cookie_string.split(b';'))
+
+        self._check_result(b'key1=val1;key2=val2', b'key1=val1;key2=val2',
+                           comparator=comparator)
+        self._check_result(b'key1=val1;key2=val2', u'key1=val1;key2=val2',
+                           comparator=comparator)
+        self._check_result(b'key1=val1;key2=val2', {b'key1': b'val1',
+                                                    b'key2': b'val2'},
+                           comparator=comparator)
+        self._check_result(b'key1=val1;key2=val2', {u'key1': u'val1',
+                                                    u'key2': u'val2'},
+                           comparator=comparator)
+
+    def test_wrong_type(self):
+        err_msg = u'cookies must be %s, %s, %s or %s, not 7'
+        err_msg = err_msg % (_compat.text.__name__,
+                             _compat.byte_string.__name__,
+                             type(None).__name__,
+                             dict.__name__)
+        self._check_exception(err_msg, 7, exc=TypeError)
+
+    def test_non_ascii_unicode(self):
+        self._check_exception(u'unicode cookies must be ascii-only', u'föö')
+
+    def test_key_values_non_ascii_unicode(self):
+        self._check_exception(u'cookies keys/values must be ascii-only',
+                              {u'föö': u'bär'.encode('utf-8')})
+
+    def test_key_values_wrong_type(self):
+        self._check_exception(u'cookies key/values must be strings',
+                              {u'foo': []}, exc=TypeError)
+        self._check_exception(u'cookies key/values must be strings',
+                              {3: b'bar'}, exc=TypeError)
+
+    def test_key_with_equals_char(self):
+        self._check_exception(u"cookies keys cannot use '=' character",
+                              {u'f=o': b'bar'})
+
+    def test_key_values_with_semicolon(self):
+        self._check_exception(u"cookies keys/values cannot use ';' character",
+                              {u'f;o': b'bar'})
+        self._check_exception(u"cookies keys/values cannot use ';' character",
+                              {u'foo': b'b;r'})
