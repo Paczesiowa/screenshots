@@ -251,7 +251,7 @@ def check_output(*popenargs, **kwargs):
 
 def killer(parent_pid, killer_should_stop):
     output = b''
-    while not killer_should_stop[0] and b' phantomjs ' not in output:
+    while not killer_should_stop[0] and b'phantomjs ' not in output:
         time.sleep(.01)
         try:
             output = check_output(
@@ -261,13 +261,14 @@ def killer(parent_pid, killer_should_stop):
     if killer_should_stop[0]:
         return
     output = output.split(b'\n')[1:]  # skip header line
-    line = list(filter(lambda l: b' phantomjs ' in l, output))[0]
+    line = list(filter(lambda l: b'phantomjs ' in l, output))[0]
     pid = int(line.split()[0])
     os.kill(pid, signal.SIGKILL)
 
 
 @contextlib.contextmanager
 def mock_phantom_js_binary(script):
+    script = script.lstrip()
     tmp_dir = tempfile.mkdtemp()
     tmp_phantomjs_path = os.path.join(tmp_dir, 'phantomjs')
     with open(tmp_phantomjs_path, 'wb') as f:

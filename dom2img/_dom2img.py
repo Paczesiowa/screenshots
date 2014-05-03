@@ -1,4 +1,6 @@
+import os
 import subprocess
+from distutils import spawn
 
 import pkg_resources
 from PIL import Image
@@ -51,8 +53,10 @@ def _render(content, width, height, top, left, cookie_domain,
     * PhantomJSTimeout if PhantomJS takes more than timeout seconds to finish
     '''
     render_file_phantom_js_location = \
-        pkg_resources.resource_filename(__name__, 'render_file.phantom.js')
-    phantomjs_args = ['env', 'phantomjs', render_file_phantom_js_location,
+        os.path.realpath(pkg_resources.resource_filename(
+            __name__, 'render_file.phantom.js'))
+    phantomjs_binary = spawn.find_executable('phantomjs')
+    phantomjs_args = [phantomjs_binary, render_file_phantom_js_location,
                       str(width), str(height), str(top),
                       str(left), cookie_domain, cookie_string]
     proc = subprocess.Popen(phantomjs_args,
