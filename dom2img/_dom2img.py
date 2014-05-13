@@ -1,5 +1,6 @@
 import os
 import subprocess
+import tempfile
 from distutils import spawn
 
 import pkg_resources
@@ -30,7 +31,19 @@ def _clean_up_html(content, prefix):
     return doc.prettify().encode('utf-8')
 
 
-def _render(content, width, height, top, left, cookie_domain,
+def _phantomjs_invocation(width, height, top, left,
+                          prefix, cookie_string):
+    cookie_domain = _cookies.get_cookie_domain(prefix)
+    render_file_phantom_js_location = \
+        os.path.realpath(pkg_resources.resource_filename(
+            __name__, 'render_file.phantom.js'))
+    phantomjs_binary = spawn.find_executable('phantomjs')
+    return [phantomjs_binary, render_file_phantom_js_location,
+            str(width), str(height), str(top),
+            str(left), cookie_domain, cookie_string]
+
+
+def _render(content, width, height, top, left, prefix,
             cookie_string, timeout):
     '''
     Renders html content using PhantomJS
@@ -42,7 +55,7 @@ def _render(content, width, height, top, left, cookie_domain,
     top is an int with the pixel offset from the top/vertical scroll position
     left is an int with the pixel offset from the left/
       horizontal scroll position
-    cookie_domain is a byte-string containing URL (just the host part)
+    prefix is an ascii-only unicode containing absolute URL
     cookie_string is a byte-string containing cookies keys and values
       using format key1=val1;key2=val2
     timeout is an int with number of seconds after which PhantomJS
@@ -52,13 +65,9 @@ def _render(content, width, height, top, left, cookie_domain,
     * PhantomJSFailure if PhantomJS process fails/crashes.
     * PhantomJSTimeout if PhantomJS takes more than timeout seconds to finish
     '''
-    render_file_phantom_js_location = \
-        os.path.realpath(pkg_resources.resource_filename(
-            __name__, 'render_file.phantom.js'))
-    phantomjs_binary = spawn.find_executable('phantomjs')
-    phantomjs_args = [phantomjs_binary, render_file_phantom_js_location,
-                      str(width), str(height), str(top),
-                      str(left), cookie_domain, cookie_string]
+    phantomjs_args = _phantomjs_invocation(width=width, height=height,
+                                           top=top, left=left, prefix=prefix,
+                                           cookie_string=cookie_string)
     proc = subprocess.Popen(phantomjs_args,
                             stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE,
@@ -128,14 +137,13 @@ def _dom2img(content, width, height, top, left, scale, prefix,
     * PhantomJSFailure if PhantomJS process fails/crashes.
     * PhantomJSTimeout if PhantomJS takes more than timeout seconds to finish
     '''
-    cookie_domain = _cookies.get_cookie_domain(prefix)
     cleaned_up_content = _clean_up_html(content, prefix)
     img_string = _render(content=cleaned_up_content,
                          width=width,
                          height=height,
                          top=top,
                          left=left,
-                         cookie_domain=cookie_domain,
+                         prefix=prefix,
                          cookie_string=cookie_string,
                          timeout=timeout)
     return _resize(img_string, scale)
@@ -200,3 +208,34 @@ def dom2img(content, width, height, prefix, top=0,
     return _dom2img(content=content, width=width, height=height,
                     prefix=prefix, top=top, left=left, scale=scale,
                     cookie_string=cookie_string, timeout=timeout)
+
+
+def dom2img_debug(content, width, height, prefix, top=0,
+                  left=0, scale=100, cookies=None):
+    content = _arg_utils.utf8_byte_string(content, u'content')
+    height = _arg_utils.non_negative_int(height, u'height')
+    width = _arg_utils.non_negative_int(width, u'width')
+    top = _arg_utils.non_negative_int(top, u'top')
+    left = _arg_utils.non_negative_int(left, u'left')
+    scale = _arg_utils.non_negative_int(scale, u'scale')
+    prefix = _arg_utils.absolute_url(prefix, u'prefix')
+    cookie_string = _cookies.cookie_string(cookies, u'cookies')
+
+    (fd, content_path) = tempfile.mkstemp(suffix='.html',
+                                          prefix='dom2img_input')
+    os.close(fd)
+
+    with open(content_path, 'wb') as f:
+        f.write(_clean_up_html(content, prefix))
+
+    quote = lambda string: u'"' + string + u'"'
+
+    phantomjs_args = \
+        _phantomjs_invocation(width=width, height=height,
+                              top=top, left=left, prefix=prefix,
+                              cookie_string=cookie_string)
+
+    command = map(quote, phantomjs_args) + \
+        [u'--debug', u'<', quote(content_path)]
+
+    print u' '.join(command)

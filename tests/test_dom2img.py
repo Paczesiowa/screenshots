@@ -84,7 +84,7 @@ class RenderTest(utils.TestCase):
                                   height=200,
                                   top=0,
                                   left=0,
-                                  cookie_domain=b'',
+                                  prefix=u'',
                                   cookie_string=b'',
                                   timeout=30)
         image = utils.image_from_bytestring(output)
@@ -96,7 +96,7 @@ class RenderTest(utils.TestCase):
                                   height=400,
                                   top=0,
                                   left=0,
-                                  cookie_domain='',
+                                  prefix=u'',
                                   cookie_string='',
                                   timeout=30)
         self._validate_render_pixels(output)
@@ -107,43 +107,46 @@ class RenderTest(utils.TestCase):
                                   height=400,
                                   top=50,
                                   left=50,
-                                  cookie_domain='',
+                                  prefix=u'http://127.0.0.1',
                                   cookie_string='',
                                   timeout=30)
         self._validate_render_pixels(output, top=50, left=50)
 
     def test_cookie_render_with_wrong_cookie(self):
         with utils.FlaskApp() as app:
+            prefix = u'http://127.0.0.1:' + str(app.port)
             output = _dom2img._render(content=utils.html_doc(app.port),
                                       width=600,
                                       height=400,
                                       top=0,
                                       left=0,
-                                      cookie_domain='127.0.0.1',
+                                      prefix=prefix,
                                       cookie_string='key=val2',
                                       timeout=30)
             self._validate_render_pixels(output)
 
     def test_cookie_render(self):
         with utils.FlaskApp() as app:
+            prefix = u'http://127.0.0.1:' + str(app.port)
             output = _dom2img._render(content=utils.html_doc(app.port),
                                       width=600,
                                       height=400,
                                       top=0,
                                       left=0,
-                                      cookie_domain='127.0.0.1',
+                                      prefix=prefix,
                                       cookie_string='key=val',
                                       timeout=30)
             self._validate_render_pixels(output, div_color=(0, 0, 0))
 
     def test_cookie_render_wrong_cookie_domain(self):
         with utils.FlaskApp() as app:
+            prefix = u'http://example.com/'
             output = _dom2img._render(content=utils.html_doc(app.port),
                                       width=600,
                                       height=400,
                                       top=0,
                                       left=0,
-                                      cookie_domain='example.com',
+                                      prefix=prefix,
                                       cookie_string='key=val',
                                       timeout=30)
             self._validate_render_pixels(output)
@@ -161,7 +164,7 @@ class RenderTest(utils.TestCase):
                       'height': 200,
                       'top': 0,
                       'left': 0,
-                      'cookie_domain': b'',
+                      'prefix': u'',
                       'cookie_string': b'',
                       'timeout': 30}
             self.assertRaisesRegexp(_exceptions.PhantomJSFailure,
@@ -182,7 +185,7 @@ exit 1
                       'height': 400,
                       'top': 0,
                       'left': 0,
-                      'cookie_domain': b'127.0.0.1',
+                      'prefix': u'http://127.0.0.1/',
                       'cookie_string': b'',
                       'timeout': 30}
             err_msg = \
@@ -199,7 +202,7 @@ exit 1
                       'height': 400,
                       'top': 0,
                       'left': 0,
-                      'cookie_domain': b'127.0.0.1',
+                      'prefix': u'http://127.0.0.1/',
                       'cookie_string': b'',
                       'timeout': 1}
             self.assertRaisesRegexp(_exceptions.PhantomJSTimeout,
