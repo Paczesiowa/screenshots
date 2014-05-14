@@ -75,10 +75,10 @@ Return status can be:
         result = _dom2img.dom2img(**args)
         os.write(sys.stdout.fileno(), result)
     except _exceptions.PhantomJSFailure as e:
-        os.write(sys.stderr.fileno(), str(e).encode('utf-8'))
+        os.write(sys.stderr.fileno(), str(e).encode('utf-8') + b'\n')
         sys.exit(2)
     except _exceptions.PhantomJSTimeout as e:
-        os.write(sys.stderr.fileno(), str(e).encode('utf-8'))
+        os.write(sys.stderr.fileno(), str(e).encode('utf-8') + b'\n')
         sys.exit(3)
 
 if __name__ == '__main__':

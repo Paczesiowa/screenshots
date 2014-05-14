@@ -93,7 +93,7 @@ class ScriptTest(utils.TestCase):
             self.assertEqual(stdout, b'')
             self.assertEqual(stderr,
                              b'PhantomJS failed with status -' +
-                             str(signal.SIGKILL).encode('ascii'))
+                             str(signal.SIGKILL).encode('ascii') + b'\n')
             self.assertEqual(proc.returncode, 2)
         finally:
             killer_should_stop[0] = True
@@ -101,7 +101,7 @@ class ScriptTest(utils.TestCase):
     def test_crash2(self):
         script = u'''
 #!/bin/sh
-echo ERRÖR 1>&2
+echo -n ERRÖR 1>&2
 exit 1
 '''.encode('utf-8')
         with utils.mock_phantom_js_binary(script):
@@ -122,7 +122,7 @@ exit 1
             result = dom2img_script(utils.freezing_html_doc(app.port),
                                     args.items())
             err_msg = b'PhantomJS process has been killed, ' + \
-                b'because it took longer than 1 seconds to finish'
+                b'because it took longer than 1 seconds to finish\n'
             self.assertEqual(result[1], err_msg)
             self.assertEqual(result[0], b'')
             self.assertEqual(result[2], 3)
