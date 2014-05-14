@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import sys
 
 
@@ -51,3 +53,6 @@ if sys.version_info < (3,):
             return unicode(val)
 else:
     make_text = str
+
+
+printf = print

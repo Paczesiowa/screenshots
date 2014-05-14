@@ -238,4 +238,4 @@ def dom2img_debug(content, width, height, prefix, top=0,
     command = map(quote, phantomjs_args) + \
         [u'--debug', u'<', quote(content_path)]
 
-    print u' '.join(command)
+    _compat.printf(u' '.join(command))

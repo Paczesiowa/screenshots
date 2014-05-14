@@ -18,7 +18,6 @@
 ** and add --debug flag to dom2img, so it dumps content to a tmp file and prints
    shell code to run render_file.phantom.js in debug mode on the same params
 ** add docstrings to _phantomjs_invocation and dom2img_debug
-** add a print wrapper so py3k test pass
 ** add tests for _phantomjs_invocation and dom2img_debug
 ** add --debug flag to script wrapper
 ** add a decorator to wrap prologs of dom2img an dom2img_debug
