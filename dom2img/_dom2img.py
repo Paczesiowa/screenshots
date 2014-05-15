@@ -33,6 +33,20 @@ def _clean_up_html(content, prefix):
 
 def _phantomjs_invocation(width, height, top, left,
                           prefix, cookie_string):
+    '''
+    Returns command line arguments for running PhantomJS.
+
+    width is an int with the width size of phantomjs viewport,
+      and width of the resulting image
+    height is an int with the height size of phantomjs viewport,
+      and height of the resulting image
+    top is an int with the pixel offset from the top/vertical scroll position
+    left is an int with the pixel offset from the left/
+      horizontal scroll position
+    prefix is an ascii-only unicode containing absolute URL
+    cookie_string is a byte-string containing cookies keys and values
+      using format key1=val1;key2=val2
+    '''
     cookie_domain = _cookies.get_cookie_domain(prefix)
     render_file_phantom_js_location = \
         os.path.realpath(pkg_resources.resource_filename(
@@ -212,6 +226,49 @@ def dom2img(content, width, height, prefix, top=0,
 
 def dom2img_debug(content, width, height, prefix, top=0,
                   left=0, scale=100, cookies=None):
+    '''
+    Returns command to run PhantomJS renderer in debug mode.
+
+    Parameters:
+    * content - html input (utf-8 encoded byte-string or unicode text)
+    * width - non-negative int with the width of virtual
+              render viewport (using pixels unit)
+    * height - non-negative int with the height of virtual
+               render viewport (using pixels unit).
+    * top - non-negative int with offset from the top of the page
+            where rendering should start (using pixels unit)
+    * left - non-negative int with offset from the left border of the page
+             where rendering should start (using pixels unit)
+    * scale - non-negative int with percentage number
+              that the screenshot will be scaled to (50 means half the
+              original size)
+    * timeout - non-negative int with number of seconds after which PhantomJS
+                will be killed and PhantomJSTimeout will be raised
+
+     height, width, top, left, timeout:
+       int or byte-string/unicode text containing
+       decimal representation of the integer number
+    * prefix - absolute URL that will be used
+               to resolve relative URLs in html (for images, css scripts)
+               and to derive cookie domain for cookies
+               can be byte-string or ascii-only unicode text.
+    * cookies - cookies key and values that will be sent with all
+                resource requests (images, css scripts)
+      * None
+      * byte-string (or ascii-only unicode text) using
+        key1=val1;key2=val2 format
+      * string dictionary with cookie keys and values.
+        Neither keys nor values should contain semicolons.
+        Keys cannot contain '=' character.
+        Keys and values can be byte-strings or ascii-only unicode texts.
+
+    Returns byte-string containing shell command, that runs
+    PhantomJS renderer script in a debug mode.
+
+    Raises:
+    * TypeError if arguments are not the right type
+    * ValueError if arguments have invalid values
+    '''
     content = _arg_utils.utf8_byte_string(content, u'content')
     height = _arg_utils.non_negative_int(height, u'height')
     width = _arg_utils.non_negative_int(width, u'width')
