@@ -1,7 +1,6 @@
 # coding=utf-8
 import os
 import signal
-import subprocess
 import threading
 
 from PIL import Image
@@ -292,10 +291,7 @@ class Dom2ImgWorkerTest(utils.TestCase):
                                              div_color=(0, 0, 0))
 
 
-class Dom2ImgTest(utils.TestCase):
-
-    FUN = _dom2img.dom2img
-    EXC = ValueError
+class Dom2ImgExceptionsMixin(object):
 
     def _make_kwargs(self, port):
         return {'content': utils.html_doc(port),
@@ -307,59 +303,14 @@ class Dom2ImgTest(utils.TestCase):
                 'prefix': u'http://example.com/',
                 'cookies': 'key=val'}
 
-    def _check_images(self, arg, val1, val2):
-        with utils.FlaskApp() as app:
-            self._check_results(self._make_kwargs(app.port), arg, val1, val2)
-
     def _check_exception(self, err_msg, arg, val, exc=None):
         with utils.FlaskApp() as app:
             kwargs = self._make_kwargs(app.port)
             kwargs[arg] = val
             if exc is not None:
                 kwargs['exc'] = exc
-            super(Dom2ImgTest, self)._check_exception(err_msg, **kwargs)
-
-    def test_content_gets_decoded_properly(self):
-        content = u'<html>fööbär</html>'
-        self._check_images('content', content, content.encode('utf-8'))
-
-    def test_width_gets_parsed_properly(self):
-        self._check_images('width', 100, b'100')
-        self._check_images('width', 100, u'100')
-
-    def test_height_gets_parsed_properly(self):
-        self._check_images('height', 200, b'200')
-        self._check_images('height', 200, u'200')
-
-    def test_top_gets_parsed_properly(self):
-        self._check_images('top', 30, b'30')
-        self._check_images('top', 30, u'30')
-
-    def test_left_gets_parsed_properly(self):
-        self._check_images('left', 40, b'40')
-        self._check_images('left', 40, u'40')
-
-    def test_scale_gets_parsed_properly(self):
-        self._check_images('scale', 50, b'50')
-        self._check_images('scale', 50, u'50')
-
-    def test_prefix_gets_parsed_properly(self):
-        with utils.FlaskApp() as app:
-            prefix1 = \
-                b'http://127.0.0.1:' + str(app.port).encode('utf-8') + b'/'
-            prefix2 = prefix1.decode('utf-8')
-            self._check_results(self._make_kwargs(app.port),
-                                'prefix', prefix1, prefix2)
-
-    def test_empty_cookies_get_serialized_properly(self):
-        self._check_images('cookies', b'', u'')
-        self._check_images('cookies', b'', None)
-        self._check_images('cookies', b'', {})
-
-    def test_non_empty_cookies_get_serialized_properly(self):
-        self._check_images('cookies', b'key=val', u'key=val')
-        self._check_images('cookies', {b'key': b'val'}, {u'key': u'val'})
-        self._check_images('cookies', {b'key': u'val'}, {u'key': b'val'})
+            super(Dom2ImgExceptionsMixin, self)._check_exception(
+                err_msg, **kwargs)
 
     def test_content_wrong_type(self):
         err_msg = u'content must be %s or %s, not []'
@@ -511,6 +462,58 @@ class Dom2ImgTest(utils.TestCase):
         self._check_exception(u"cookies keys/values cannot use ';' character",
                               'cookies', {u'foo': b'b;r'})
 
+
+class Dom2ImgTest(Dom2ImgExceptionsMixin, utils.TestCase):
+
+    FUN = _dom2img.dom2img
+    EXC = ValueError
+
+    def _check_images(self, arg, val1, val2):
+        with utils.FlaskApp() as app:
+            self._check_results(self._make_kwargs(app.port), arg, val1, val2)
+
+    def test_content_gets_decoded_properly(self):
+        content = u'<html>fööbär</html>'
+        self._check_images('content', content, content.encode('utf-8'))
+
+    def test_width_gets_parsed_properly(self):
+        self._check_images('width', 100, b'100')
+        self._check_images('width', 100, u'100')
+
+    def test_height_gets_parsed_properly(self):
+        self._check_images('height', 200, b'200')
+        self._check_images('height', 200, u'200')
+
+    def test_top_gets_parsed_properly(self):
+        self._check_images('top', 30, b'30')
+        self._check_images('top', 30, u'30')
+
+    def test_left_gets_parsed_properly(self):
+        self._check_images('left', 40, b'40')
+        self._check_images('left', 40, u'40')
+
+    def test_scale_gets_parsed_properly(self):
+        self._check_images('scale', 50, b'50')
+        self._check_images('scale', 50, u'50')
+
+    def test_prefix_gets_parsed_properly(self):
+        with utils.FlaskApp() as app:
+            prefix1 = \
+                b'http://127.0.0.1:' + str(app.port).encode('utf-8') + b'/'
+            prefix2 = prefix1.decode('utf-8')
+            self._check_results(self._make_kwargs(app.port),
+                                'prefix', prefix1, prefix2)
+
+    def test_empty_cookies_get_serialized_properly(self):
+        self._check_images('cookies', b'', u'')
+        self._check_images('cookies', b'', None)
+        self._check_images('cookies', b'', {})
+
+    def test_non_empty_cookies_get_serialized_properly(self):
+        self._check_images('cookies', b'key=val', u'key=val')
+        self._check_images('cookies', {b'key': b'val'}, {u'key': u'val'})
+        self._check_images('cookies', {b'key': u'val'}, {u'key': b'val'})
+
     def test_crashy_phantomjs(self):
         killer_should_stop = [False]
         threading.Thread(target=utils.killer,
@@ -560,3 +563,35 @@ exit 1
             self.assertRaisesRegexp(_exceptions.PhantomJSTimeout,
                                     u'', _dom2img.dom2img,
                                     **kwargs)
+
+
+class Dom2ImgDebugTest(Dom2ImgExceptionsMixin, utils.TestCase):
+
+    FUN = _dom2img.dom2img_debug
+    EXC = ValueError
+
+    def test(self):
+        result = _dom2img.dom2img_debug(content=b'<html></html>',
+                                        width=800,
+                                        height=600,
+                                        prefix=b'http://example.com/',
+                                        top=50,
+                                        left=25,
+                                        scale=75,
+                                        cookies=b'key1=val1;key2=val2')
+        self.assertTrue(isinstance(result, _compat.text))
+
+        content_path = result.split()[-1][1:-1]  # strip quotes from path
+        with open(content_path, 'r') as f:
+            content = f.read()
+
+        output = utils.check_output(result, shell=True)
+
+        os.remove(content_path)
+
+        self.assertTrue(b'Viewport size: 800x600' in output)
+        self.assertTrue(b'Scroll offsets (left:top): 25:50' in output)
+        self.assertTrue(b'Cookie domain: example.com' in output)
+        self.assertTrue(b'key1: val1' in output)
+        self.assertTrue(b'key2: val2' in output)
+        self.assertEqual(content, b'<html>\n</html>')

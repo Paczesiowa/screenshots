@@ -242,10 +242,9 @@ def dom2img_debug(content, width, height, prefix, top=0,
     * scale - non-negative int with percentage number
               that the screenshot will be scaled to (50 means half the
               original size)
-    * timeout - non-negative int with number of seconds after which PhantomJS
-                will be killed and PhantomJSTimeout will be raised
+    * timeout - unused
 
-     height, width, top, left, timeout:
+     height, width, top, left:
        int or byte-string/unicode text containing
        decimal representation of the integer number
     * prefix - absolute URL that will be used
@@ -262,7 +261,7 @@ def dom2img_debug(content, width, height, prefix, top=0,
         Keys cannot contain '=' character.
         Keys and values can be byte-strings or ascii-only unicode texts.
 
-    Returns byte-string containing shell command, that runs
+    Returns unicode text containing shell command, that runs
     PhantomJS renderer script in a debug mode.
 
     Raises:
@@ -295,4 +294,4 @@ def dom2img_debug(content, width, height, prefix, top=0,
     command = map(quote, phantomjs_args) + \
         [u'--debug', u'<', quote(content_path)]
 
-    _compat.printf(u' '.join(command))
+    return u' '.join(command)
