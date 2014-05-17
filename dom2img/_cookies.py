@@ -121,6 +121,20 @@ def get_cookie_domain(url):
 @_arg_utils._check_type(_compat.text, _compat.byte_string,
                         type(None), dict)
 def cookie_string(val, variable_name):
+    '''
+    Returns byte-string with cookies using key1=val1;key2=val2 format
+
+    val can be:
+      * None
+      * byte-string (or ascii-only unicode text) using
+        key1=val1;key2=val2 format
+      * string dictionary with cookie keys and values.
+        Neither keys nor values should contain semicolons.
+        Keys cannot contain '=' character.
+        Keys and values can be byte-strings or ascii-only unicode texts.
+
+    variable_name is a unicode string used for exception message (or None).
+    '''
     if val is None:
         return b''
     if isinstance(val, dict):
