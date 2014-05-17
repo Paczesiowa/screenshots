@@ -1,6 +1,7 @@
 # coding=utf-8
 import os
 import signal
+import subprocess
 import threading
 
 from PIL import Image
@@ -71,6 +72,34 @@ class CleanUpHTMLTest(utils.TestCase):
 '''
         self._check_result(content, utils.dirty_html_doc,
                            comparator=lambda c: BeautifulSoup(c).prettify())
+
+
+class PhantomjsInvocationTest(utils.TestCase):
+
+    def test(self):
+        fun = _dom2img._phantomjs_invocation
+        result = fun(width=800, height=600, top=50,
+                     left=50, prefix=u'http://example.com/',
+                     cookie_string=b'key1=val1;key2=val2')
+
+        self.assertEqual(len(result), 8)
+
+        phantomjs_path = result[0]
+        self.assertTrue(phantomjs_path.endswith('phantomjs'))
+        self.assertTrue(os.path.isabs(phantomjs_path))
+        self.assertEqual(os.path.normpath(phantomjs_path), phantomjs_path)
+        self.assertTrue(b'phantomjs' in utils.check_output(
+            [phantomjs_path, '--help']))
+
+        self.assertEqual(result[1],
+                         os.path.join(os.path.dirname(_dom2img.__file__),
+                                      'render_file.phantom.js'))
+        self.assertEqual(result[2], '800')
+        self.assertEqual(result[3], '600')
+        self.assertEqual(result[4], '50')
+        self.assertEqual(result[5], '50')
+        self.assertEqual(result[6], b'example.com')
+        self.assertEqual(result[7], b'key1=val1;key2=val2')
 
 
 class RenderTest(utils.TestCase):
