@@ -83,7 +83,7 @@ class PhantomjsInvocationTest(utils.TestCase):
 
         self.assertEqual(len(result), 8)
         for i in range(8):
-            self.assertTrue(isinstance(result[i], str), i)
+            self.assertTrue(isinstance(result[i], _compat.text), i)
 
         phantomjs_path = result[0]
         self.assertTrue(phantomjs_path.endswith('phantomjs'))

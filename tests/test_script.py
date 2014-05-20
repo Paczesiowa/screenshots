@@ -1,5 +1,6 @@
 # coding=utf-8
 import itertools
+import os
 import random
 import signal
 import threading
@@ -126,3 +127,25 @@ exit 1
             self.assertEqual(result[1], err_msg)
             self.assertEqual(result[0], b'')
             self.assertEqual(result[2], 3)
+
+    def test_debug(self):
+        args = list(self.ARGS) + [('debug', None)]
+        stdout, stderr, retcode = dom2img_script(b'<html></html>', args)
+        self.assertEqual(stderr, b'')
+        self.assertEqual(retcode, 0)
+
+        self.assertTrue(isinstance(stdout, bytes))
+
+        content_path = stdout.split()[-1]
+        with open(content_path, 'rb') as f:
+            content = f.read()
+
+        output = utils.check_output(stdout, shell=True)
+
+        os.remove(content_path)
+
+        self.assertTrue(b'Viewport size: 600x400' in output)
+        self.assertTrue(b'Scroll offsets (left:top): 50:50' in output)
+        self.assertTrue(b'Cookie domain: example.com' in output)
+        self.assertTrue(b'key: val' in output)
+        self.assertEqual(content, b'<html>\n</html>')

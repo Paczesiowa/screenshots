@@ -61,6 +61,9 @@ Return status can be:
                         default='',
                         help='semicolon-separated string containing ' +
                         'cookie elems using key=val format')
+    parser.add_argument('--debug', action='store_true',
+                        help='print a shell command, that runs PhantomJS ' +
+                        'renderer in a debug mode')
     parser.add_argument('-v', '-V', '--version', action='version',
                         version='%(prog)s ' + dom2img.__version__)
 
@@ -71,8 +74,12 @@ Return status can be:
         sys.exit(code)
     args['content'] = sys.stdin.read()
 
+    fun = _dom2img.dom2img_debug if args.pop('debug') else _dom2img.dom2img
+
     try:
-        result = _dom2img.dom2img(**args)
+        result = fun(**args)
+        if not isinstance(result, bytes):
+            result = result.encode(sys.stdout.encoding or 'utf-8')
         os.write(sys.stdout.fileno(), result)
     except _exceptions.PhantomJSFailure as e:
         os.write(sys.stderr.fileno(), str(e).encode('utf-8') + b'\n')

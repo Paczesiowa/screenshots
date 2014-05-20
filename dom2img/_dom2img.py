@@ -49,19 +49,25 @@ def _phantomjs_invocation(width, height, top, left,
     cookie_string is a byte-string containing cookies keys and values
       using format key1=val1;key2=val2
 
-    Result is a list of str objects (both python2 and py3k)
+    Result is a list of text objects.
     '''
     cookie_domain = _cookies.get_cookie_domain(prefix)
+
     render_file_phantom_js_location = \
         os.path.realpath(pkg_resources.resource_filename(
             __name__, 'render_file.phantom.js'))
     phantomjs_binary = spawn.find_executable('phantomjs')
-    if sys.version_info >= (3,):
-        cookie_domain = cookie_domain.decode('ascii')
-        cookie_string = cookie_string.decode('ascii')
+
+    if isinstance(render_file_phantom_js_location, bytes):
+        render_file_phantom_js_location = \
+            render_file_phantom_js_location.decode(sys.getfilesystemencoding())
+        phantomjs_binary = phantomjs_binary.decode(sys.getfilesystemencoding())
+
     return [phantomjs_binary, render_file_phantom_js_location,
-            str(width), str(height), str(top),
-            str(left), cookie_domain, cookie_string]
+            _compat.text(width), _compat.text(height),
+            _compat.text(top), _compat.text(left),
+            cookie_domain.decode('ascii'),
+            cookie_string.decode('ascii')]
 
 
 def _render(content, width, height, top, left, prefix,
@@ -231,8 +237,8 @@ def dom2img(content, width, height, prefix, top=0,
                     cookie_string=cookie_string, timeout=timeout)
 
 
-def dom2img_debug(content, width, height, prefix, top=0,
-                  left=0, scale=100, cookies=None):
+def dom2img_debug(content, width, height, prefix, timeout=30,
+                  top=0, left=0, scale=100, cookies=None):
     '''
     Returns command to run PhantomJS renderer in debug mode.
 
@@ -268,8 +274,8 @@ def dom2img_debug(content, width, height, prefix, top=0,
         Keys cannot contain '=' character.
         Keys and values can be byte-strings or ascii-only unicode texts.
 
-    Returns unicode text containing shell command, that runs
-    PhantomJS renderer script in a debug mode.
+    Returns text string containing shell command,
+    that runs PhantomJS renderer script in a debug mode.
 
     Raises:
     * TypeError if arguments are not the right type
