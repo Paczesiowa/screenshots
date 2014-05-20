@@ -82,6 +82,8 @@ class PhantomjsInvocationTest(utils.TestCase):
                      cookie_string=b'key1=val1;key2=val2')
 
         self.assertEqual(len(result), 8)
+        for i in range(8):
+            self.assertTrue(isinstance(result[i], str), i)
 
         phantomjs_path = result[0]
         self.assertTrue(phantomjs_path.endswith('phantomjs'))
@@ -97,8 +99,8 @@ class PhantomjsInvocationTest(utils.TestCase):
         self.assertEqual(result[3], '600')
         self.assertEqual(result[4], '50')
         self.assertEqual(result[5], '50')
-        self.assertEqual(result[6], b'example.com')
-        self.assertEqual(result[7], b'key1=val1;key2=val2')
+        self.assertEqual(result[6], 'example.com')
+        self.assertEqual(result[7], 'key1=val1;key2=val2')
 
 
 class RenderTest(utils.TestCase):
@@ -125,7 +127,7 @@ class RenderTest(utils.TestCase):
                                   top=0,
                                   left=0,
                                   prefix=u'',
-                                  cookie_string='',
+                                  cookie_string=b'',
                                   timeout=30)
         self._validate_render_pixels(output)
 
@@ -136,7 +138,7 @@ class RenderTest(utils.TestCase):
                                   top=50,
                                   left=50,
                                   prefix=u'http://127.0.0.1',
-                                  cookie_string='',
+                                  cookie_string=b'',
                                   timeout=30)
         self._validate_render_pixels(output, top=50, left=50)
 
@@ -149,7 +151,7 @@ class RenderTest(utils.TestCase):
                                       top=0,
                                       left=0,
                                       prefix=prefix,
-                                      cookie_string='key=val2',
+                                      cookie_string=b'key=val2',
                                       timeout=30)
             self._validate_render_pixels(output)
 
@@ -162,7 +164,7 @@ class RenderTest(utils.TestCase):
                                       top=0,
                                       left=0,
                                       prefix=prefix,
-                                      cookie_string='key=val',
+                                      cookie_string=b'key=val',
                                       timeout=30)
             self._validate_render_pixels(output, div_color=(0, 0, 0))
 
@@ -175,7 +177,7 @@ class RenderTest(utils.TestCase):
                                       top=0,
                                       left=0,
                                       prefix=prefix,
-                                      cookie_string='key=val',
+                                      cookie_string=b'key=val',
                                       timeout=30)
             self._validate_render_pixels(output)
 
@@ -581,8 +583,8 @@ class Dom2ImgDebugTest(Dom2ImgExceptionsMixin, utils.TestCase):
                                         cookies=b'key1=val1;key2=val2')
         self.assertTrue(isinstance(result, _compat.text))
 
-        content_path = result.split()[-1][1:-1]  # strip quotes from path
-        with open(content_path, 'r') as f:
+        content_path = result.split()[-1]
+        with open(content_path, 'rb') as f:
             content = f.read()
 
         output = utils.check_output(result, shell=True)

@@ -1,5 +1,7 @@
 import os
+import pipes
 import subprocess
+import sys
 import tempfile
 from distutils import spawn
 
@@ -46,12 +48,17 @@ def _phantomjs_invocation(width, height, top, left,
     prefix is an ascii-only unicode containing absolute URL
     cookie_string is a byte-string containing cookies keys and values
       using format key1=val1;key2=val2
+
+    Result is a list of str objects (both python2 and py3k)
     '''
     cookie_domain = _cookies.get_cookie_domain(prefix)
     render_file_phantom_js_location = \
         os.path.realpath(pkg_resources.resource_filename(
             __name__, 'render_file.phantom.js'))
     phantomjs_binary = spawn.find_executable('phantomjs')
+    if sys.version_info >= (3,):
+        cookie_domain = cookie_domain.decode('ascii')
+        cookie_string = cookie_string.decode('ascii')
     return [phantomjs_binary, render_file_phantom_js_location,
             str(width), str(height), str(top),
             str(left), cookie_domain, cookie_string]
@@ -284,14 +291,12 @@ def dom2img_debug(content, width, height, prefix, top=0,
     with open(content_path, 'wb') as f:
         f.write(_clean_up_html(content, prefix))
 
-    quote = lambda string: u'"' + string + u'"'
-
     phantomjs_args = \
         _phantomjs_invocation(width=width, height=height,
                               top=top, left=left, prefix=prefix,
                               cookie_string=cookie_string)
 
-    command = map(quote, phantomjs_args) + \
-        [u'--debug', u'<', quote(content_path)]
+    command = list(map(pipes.quote, phantomjs_args)) + \
+        [u'--debug', u'<', pipes.quote(content_path)]
 
     return u' '.join(command)
