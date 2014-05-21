@@ -3,6 +3,7 @@ Invalid argument value exception and validation utilities.
 '''
 from dom2img import _compat, _url_utils
 import functools
+import inspect
 
 
 def _concat_alternatives(alternatives):
@@ -71,6 +72,24 @@ def _prettify_value_errors(fun):
                                          _compat.make_text(val))
             e.args = (_compat.clean_exc_message(err_msg),)
             raise e
+    return wrapper
+
+
+def validate_and_unify(**arg_validators):
+    'Decorator applying type-value unifiers to function arguments'
+    def wrapper(fun):
+        @functools.wraps(fun)
+        def inner_wrapper(*args, **kwargs):
+            args_values = inspect.getcallargs(fun, *args, **kwargs)
+            for arg in args_values:
+                try:
+                    validator = arg_validators[arg]
+                except KeyError:
+                    pass
+                else:
+                    args_values[arg] = validator(args_values[arg], arg)
+            return fun(**args_values)
+        return inner_wrapper
     return wrapper
 
 

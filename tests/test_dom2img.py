@@ -266,33 +266,6 @@ class ResizeTest(utils.TestCase):
         self.assertEqual((300, 200), result_img.size)
 
 
-class Dom2ImgWorkerTest(utils.TestCase):
-
-    def test_complex(self):
-        # override _resize to use 'nearest' resize filter
-        # to make unit testing possible
-        old_resize = _dom2img._resize
-
-        def _new_resize(img_string, scale):
-            return old_resize(img_string, scale, Image.NEAREST)
-
-        with utils.MonkeyPatch(_dom2img, '_resize', _new_resize):
-            with utils.FlaskApp() as app:
-                port = app.port
-                prefix = utils.prefix_for_port(port)
-                output = _dom2img._dom2img(content=utils.html_doc(port),
-                                           width=600,
-                                           height=400,
-                                           top=50,
-                                           left=50,
-                                           scale=50,
-                                           prefix=prefix,
-                                           cookie_string=b'key=val',
-                                           timeout=30)
-                self._validate_render_pixels(output, left=50, top=50, scale=.5,
-                                             div_color=(0, 0, 0))
-
-
 class Dom2ImgExceptionsMixin(object):
 
     def _make_kwargs(self, port):
@@ -469,6 +442,30 @@ class Dom2ImgTest(Dom2ImgExceptionsMixin, utils.TestCase):
 
     FUN = _dom2img.dom2img
     EXC = ValueError
+
+    def test_complex(self):
+        # override _resize to use 'nearest' resize filter
+        # to make unit testing possible
+        old_resize = _dom2img._resize
+
+        def _new_resize(img_string, scale):
+            return old_resize(img_string, scale, Image.NEAREST)
+
+        with utils.MonkeyPatch(_dom2img, '_resize', _new_resize):
+            with utils.FlaskApp() as app:
+                port = app.port
+                prefix = utils.prefix_for_port(port)
+                output = _dom2img.dom2img(content=utils.html_doc(port),
+                                          width=600,
+                                          height=400,
+                                          top=50,
+                                          left=50,
+                                          scale=50,
+                                          prefix=prefix,
+                                          cookies=b'key=val',
+                                          timeout=30)
+                self._validate_render_pixels(output, left=50, top=50, scale=.5,
+                                             div_color=(0, 0, 0))
 
     def _check_images(self, arg, val1, val2):
         with utils.FlaskApp() as app:

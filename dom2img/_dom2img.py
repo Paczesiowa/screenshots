@@ -132,50 +132,18 @@ def _resize(img_string, scale, resize_filter=Image.ANTIALIAS):
         return img_string
 
 
-def _dom2img(content, width, height, top, left, scale, prefix,
-             cookie_string, timeout):
-    '''
-    Renders html using PhantomJS.
-
-    Parameters:
-    * content - utf-8 encoded byte-string containing html input
-    * width - non-negative int with the width of virtual render viewport
-              (using pixels unit)
-    * height - non-negative int with the height of virtual render viewport
-               (using pixels unit)
-    * top - non-negative int with offset from the top of the page,
-            that should be rendered (using pixels unit)
-    * left - non-negative int with offset from the left border of the page,
-             that should be rendered (using pixels unit)
-    * scale - non-negative int with percentage number,
-              that the screenshot will be scaled to (50 means half the
-              original size)
-    * prefix - ascii-only unicode containing absolute URL that will be used
-               to handle relative URLs in html (for images, css scripts)
-               and optionally for cookies
-    * cookie_string - byte-string containing cookies keys and values
-                      using format key1=val1;key2=val2
-    * timeout - non-negative int with number of seconds after which PhantomJS
-                will be killed and PhantomJSTimeout will be raised
-
-    Returns string containing png image with the screenshot.
-
-    Raises:
-    * PhantomJSFailure if PhantomJS process fails/crashes.
-    * PhantomJSTimeout if PhantomJS takes more than timeout seconds to finish
-    '''
-    cleaned_up_content = _clean_up_html(content, prefix)
-    img_string = _render(content=cleaned_up_content,
-                         width=width,
-                         height=height,
-                         top=top,
-                         left=left,
-                         prefix=prefix,
-                         cookie_string=cookie_string,
-                         timeout=timeout)
-    return _resize(img_string, scale)
+_dom2img_args_validator = \
+    _arg_utils.validate_and_unify(content=_arg_utils.utf8_byte_string,
+                                  height=_arg_utils.non_negative_int,
+                                  width=_arg_utils.non_negative_int,
+                                  top=_arg_utils.non_negative_int,
+                                  left=_arg_utils.non_negative_int,
+                                  scale=_arg_utils.non_negative_int,
+                                  timeout=_arg_utils.non_negative_int,
+                                  prefix=_arg_utils.absolute_url)
 
 
+@_dom2img_args_validator
 def dom2img(content, width, height, prefix, top=0,
             left=0, scale=100, cookies=None, timeout=30):
     '''
@@ -222,21 +190,15 @@ def dom2img(content, width, height, prefix, top=0,
     * PhantomJSFailure if PhantomJS process fails/crashes.
     * PhantomJSTimeout if PhantomJS takes more than timeout seconds to finish
     '''
-    content = _arg_utils.utf8_byte_string(content, u'content')
-    height = _arg_utils.non_negative_int(height, u'height')
-    width = _arg_utils.non_negative_int(width, u'width')
-    top = _arg_utils.non_negative_int(top, u'top')
-    left = _arg_utils.non_negative_int(left, u'left')
-    scale = _arg_utils.non_negative_int(scale, u'scale')
-    timeout = _arg_utils.non_negative_int(timeout, u'timeout')
-    prefix = _arg_utils.absolute_url(prefix, u'prefix')
     cookie_string = _cookies.cookie_string(cookies, u'cookies')
+    cleaned_up_content = _clean_up_html(content, prefix)
+    img_string = _render(content=cleaned_up_content, width=width,
+                         height=height, top=top, left=left, prefix=prefix,
+                         cookie_string=cookie_string, timeout=timeout)
+    return _resize(img_string, scale)
 
-    return _dom2img(content=content, width=width, height=height,
-                    prefix=prefix, top=top, left=left, scale=scale,
-                    cookie_string=cookie_string, timeout=timeout)
 
-
+@_dom2img_args_validator
 def dom2img_debug(content, width, height, prefix, timeout=30,
                   top=0, left=0, scale=100, cookies=None):
     '''
@@ -255,7 +217,7 @@ def dom2img_debug(content, width, height, prefix, timeout=30,
     * scale - non-negative int with percentage number
               that the screenshot will be scaled to (50 means half the
               original size)
-    * timeout - unused
+    * timeout - non-negative int (unused)
 
      height, width, top, left:
        int or byte-string/unicode text containing
@@ -281,13 +243,6 @@ def dom2img_debug(content, width, height, prefix, timeout=30,
     * TypeError if arguments are not the right type
     * ValueError if arguments have invalid values
     '''
-    content = _arg_utils.utf8_byte_string(content, u'content')
-    height = _arg_utils.non_negative_int(height, u'height')
-    width = _arg_utils.non_negative_int(width, u'width')
-    top = _arg_utils.non_negative_int(top, u'top')
-    left = _arg_utils.non_negative_int(left, u'left')
-    scale = _arg_utils.non_negative_int(scale, u'scale')
-    prefix = _arg_utils.absolute_url(prefix, u'prefix')
     cookie_string = _cookies.cookie_string(cookies, u'cookies')
 
     (fd, content_path) = tempfile.mkstemp(suffix='.html',

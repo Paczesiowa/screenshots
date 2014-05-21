@@ -8,6 +8,7 @@
 ** przejrzec i upiekszyc kod w libce
 ** sprawdzic co sie w kazdej funkcji moze zjebac
 ** sprawdzic czy w ogole istnieje phantomjs w PATH
+** https://github.com/dobarkod/typedecorator
 ** sprawdzic czy kazda prywatna funkcja sie zaczyna od _ i vice versa
 ** kazdy plik pep8+pyflakes+rope-organize-imports+pylint
 ** zobaczyc czy setup.py wszystko moze odpalic poprawnie na golym pythonie
@@ -18,7 +19,8 @@
 * add page debugging support to render_file.phantom.js
 ** and add --debug flag to dom2img, so it dumps content to a tmp file and prints
    shell code to run render_file.phantom.js in debug mode on the same params
-** add a decorator to wrap prologs of dom2img an dom2img_debug
+** copy inspect.getcallargs from python sources to make it work in 2.6
+** add tests for validate_and_unify
 * write readme
 * clean backend
 ** dodac backend do exampli w setupy.py
