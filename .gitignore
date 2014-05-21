@@ -3,3 +3,7 @@
 dist
 virtualenv*
 dom2img.egg-info
+.noseids
+aliases.sh
+bare_python_tests
+build
