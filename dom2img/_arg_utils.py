@@ -1,9 +1,9 @@
 '''
 Invalid argument value exception and validation utilities.
 '''
-from dom2img import _compat, _url_utils
 import functools
-import inspect
+
+from dom2img import _compat, _url_utils, _inspect
 
 
 def _concat_alternatives(alternatives):
@@ -80,7 +80,7 @@ def validate_and_unify(**arg_validators):
     def wrapper(fun):
         @functools.wraps(fun)
         def inner_wrapper(*args, **kwargs):
-            args_values = inspect.getcallargs(fun, *args, **kwargs)
+            args_values = _inspect.getcallargs(fun, *args, **kwargs)
             for arg in args_values:
                 try:
                     validator = arg_validators[arg]
