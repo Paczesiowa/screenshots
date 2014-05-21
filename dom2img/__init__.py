@@ -1,3 +1,4 @@
+# coding=utf-8
 import pkg_resources
 
 from dom2img import _dom2img, _exceptions
@@ -7,6 +8,9 @@ try:
     __version__ = pkg_resources.require('dom2img')[0].version
 except pkg_resources.DistributionNotFound:
     __version__ = 'dev'
+
+
+__author__ = 'Bartek Ćwikłowski <paczesiowa@gmail.com>'
 
 
 dom2img = _dom2img.dom2img
