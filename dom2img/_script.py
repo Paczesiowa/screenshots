@@ -74,13 +74,13 @@ Return status can be:
         sys.exit(code)
     args['content'] = sys.stdin.read()
 
-    fun = _dom2img.dom2img_debug if args.pop('debug') else _dom2img.dom2img
-
     try:
-        result = fun(**args)
-        if not isinstance(result, bytes):
-            result = result.encode(sys.stdout.encoding or 'utf-8')
-        os.write(sys.stdout.fileno(), result)
+        if args.pop('debug'):
+            result = _dom2img.dom2img_debug(**args)
+            output = result.encode(sys.stdout.encoding or 'utf-8') + b'\n'
+        else:
+            output = _dom2img.dom2img(**args)
+        os.write(sys.stdout.fileno(), output)
     except _exceptions.PhantomJSFailure as e:
         os.write(sys.stderr.fileno(), str(e).encode('utf-8') + b'\n')
         sys.exit(2)
