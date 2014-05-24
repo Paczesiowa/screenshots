@@ -67,14 +67,14 @@ if (debug) {
     }
   }
   phantom.exit();
+} else {
+  page.viewportSize = {width: width, height: height};
+  page.clipRect = {top: top, left: left, width: width, height: height};
+
+  page.content = content;
+
+  page.onLoadFinished = function() {
+    page.render('/dev/stdout');
+    phantom.exit();
+  };
 }
-
-page.viewportSize = {width: width, height: height};
-page.clipRect = {top: top, left: left, width: width, height: height};
-
-page.content = content;
-
-page.onLoadFinished = function() {
-  page.render('/dev/stdout');
-  phantom.exit();
-};
