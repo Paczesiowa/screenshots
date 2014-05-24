@@ -32,7 +32,7 @@ var cookie_string = system.args[6];
 var debug = system.args[5] === '--debug' || system.args[7] === '--debug';
 
 var cookies = null;
-if (cookie_string !== undefined) {
+if (cookie_string !== undefined && cookie_string !== '') {
   cookies = {};
   var cookie_elems = cookie_string.split(';');
   for (var i = 0; i < cookie_elems.length; i++) {
