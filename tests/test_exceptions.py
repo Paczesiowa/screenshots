@@ -24,3 +24,11 @@ class PhantomJSTimeoutTest(utils.TestCase):
         err_msg = u'PhantomJS process has been killed, ' + \
             u'because it took longer than 30 seconds to finish'
         self.assertEqual(str(exc_inst), err_msg)
+
+
+class PhantomJSNotInPathTest(utils.TestCase):
+
+    def test_string(self):
+        exc_inst = _exceptions.PhantomJSNotInPath()
+        err_msg = u"Couldn't find phantomjs binary in $PATH"
+        self.assertEqual(str(exc_inst), err_msg)

@@ -7,7 +7,6 @@
 ** generowanie dokumentacji - format docstringow
 ** przejrzec i upiekszyc kod w libce
 ** sprawdzic co sie w kazdej funkcji moze zjebac
-** sprawdzic czy w ogole istnieje phantomjs w PATH
 ** https://github.com/dobarkod/typedecorator
 ** sprawdzic czy kazda prywatna funkcja sie zaczyna od _ i vice versa
 ** kazdy plik pep8+pyflakes+rope-organize-imports+pylint

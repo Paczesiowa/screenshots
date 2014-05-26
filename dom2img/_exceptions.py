@@ -24,3 +24,9 @@ class PhantomJSTimeout(Dom2ImgError):
         return u'PhantomJS process has been killed, ' + \
             u'because it took longer than ' + str(self.timeout) + \
             u' seconds to finish'
+
+
+class PhantomJSNotInPath(Dom2ImgError):
+
+    def __str__(self):
+        return u"Couldn't find phantomjs binary in $PATH"

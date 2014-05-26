@@ -50,6 +50,8 @@ def _phantomjs_invocation(width, height, top, left,
       using format key1=val1;key2=val2
 
     Result is a list of text objects.
+
+    Raises PhantomJSNotInPath if there's no phantomjs in $PATH
     '''
     cookie_domain = _cookies.get_cookie_domain(prefix)
 
@@ -57,6 +59,8 @@ def _phantomjs_invocation(width, height, top, left,
         os.path.realpath(pkg_resources.resource_filename(
             __name__, 'render_file.phantom.js'))
     phantomjs_binary = spawn.find_executable('phantomjs')
+    if phantomjs_binary is None:
+        raise _exceptions.PhantomJSNotInPath()
 
     if isinstance(render_file_phantom_js_location, bytes):
         render_file_phantom_js_location = \
@@ -91,6 +95,7 @@ def _render(content, width, height, top, left, prefix,
     Raises:
     * PhantomJSFailure if PhantomJS process fails/crashes.
     * PhantomJSTimeout if PhantomJS takes more than timeout seconds to finish
+    * PhantomJSNotInPath if there's no phantomjs in $PATH
     '''
     phantomjs_args = _phantomjs_invocation(width=width, height=height,
                                            top=top, left=left, prefix=prefix,
@@ -189,6 +194,7 @@ def dom2img(content, width, height, prefix, top=0,
     * ValueError if arguments have invalid values
     * PhantomJSFailure if PhantomJS process fails/crashes.
     * PhantomJSTimeout if PhantomJS takes more than timeout seconds to finish
+    * PhantomJSNotInPath if there's no phantomjs in $PATH
     '''
     cookie_string = _cookies.cookie_string(cookies, u'cookies')
     cleaned_up_content = _clean_up_html(content, prefix)
@@ -242,6 +248,7 @@ def dom2img_debug(content, width, height, prefix, timeout=30,
     Raises:
     * TypeError if arguments are not the right type
     * ValueError if arguments have invalid values
+    * PhantomJSNotInPath if there's no phantomjs in $PATH
     '''
     cookie_string = _cookies.cookie_string(cookies, u'cookies')
 

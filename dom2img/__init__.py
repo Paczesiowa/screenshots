@@ -18,5 +18,6 @@ dom2img_debug = _dom2img.dom2img_debug
 Dom2ImgError = _exceptions.Dom2ImgError
 PhantomJSFailure = _exceptions.PhantomJSFailure
 PhantomJSTimeout = _exceptions.PhantomJSTimeout
+PhantomJSNotInPath = _exceptions.PhantomJSNotInPath
 __all__ = ['dom2img', 'dom2img_debug', 'Dom2ImgError',
-           'PhantomJSFailure', 'PhantomJSTimeout']
+           'PhantomJSFailure', 'PhantomJSTimeout', 'PhantomJSNotInPath']

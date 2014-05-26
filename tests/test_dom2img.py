@@ -281,7 +281,8 @@ class Dom2ImgExceptionsMixin(object):
     def _check_exception(self, err_msg, arg, val, exc=None):
         with utils.FlaskApp() as app:
             kwargs = self._make_kwargs(app.port)
-            kwargs[arg] = val
+            if arg is not None:
+                kwargs[arg] = val
             if exc is not None:
                 kwargs['exc'] = exc
             super(Dom2ImgExceptionsMixin, self)._check_exception(
@@ -436,6 +437,15 @@ class Dom2ImgExceptionsMixin(object):
                               'cookies', {u'f;o': b'bar'})
         self._check_exception(u"cookies keys/values cannot use ';' character",
                               'cookies', {u'foo': b'b;r'})
+
+    def test_phantomjs_not_in_path(self):
+        old_path = os.environ['PATH']
+        os.environ['PATH'] = ''
+        try:
+            self._check_exception(u"Couldn't find phantomjs binary in $PATH",
+                                  None, None, _exceptions.PhantomJSNotInPath)
+        finally:
+            os.environ['PATH'] = old_path
 
 
 class Dom2ImgTest(Dom2ImgExceptionsMixin, utils.TestCase):
