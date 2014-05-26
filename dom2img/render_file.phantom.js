@@ -50,27 +50,41 @@ for (var key in cookies) {
 }
 
 var content = system.stdin.read();
+page.viewportSize = {width: width, height: height};
+page.clipRect = {top: top, left: left, width: width, height: height};
 
 if (debug) {
-  console.log('dom2img PhantomJS debug mode enabled. Please follow the instructions');
-  console.log('');
-  console.log('Viewport size: ' + width + 'x' + height);
-  console.log('Scroll offsets (left:top): ' + left + ':' + top);
-  if (cookies !== null) {
-    console.log('Cookie domain: ' + cookie_domain);
-    console.log('Cookies:');
-    for (var cookie_key in cookies) {
-      if (!cookies.hasOwnProperty(cookie_key)) {
-        break;
+  var start = new Date();
+  debugger;
+  var stop = new Date();
+  if (stop - start < 1000) {
+    // execution didn't stop at debugger stmt - first (auto) run
+    console.log('\n\n\n');
+    console.log('dom2img PhantomJS debug mode enabled.\n');
+    console.log('Viewport size: ' + width + 'x' + height);
+    console.log('Scroll offsets (left:top): ' + left + ':' + top);
+    if (cookies !== null) {
+      console.log('Cookie domain: ' + cookie_domain);
+      console.log('Cookies:');
+      for (var cookie_key in cookies) {
+        if (!cookies.hasOwnProperty(cookie_key)) {
+          break;
+        }
+        console.log('  ' + cookie_key + ': ' + cookies[cookie_key]);
       }
-      console.log('  ' + cookie_key + ': ' + cookies[cookie_key]);
     }
+    console.log('\nPlease follow the instructions:');
+    console.log('1. Open (in a Webkit-based browser) http://127.0.0.1:9000/webkit/inspector/inspector.html?page=1');
+    console.log('2. Go to console tab');
+    console.log('3. type "__run()" (without quotes) and hit enter');
+    console.log('4. Open (in a Webkit-based browser) in another browser tab http://127.0.0.1:9000/webkit/inspector/inspector.html?page=3');
+    console.log('5. Go back to the first browser tab and unpause script execution');
+    console.log('6. In the second browser tab you can debug your HTML');
+  } else {
+    // execution paused at the debugger statement - __run() was called in the browser
+    page.content = content;
   }
-  phantom.exit();
 } else {
-  page.viewportSize = {width: width, height: height};
-  page.clipRect = {top: top, left: left, width: width, height: height};
-
   page.content = content;
 
   page.onLoadFinished = function() {
