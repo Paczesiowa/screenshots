@@ -29,7 +29,7 @@ class CleanUpHTMLTest(utils.TestCase):
     def test_result_is_utf8_byte_string(self):
         result = _dom2img._clean_up_html(utils.dirty_html_doc,
                                          u'http://example.com')
-        self.assertTrue(isinstance(result, _compat.byte_string))
+        self.assertTrue(isinstance(result, bytes))
         result.decode('utf-8')
 
     def test_complex(self):
@@ -290,14 +290,12 @@ class Dom2ImgExceptionsMixin(object):
 
     def test_content_wrong_type(self):
         err_msg = u'content must be %s or %s, not []'
-        err_msg = err_msg % (_compat.text.__name__,
-                             _compat.byte_string.__name__)
+        err_msg = err_msg % (_compat.text.__name__, bytes.__name__)
         self._check_exception(err_msg, 'content', [], exc=TypeError)
 
     def test_width_wrong_type(self):
         err_msg = u'width must be %s, %s or int, not None'
-        err_msg = err_msg % (_compat.text.__name__,
-                             _compat.byte_string.__name__)
+        err_msg = err_msg % (_compat.text.__name__, bytes.__name__)
         self._check_exception(err_msg, 'width', None, exc=TypeError)
 
     def test_width_non_ascii_unicode(self):
@@ -314,8 +312,7 @@ class Dom2ImgExceptionsMixin(object):
 
     def test_height_wrong_type(self):
         err_msg = u'height must be %s, %s or int, not None'
-        err_msg = err_msg % (_compat.text.__name__,
-                             _compat.byte_string.__name__)
+        err_msg = err_msg % (_compat.text.__name__, bytes.__name__)
         self._check_exception(err_msg, 'height', None, exc=TypeError)
 
     def test_height_non_ascii_unicode(self):
@@ -332,8 +329,7 @@ class Dom2ImgExceptionsMixin(object):
 
     def test_top_wrong_type(self):
         err_msg = u'top must be %s, %s or int, not None'
-        err_msg = err_msg % (_compat.text.__name__,
-                             _compat.byte_string.__name__)
+        err_msg = err_msg % (_compat.text.__name__, bytes.__name__)
         self._check_exception(err_msg, 'top', None, exc=TypeError)
 
     def test_top_non_ascii_unicode(self):
@@ -350,8 +346,7 @@ class Dom2ImgExceptionsMixin(object):
 
     def test_left_wrong_type(self):
         err_msg = u'left must be %s, %s or int, not None'
-        err_msg = err_msg % (_compat.text.__name__,
-                             _compat.byte_string.__name__)
+        err_msg = err_msg % (_compat.text.__name__, bytes.__name__)
         self._check_exception(err_msg, 'left', None, exc=TypeError)
 
     def test_left_non_ascii_unicode(self):
@@ -368,8 +363,7 @@ class Dom2ImgExceptionsMixin(object):
 
     def test_scale_wrong_type(self):
         err_msg = u'scale must be %s, %s or int, not None'
-        err_msg = err_msg % (_compat.text.__name__,
-                             _compat.byte_string.__name__)
+        err_msg = err_msg % (_compat.text.__name__, bytes.__name__)
         self._check_exception(err_msg, 'scale', None, exc=TypeError)
 
     def test_scale_non_ascii_unicode(self):
@@ -391,8 +385,7 @@ class Dom2ImgExceptionsMixin(object):
 
     def test_prefix_wrong_type(self):
         err_msg = u'prefix must be %s or %s, not None'
-        err_msg = err_msg % (_compat.text.__name__,
-                             _compat.byte_string.__name__)
+        err_msg = err_msg % (_compat.text.__name__, bytes.__name__)
         self._check_exception(err_msg, 'prefix', None, exc=TypeError)
 
     def test_prefix_non_absolute_url(self):
@@ -408,10 +401,8 @@ class Dom2ImgExceptionsMixin(object):
 
     def test_cookies_wrong_type(self):
         err_msg = u'cookies must be %s, %s, %s or %s, not 7'
-        err_msg = err_msg % (_compat.text.__name__,
-                             _compat.byte_string.__name__,
-                             type(None).__name__,
-                             dict.__name__)
+        err_msg = err_msg % (_compat.text.__name__, bytes.__name__,
+                             type(None).__name__, dict.__name__)
         self._check_exception(err_msg, 'cookies', 7, exc=TypeError)
 
     def test_cookies_non_ascii_unicode(self):

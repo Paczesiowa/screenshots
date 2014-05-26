@@ -21,10 +21,8 @@ urljoin = urllib.urljoin
 
 if sys.version_info < (3,):
     text = unicode
-    byte_string = str
 else:
     text = str
-    byte_string = bytes
 
 if sys.version_info < (3,):
     # exceptions in python2, cannot contain unicode chars

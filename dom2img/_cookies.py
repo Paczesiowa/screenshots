@@ -37,7 +37,7 @@ def parse_cookie_string(cookie_string):
         except UnicodeEncodeError:
             err_msg = u'unicode cookie_string must be ascii-only'
             raise ValueError(err_msg)
-    if not isinstance(cookie_string, _compat.byte_string):
+    if not isinstance(cookie_string, bytes):
         err_msg = u'cookie_string must be an ascii-only ' +\
             u'unicode text or a byte-string'
         raise TypeError(err_msg)
@@ -75,7 +75,7 @@ def validate_cookies(cookies):
         raise TypeError(u'cookies must be a dict')
 
     def validate_cookie_string(s):
-        if not isinstance(s, _compat.byte_string) and \
+        if not isinstance(s, bytes) and \
                 not isinstance(s, _compat.text):
             raise TypeError(u'cookies key/values must be strings')
         if isinstance(s, _compat.text):
@@ -118,8 +118,7 @@ def get_cookie_domain(url):
 
 
 @_arg_utils._fix_variable_name
-@_arg_utils._check_type(_compat.text, _compat.byte_string,
-                        type(None), dict)
+@_arg_utils._check_type(_compat.text, bytes, type(None), dict)
 def cookie_string(val, variable_name):
     '''
     Returns byte-string with cookies using key1=val1;key2=val2 format

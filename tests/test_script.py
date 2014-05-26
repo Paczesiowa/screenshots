@@ -5,14 +5,13 @@ import random
 import signal
 import threading
 
-import dom2img
 import tests.utils as utils
 
 
 def serialize_args_for_dom2img_script(kwargs_list):
     args = ['python', 'dom2img/_script.py']
     for key, val in kwargs_list:
-        if val and isinstance(val, dom2img._compat.byte_string):
+        if val and isinstance(val, bytes):
             val = val.decode('ascii')
         args.append('--' + key + ('=' + str(val) if val else ''))
     return args

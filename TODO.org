@@ -10,14 +10,13 @@
 ** https://github.com/dobarkod/typedecorator
 ** sprawdzic czy kazda prywatna funkcja sie zaczyna od _ i vice versa
 ** kazdy plik pep8+pyflakes+rope-organize-imports+pylint
+** remove tests for all private functions, that can be substituted by tests on public functions
+** something better than functool.wraps
+** decorator od typow moglby dodawac stringa do docstringa
 ** zobaczyc czy setup.py wszystko moze odpalic poprawnie na golym pythonie
 *** test
 *** install
 *** run backend example
-** use bytes instead of compat.byte_string
-** remove tests for all private functions, that can be substituted by tests on public functions
-** something better than functool.wraps
-** decorator od typow moglby dodawac stringa do docstringa
 * write readme
 * clean backend
 ** dodac backend do exampli w setupy.py

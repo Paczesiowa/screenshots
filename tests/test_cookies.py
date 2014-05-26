@@ -206,10 +206,8 @@ class CookieStringTest(utils.TestCase):
 
     def test_wrong_type(self):
         err_msg = u'cookies must be %s, %s, %s or %s, not 7'
-        err_msg = err_msg % (_compat.text.__name__,
-                             _compat.byte_string.__name__,
-                             type(None).__name__,
-                             dict.__name__)
+        err_msg = err_msg % (_compat.text.__name__, bytes.__name__,
+                             type(None).__name__, dict.__name__)
         self._check_exception(err_msg, 7, exc=TypeError)
 
     def test_non_ascii_unicode(self):

@@ -94,7 +94,7 @@ def validate_and_unify(**arg_validators):
 
 
 @_fix_variable_name
-@_check_type(_compat.text, _compat.byte_string, int)
+@_check_type(_compat.text, bytes, int)
 @_prettify_value_errors
 def non_negative_int(val, variable_name):
     '''
@@ -126,7 +126,7 @@ non_negative_int.__name__ = 'non-negative integer'
 
 
 @_fix_variable_name
-@_check_type(_compat.text, _compat.byte_string)
+@_check_type(_compat.text, bytes)
 @_prettify_value_errors
 def absolute_url(val, variable_name):
     '''
@@ -144,7 +144,7 @@ def absolute_url(val, variable_name):
     * ValueError if val is not an absolute URL
     '''
     try:
-        if isinstance(val, _compat.byte_string):
+        if isinstance(val, bytes):
             val = val.decode('ascii')
         else:
             val.encode('ascii')  # check if it would work
@@ -161,7 +161,7 @@ absolute_url.__name__ = 'absolute URL'
 
 
 @_fix_variable_name
-@_check_type(_compat.text, _compat.byte_string)
+@_check_type(_compat.text, bytes)
 def utf8_byte_string(val, variable_name):
     '''
     Returns utf-8 encoded byte-string.

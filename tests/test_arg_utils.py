@@ -150,15 +150,13 @@ class NonNegativeIntTest(utils.TestCase):
 
     def test_wrong_type(self):
         err_msg = u'x must be %s, %s or int, not []'
-        err_msg = err_msg % (_compat.text.__name__,
-                             _compat.byte_string.__name__)
+        err_msg = err_msg % (_compat.text.__name__, bytes.__name__)
         self._check_exception(err_msg, [], u'x', exc=TypeError)
 
     def test_wrong_type_without_variable_name(self):
         err_msg = u'non_negative_int() argument must be %s, ' + \
             u'%s or int, not {}'
-        err_msg = err_msg % (_compat.text.__name__,
-                             _compat.byte_string.__name__)
+        err_msg = err_msg % (_compat.text.__name__, bytes.__name__)
         self._check_exception(err_msg, {}, exc=TypeError)
 
     def test_non_ascii_unicode_input(self):
@@ -221,8 +219,7 @@ class AbsoluteURLTest(utils.TestCase):
     def test_wrong_type(self):
         err_msg = u'absolute_url() argument must be ' + \
             u'%s or %s, not None'
-        err_msg = err_msg % (_compat.text.__name__,
-                             _compat.byte_string.__name__)
+        err_msg = err_msg % (_compat.text.__name__, bytes.__name__)
         self._check_exception(err_msg, None, exc=TypeError)
 
     def test_non_ascii_unicode(self):
@@ -276,15 +273,13 @@ class UTF8ByteStringTest(utils.TestCase):
 
     def test_wrong_type(self):
         err_msg = u'x must be %s or %s, not []'
-        err_msg = err_msg % (_compat.text.__name__,
-                             _compat.byte_string.__name__)
+        err_msg = err_msg % (_compat.text.__name__, bytes.__name__)
         self._check_exception(err_msg, [], u'x', exc=TypeError)
 
     def test_wrong_type_without_variable_name(self):
         err_msg = u'utf8_byte_string() argument must be %s or ' + \
             u'%s, not {}'
-        err_msg = err_msg % (_compat.text.__name__,
-                             _compat.byte_string.__name__)
+        err_msg = err_msg % (_compat.text.__name__, bytes.__name__)
         self._check_exception(err_msg, {}, exc=TypeError)
 
     def test_byte_string_not_utf8(self):
