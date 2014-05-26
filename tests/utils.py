@@ -249,6 +249,23 @@ def check_output(*popenargs, **kwargs):
     return output
 
 
+def read_process_until_line(cmd, line):
+    '''
+    Run shell command, read all the output lines until line encountered.
+    Kill it.
+    '''
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True,
+                               preexec_fn=os.setpgrp)
+    result = b''
+    while True:
+        output_line = process.stdout.readline()
+        result += output_line
+        if output_line == line:
+            break
+    os.killpg(process.pid, signal.SIGTERM)
+    return result
+
+
 def killer(parent_pid, killer_should_stop):
     output = b''
     while not killer_should_stop[0] and b'phantomjs ' not in output:

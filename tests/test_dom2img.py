@@ -584,7 +584,8 @@ class Dom2ImgDebugTest(Dom2ImgExceptionsMixin, utils.TestCase):
         with open(content_path, 'rb') as f:
             content = f.read()
 
-        output = utils.check_output(result, shell=True)
+        output = utils.read_process_until_line(
+            result, b'Please follow the instructions:\n')
 
         os.remove(content_path)
 

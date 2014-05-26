@@ -140,7 +140,8 @@ exit 1
         with open(content_path, 'rb') as f:
             content = f.read()
 
-        output = utils.check_output(stdout, shell=True)
+        output = utils.read_process_until_line(
+            stdout, b'Please follow the instructions:\n')
 
         os.remove(content_path)
 
