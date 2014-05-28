@@ -3,7 +3,6 @@
 *** that we throw explicitly
 *** that could be thrown implicitly
 ** eggsecutable
-** coverage testow
 ** generowanie dokumentacji - format docstringow
 ** przejrzec i upiekszyc kod w libce
 ** sprawdzic co sie w kazdej funkcji moze zjebac
