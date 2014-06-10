@@ -8,7 +8,14 @@ from dom2img import _compat, _url_utils, _inspect
 
 def _concat_alternatives(alternatives):
     '''
-    Return sentence with a list of alternatives
+    Return sentence with a list of alternatives.
+
+    Args:
+        alternatives: non-empty list of unicode texts.
+
+    Returns:
+        Unicode text with english sentence using the following format:
+        "foo, bar or baz".
 
     >>> _concat_alternatives([u'foo']) == u'foo'
     True
@@ -28,8 +35,17 @@ def _concat_alternatives(alternatives):
 
 
 def _check_type(*possible_types):
-    '''Type-value unifier decorator, that checks if value
-    is instance of one of the specified types
+    '''
+    Decorator factory for checking class of type-value unifier's value.
+
+    Args:
+        *possible_types: non-empty tuple of types, type-value unifier's value
+            will be checked if it is an instance of these types.
+
+    Returns:
+        Function, that decorates type-value unifier, that works the same way,
+        but it will throw a TypeError for values that aren't instance
+        of one of possible_types.
     '''
     def wrapper(fun):
         @functools.wraps(fun)
@@ -51,7 +67,17 @@ def _check_type(*possible_types):
 
 
 def _fix_variable_name(fun):
-    'Type-value unifier decorator, that sets default variable_name'
+    '''
+    Decorator for setting default type-value unifier's variable name.
+
+    Args:
+        fun: type-value unifier to decorate.
+
+    Returns:
+        Function, type-value unifier that works the same way as fun, but makes
+        the variable_name argument optional, by providing default value for it,
+        e.g. "foo() argument".
+    '''
     @functools.wraps(fun)
     def wrapper(val, variable_name=None):
         if variable_name is None:
@@ -61,7 +87,17 @@ def _fix_variable_name(fun):
 
 
 def _prettify_value_errors(fun):
-    'Type-value unifier decorator, that value adds info to thrown ValueErrors'
+    '''
+    Type-value unifier decorator, that adds value info to thrown ValueErrors.
+
+    Args:
+        fun: Type-value unifier to decorate.
+
+    Returns:
+        Function, type-value unifier, that works the same way as fun, but adds
+        information about value to all ValueError exceptions thrown during
+        validation process.
+    '''
     @functools.wraps(fun)
     def wrapper(val, variable_name):
         try:
@@ -76,7 +112,30 @@ def _prettify_value_errors(fun):
 
 
 def validate_and_unify(**arg_validators):
-    'Decorator applying type-value unifiers to function arguments'
+    '''
+    Decorator factory for adding type-value unifiers to function arguments.
+
+    Example usage:
+
+    @validate_and_unify(x=some_type_value_unifier)
+    def foo(x):
+        ...
+
+    Args:
+        **arg_validators: Dict, that maps decorated function argument names
+            to type-value unifiers. Decorated function will be called with
+            unified arguments, or if they don't have the correct type,
+            or fail the respective validation process an exception will
+            be thrown instead.
+
+    Returns:
+        Function decorator; decorated function will work the same way, as long
+        as call params will pass their respective type-value unifiers.
+        Additionally, call params will be unified prior to being passed to
+        decorated function. If they do not pass type checks or validation
+        process, TypeError or ValueError will be raised instead of calling
+        the decorated function.
+    '''
     def wrapper(fun):
         @functools.wraps(fun)
         def inner_wrapper(*args, **kwargs):
@@ -98,16 +157,26 @@ def validate_and_unify(**arg_validators):
 @_prettify_value_errors
 def non_negative_int(val, variable_name):
     '''
-    Check if val can be used as an non-negative integer value. it can be:
-    * non-negative int
-    * byte-string containing decimal representation of non-negative-int
-    * unicode text containing decimal representation of non-negative-int
+    Type-value unifier for non-negative integers.
 
-    variable_name is a unicode string used for exception message (or None).
+    Values can be ints or [byte-]strings. Strings should be decimal
+    representations of integers.
+
+    Validation process checks if the value is greater, or equal to zero.
+
+    Args:
+        val: int, bytes or unicode text, containing value that should be
+            unified to int and validated for being greater or equal to zero.
+        variable_name: unicode text (optional, may be None), with variable
+            name used for this value in the calling function. Used only
+            for exception messages.
+
+    Returns:
+        int, that is greater or equal to zero.
 
     Raises:
-    * TypeError if val is not int or string
-    * ValueError if val is negative or cannot be parsed
+        TypeError: val is not int, bytes or an unicode text.
+        ValueError: val is a negative int or cannot be parsed as an int.
 
     >>> non_negative_int(u'7', 'x')
     7
@@ -130,18 +199,25 @@ non_negative_int.__name__ = 'non-negative integer'
 @_prettify_value_errors
 def absolute_url(val, variable_name):
     '''
-    Parse absolute URL.
+    Type-value unifier for absolute URLs.
 
-    val is a ascii-only byte-string or unicode text containing absolute URL.
+    Values can be bytes or an unicode text.
 
-    variable_name is a unicode string used for exception message (or None).
+    Validation process checks if the string can be parsed as an absolute URL.
 
-    Returns ascii-only unicode text containing absolute URL.
+    Args:
+        val: bytes or unicode text, containing ascii-only value, that must be
+            an absolute URL.
+        variable_name: unicode text (optional, may be None), with variable
+            name used for this value in the calling function. Used only
+            for exception messages.
+
+    Returns:
+        Unicode text, that is ascii-only and represents an absolute URL.
 
     Raises:
-    * TypeError if val is not a byte-string or unicode text
-    * ValueError if val is not an ascii-only string
-    * ValueError if val is not an absolute URL
+        TypeError: val is not bytes or an unicode text.
+        ValueError: val is not ascii-only or it's not an absolute URL.
     '''
     try:
         if isinstance(val, bytes):
@@ -164,14 +240,25 @@ absolute_url.__name__ = 'absolute URL'
 @_check_type(_compat.text, bytes)
 def utf8_byte_string(val, variable_name):
     '''
-    Returns utf-8 encoded byte-string.
+    Type-value unifier for utf-8 strings.
 
-    val is either utf-8 encoded byte-string or a unicode text.
-    variable_name is a unicode string used for exception message (or None).
+    Values can be bytes or unicode texts.
+
+    Validation process checks if the bytes object is properly utf-8 encoded.
+    Unicode texts don't need any validation.
+
+    Args:
+        val: utf-8 encoded bytes or unicode text.
+        variable_name: unicode text (optional, may be None), with variable
+            name used for this value in the calling function. Used only
+            for exception messages.
+
+    Returns:
+        bytes, utf-8 encoded.
 
     Raises:
-    * TypeError if val is not a byte-string or unicode text
-    * ValueError if val is a byte-string, that's not properly utf-8 encoded
+        TypeError: val is not bytes or an unicode text.
+        ValueError: val is bytes, but not properly utf-8 encoded.
     '''
     if isinstance(val, _compat.text):
         return val.encode('utf-8')

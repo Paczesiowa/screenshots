@@ -15,11 +15,16 @@ from dom2img import _cookies, _url_utils, _arg_utils, \
 
 def _clean_up_html(content, prefix):
     '''
-    Clean up html by removing all script tags
-    and making relative URLs absolute.
-    content is an utf-8 encoded byte-string with html
-    prefix is an ascii-only unicode URL that will be used to make absolute URL
-    Returns cleaned up, utf-8 encoded html byte-string
+    Remove all script tags and make relative URLs absolute.
+
+    Args:
+        content: Utf-8 encoded bytes with HTML.
+        prefix: Ascii-only unicode URL, that will be used to make
+            absolute URLs.
+
+    Returns:
+        Utf-8 encoded bytes with HTML that doesn't contain any script tags,
+        and all relative URLs were made absolute.
     '''
     doc = BeautifulSoup(content)
 
@@ -36,22 +41,24 @@ def _clean_up_html(content, prefix):
 def _phantomjs_invocation(width, height, top, left,
                           prefix, cookie_string):
     '''
-    Returns command line arguments for running PhantomJS.
+    Prepare command line arguments for running PhantomJS renderer.
 
-    width is an int with the width size of phantomjs viewport,
-      and width of the resulting image
-    height is an int with the height size of phantomjs viewport,
-      and height of the resulting image
-    top is an int with the pixel offset from the top/vertical scroll position
-    left is an int with the pixel offset from the left/
-      horizontal scroll position
-    prefix is an ascii-only unicode containing absolute URL
-    cookie_string is a byte-string containing cookies keys and values
-      using format key1=val1;key2=val2
+    Args:
+        width: int, non-negative width of PhantomJS viewport in pixels.
+        height: int, non-negative height of PhantomJS viewport in pixels.
+        top: int, pixel offset from the top/vertical scroll position.
+        left: int, pixel offset from the left/horizontal scroll position.
+        prefix: Ascii-only unicode text containing absolute URL
+            with origin of the HTML.
+        cookie_string: bytes containing cookies using "key1=val1;key2=val2"
+            format.
 
-    Result is a list of text objects.
+    Returns:
+        list of unicode text objects that contains cli args for running
+        PhantomJS renderer.
 
-    Raises PhantomJSNotInPath if there's no phantomjs in $PATH
+    Raises:
+        PhantomJSNotInPath: There's no phantomjs in $PATH.
     '''
     cookie_domain = _cookies.get_cookie_domain(prefix)
 
@@ -77,25 +84,27 @@ def _phantomjs_invocation(width, height, top, left,
 def _render(content, width, height, top, left, prefix,
             cookie_string, timeout):
     '''
-    Renders html content using PhantomJS
-    content is an utf-8 encoded byte-string with html.
-    width is an int with the width size of phantomjs viewport,
-      and width of the resulting image
-    height is an int with the height size of phantomjs viewport,
-      and height of the resulting image
-    top is an int with the pixel offset from the top/vertical scroll position
-    left is an int with the pixel offset from the left/
-      horizontal scroll position
-    prefix is an ascii-only unicode containing absolute URL
-    cookie_string is a byte-string containing cookies keys and values
-      using format key1=val1;key2=val2
-    timeout is an int with number of seconds after which PhantomJS
-      will be killed and PhantomJSTimeout will be raised
+    Renders HTML content using PhantomJS.
+
+    Args:
+        content: Utf-8 encoded bytes with HTML.
+        width: int, non-negative width of PhantomJS viewport in pixels.
+        height: int, non-negative height of PhantomJS viewport in pixels.
+        top: int, pixel offset from the top/vertical scroll position.
+        left: int, pixel offset from the left/horizontal scroll position.
+        prefix: Ascii-only unicode text containing absolute URL
+            with origin of the HTML.
+        cookie_string: bytes containing cookies using "key1=val1;key2=val2"
+            format.
+        timeout: int, number of seconds after which PhantomJS will be killed.
+
+    Returns:
+        bytes with PNG data of the render.
 
     Raises:
-    * PhantomJSFailure if PhantomJS process fails/crashes.
-    * PhantomJSTimeout if PhantomJS takes more than timeout seconds to finish
-    * PhantomJSNotInPath if there's no phantomjs in $PATH
+        PhantomJSFailure: PhantomJS process failed/crashed.
+        PhantomJSTimeout: PhantomJS took more than timeout seconds to finish.
+        PhantomJSNotInPath: There's no PhantomJS in $PATH.
     '''
     phantomjs_args = _phantomjs_invocation(width=width, height=height,
                                            top=top, left=left, prefix=prefix,
@@ -119,10 +128,16 @@ def _render(content, width, height, top, left, prefix,
 
 def _resize(img_string, scale, resize_filter=Image.ANTIALIAS):
     '''
-    Resizes to <scale>% of original size the img_string
-    img_string is a byte-string containing png image data
-    scale is an integer percentage number (50 means 2 times smaller image)
-    resize_filter is a PIL filter used for resizing
+    Resize an image.
+
+    Args:
+        img_string: bytes containing PNG image data.
+        scale: int with percentage number of the resize, 50 (percent)
+            means 2 times smaller image.
+        resize_filter: Pillow resize filter, abstracted for tests.
+
+    Returns:
+        bytes containing PNG image data of the resized image.
     '''
     if scale != 100:  # no point in resizing to 100%
         img = Image.open(_compat.BytesIO(img_string))
@@ -152,49 +167,56 @@ _dom2img_args_validator = \
 def dom2img(content, width, height, prefix, top=0,
             left=0, scale=100, cookies=None, timeout=30):
     '''
-    Renders html using PhantomJS.
+    Renders HTML using PhantomJS.
 
-    Parameters:
-    * content - html input (utf-8 encoded byte-string or unicode text)
-    * width - non-negative int with the width of virtual
-              render viewport (using pixels unit)
-    * height - non-negative int with the height of virtual
-               render viewport (using pixels unit).
-    * top - non-negative int with offset from the top of the page
-            where rendering should start (using pixels unit)
-    * left - non-negative int with offset from the left border of the page
-             where rendering should start (using pixels unit)
-    * scale - non-negative int with percentage number
-              that the screenshot will be scaled to (50 means half the
-              original size)
-    * timeout - non-negative int with number of seconds after which PhantomJS
-                will be killed and PhantomJSTimeout will be raised
+    Args:
+        content: Utf-8 encoded bytes or unicode text with HTML input.
+        width: int, bytes or unicode text containing integer, or decimal
+            representation of an integer, that is greater or equal to zero,
+            and represents the width of the virtual render viewport, using
+            pixels unit.
+        height: int, bytes or unicode text containing integer, or decimal
+            representation of an integer, that is greater or equal to zero,
+            and represents the height of the virtual render viewport, using
+            pixels unit.
+        top: int, bytes or unicode text containing integer, or decimal
+            representation of an integer, that is greater or equal to zero,
+            and represents the vertical offset, using pixels unit, from the top
+            of the page, where rendering should start.
+        left: int, bytes or unicode text containing integer, or decimal
+            representation of an integer, that is greater or equal to zero,
+            and represents the horizontal offset, using pixels unit, from the
+            left border of the page, where rendering should start.
+        scale: int, bytes or unicode text containing integer, or decimal
+            representation of an integer, that is greater or equal to zero,
+            and represents the percentage number of the desired resize,
+            50 (percent) means 2 times smaller image.
+        timeout: int, bytes or unicode text containing integer, or decimal
+            representation of an integer, that is greater or equal to zero,
+            and represents the number of seconds after which PhantomJS will
+            be killed.
+        prefix: Ascii-only bytes or unicode text containing absolute URL,
+            that will be used to resolve relative URLs in HTML
+            (e.g. for images, css scripts) and to derive cookie domain for
+            cookies.
+        cookies: Cookies keys and values that will be sent with all
+            resource requests (e.g. images, css scripts). Cookies can be:
+                * None
+                * bytes or ascii-only unicode text using "key1=val1;key2=val2"
+                    format.
+                * dict with cookie bytes/unicode text keys and values.
+                    Neither keys nor values should contain semicolons.
+                    Keys cannot contain '=' character.
 
-     height, width, top, left, timeout:
-       int or byte-string/unicode text containing
-       decimal representation of the integer number
-    * prefix - absolute URL that will be used
-               to resolve relative URLs in html (for images, css scripts)
-               and to derive cookie domain for cookies
-               can be byte-string or ascii-only unicode text.
-    * cookies - cookies key and values that will be sent with all
-                resource requests (images, css scripts)
-      * None
-      * byte-string (or ascii-only unicode text) using
-        key1=val1;key2=val2 format
-      * string dictionary with cookie keys and values.
-        Neither keys nor values should contain semicolons.
-        Keys cannot contain '=' character.
-        Keys and values can be byte-strings or ascii-only unicode texts.
-
-    Returns byte-string containing png image with the screenshot.
+    Returns:
+        bytes containing PNG image data with the render.
 
     Raises:
-    * TypeError if arguments are not the right type
-    * ValueError if arguments have invalid values
-    * PhantomJSFailure if PhantomJS process fails/crashes.
-    * PhantomJSTimeout if PhantomJS takes more than timeout seconds to finish
-    * PhantomJSNotInPath if there's no phantomjs in $PATH
+        TypeError: arguments are not the right type.
+        ValueError: arguments have invalid values.
+        PhantomJSFailure: PhantomJS process failed/crashed.
+        PhantomJSTimeout: PhantomJS took too long to finish.
+        PhantomJSNotInPath: There's no PhantomJS in $PATH.
     '''
     cookie_string = _cookies.cookie_string(cookies, u'cookies')
     cleaned_up_content = _clean_up_html(content, prefix)
@@ -208,47 +230,19 @@ def dom2img(content, width, height, prefix, top=0,
 def dom2img_debug(content, width, height, prefix, timeout=30,
                   top=0, left=0, scale=100, cookies=None):
     '''
-    Returns command to run PhantomJS renderer in debug mode.
+    Build a command to run PhantomJS renderer in debug mode.
 
-    Parameters:
-    * content - html input (utf-8 encoded byte-string or unicode text)
-    * width - non-negative int with the width of virtual
-              render viewport (using pixels unit)
-    * height - non-negative int with the height of virtual
-               render viewport (using pixels unit).
-    * top - non-negative int with offset from the top of the page
-            where rendering should start (using pixels unit)
-    * left - non-negative int with offset from the left border of the page
-             where rendering should start (using pixels unit)
-    * scale - non-negative int with percentage number
-              that the screenshot will be scaled to (50 means half the
-              original size)
-    * timeout - non-negative int (unused)
+    Args:
+        The same as for dom2img().
 
-     height, width, top, left:
-       int or byte-string/unicode text containing
-       decimal representation of the integer number
-    * prefix - absolute URL that will be used
-               to resolve relative URLs in html (for images, css scripts)
-               and to derive cookie domain for cookies
-               can be byte-string or ascii-only unicode text.
-    * cookies - cookies key and values that will be sent with all
-                resource requests (images, css scripts)
-      * None
-      * byte-string (or ascii-only unicode text) using
-        key1=val1;key2=val2 format
-      * string dictionary with cookie keys and values.
-        Neither keys nor values should contain semicolons.
-        Keys cannot contain '=' character.
-        Keys and values can be byte-strings or ascii-only unicode texts.
-
-    Returns text string containing shell command,
-    that runs PhantomJS renderer script in a debug mode.
+    Returns:
+        Unicode text with a command to run PhantomJS renderer script
+        in a debug mode.
 
     Raises:
-    * TypeError if arguments are not the right type
-    * ValueError if arguments have invalid values
-    * PhantomJSNotInPath if there's no phantomjs in $PATH
+        TypeError: arguments are not the right type.
+        ValueError: arguments have invalid values.
+        PhantomJSNotInPath: There's no PhantomJS in $PATH.
     '''
     cookie_string = _cookies.cookie_string(cookies, u'cookies')
 

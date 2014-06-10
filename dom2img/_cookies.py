@@ -6,26 +6,32 @@ from dom2img import _compat, _arg_utils
 def serialize_cookies(cookies):
     '''
     Serializes cookie dictionary to cookie string.
-    cookies must be a dict mapping byte-string cookie keys
-    to byte-string cookie values. Neither keys nor values should
-    contain semicolons. Keys cannot contain '=' character.
-    Result is a semicolon-separated byte-string with cookie elems
-    in key=value format.
+
+    Args:
+        cookies: dict mapping byte-string cookie keys to byte-string
+            cookie values. Neither keys nor values should contain semicolons.
+            Keys cannot contain '=' character.
+
+    Returns:
+        Semicolon-separated bytes object with cookie elems in key=value format.
     '''
     return b';'.join(map(b'='.join, cookies.items()))
 
 
 def parse_cookie_string(cookie_string):
     '''
-    Parse cookie dictionary from a byte-string or ascii-only unicode text,
-    using format key1=val1;key2=val2.
-    Returns dictionary mapping byte-string cookie keys to byte string
-    cookie values.
+    Parse cookie dictionary from a string using "key1=val1;key2=val2" format.
+
+    Args:
+        cookie_string: Ascii-only bytes or unicode text with cookies, using
+            "key1=val1;key2=val2" format.
+
+    Returns:
+        dict mapping bytes cookie keys to bytes cookie values.
 
     Raises:
-    * TypeError if cookie_string is not a string
-    * ValueError if cookie_string is an unicode text
-      and it contains non-ascii characters.
+        TypeError: cookie_string is not bytes or unicode text.
+        ValueError: cookie_string contains non-ascii characters.
 
     >>> parse_cookie_string(u'key1=val1;key2=val2') == \
         {b'key1': b'val1', b'key2': b'val2'}
@@ -58,14 +64,24 @@ parse_cookie_string.__name__ = 'cookie string'
 
 def validate_cookies(cookies):
     '''
+    Validates cookies dict for illegal characters and types.
+
     Check if cookies is a dict:
-    * dict keys can be byte-strings or ascii-only unicode text strings,
-      they cannot contain ';' and '=' characters.
-    * dict values can be byte-strings or ascii-only unicode text strings,
-      they cannot contain ';'.
-    Returns validated dict, where keys and values are byte-strings.
-    Raises exception if cookie keys/values contain illegal characters,
-    or if they contain non-ascii characters.
+        dict keys can be ascii-only bytes or unicode text strings,
+            they cannot contain ';' and '=' characters.
+        dict values can be ascii-only bytes or unicode text strings,
+            they cannot contain ';'.
+
+    Args:
+        cookies: dict with cookies.
+
+    Returns:
+        dict with validated cookies. all keys and values are bytes.
+
+    Raises:
+        TypeError: cookies keys or values are not bytes or unicode texts.
+        ValueError: cookies keys or values are not ascii-only, or
+            contain illegal characters.
 
     >>> validate_cookies({u'key1': u'val1', u'key2': u'val2'}) == \
         {b'key1': b'val1', b'key2': b'val2'}
@@ -99,14 +115,19 @@ def validate_cookies(cookies):
 
 def get_cookie_domain(url):
     '''
-    Returns server domain that can be used as a cookie domain.
-    Port number is stripped from the URL.
-    url bust be an ascii-only unicode with absolute URL containing scheme
-    Result is a byte-string.
+    Extract server domain that can be used as a cookie domain.
 
-    >>> get_cookie_domain(u'http://google.com:7000/path/' + \
+    Port number is stripped from the URL.
+
+    Args:
+        url: Ascii-only unicode text with absolute URL containing scheme.
+
+    Returns:
+        bytes with hostname that can be used as a cookie domain.
+
+    >>> get_cookie_domain(u'http://example.com:7000/path/' + \
                            u'something?key=val&key2=val2') == \
-        b'google.com'
+        b'example.com'
     True
     '''
     parsed_prefix = _compat.urlparse(url)
@@ -121,18 +142,28 @@ def get_cookie_domain(url):
 @_arg_utils._check_type(_compat.text, bytes, type(None), dict)
 def cookie_string(val, variable_name):
     '''
-    Returns byte-string with cookies using key1=val1;key2=val2 format
+    Type-value unifier for cookie strings.
 
-    val can be:
-      * None
-      * byte-string (or ascii-only unicode text) using
-        key1=val1;key2=val2 format
-      * string dictionary with cookie keys and values.
-        Neither keys nor values should contain semicolons.
-        Keys cannot contain '=' character.
-        Keys and values can be byte-strings or ascii-only unicode texts.
+    Args:
+        val:
+            * None
+            * bytes or ascii-only unicode text using "key1=val1;key2=val2"
+                format.
+            * dict with cookie bytes/unicode text keys and values.
+                Neither keys nor values should contain semicolons.
+                Keys cannot contain '=' character.
+        variable_name: unicode text (optional, may be None), with variable
+            name used for this value in the calling function. Used only
+            for exception messages.
 
-    variable_name is a unicode string used for exception message (or None).
+    Returns:
+        bytes with cookie string using "key1=val1;key2=val2" format.
+
+    Raises:
+        TypeError: val is not None, bytes, unicode text or dict, or contains
+            keys or values that are not bytes or unicode texts.
+        ValueError: cookies or its keys/values is not ascii-only, or
+            contain illegal characters.
     '''
     if val is None:
         return b''

@@ -10,12 +10,13 @@ def communicate_with_timeout(proc, timeout, input_=None):
     using proc.kill() (so its children will not be killed).
     Process shouldn't be communicated with before calling this function.
 
-    proc is a Popen object
-    timeout is an int with number of seconds to wait for proc to finish
-    input_ is optional stdin to pipe into proc
+    Args:
+        proc: Popen object.
+        timeout: int with number of seconds to wait for proc to finish.
+        input_: bytes object with stdin to pipe into proc, or None.
 
-    Returns None if timeout seconds have passed,
-    or result of proc.communicate().
+    Returns:
+        None if timeout seconds have passed, or result of proc.communicate().
     '''
     waker = threading.Event()
     proc_killed = [False]
