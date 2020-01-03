@@ -11,7 +11,7 @@ except ImportError:
 __version__ = '0.1'
 
 
-tests_require = ['nose == 1.3.1', 'flask == 0.10.1']
+tests_require = ['nose == 1.3.1', 'flask == 1.0']
 if sys.version_info < (3,):
     tests_require.append('unittest2 == 0.5.1')
 else:
