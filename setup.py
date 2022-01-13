@@ -17,7 +17,7 @@ if sys.version_info < (3,):
 else:
     tests_require.append('unittest2py3k == 0.5.1')
 
-install_require = ['BeautifulSoup4 == 4.3.2', 'pillow == 2.3.0']
+install_require = ['BeautifulSoup4 == 4.3.2', 'pillow == 9.0.0']
 if sys.version_info < (2, 7):
     install_require.append('argparse == 1.2.1')
 
